@@ -3,13 +3,14 @@ from typing import Optional
 from fastapi import APIRouter, Depends, Path, Query
 from sqlalchemy import or_
 from sqlalchemy.orm import selectinload
-from sqlalchemy.testing.pickleable import User
 
 from app.core.app_exception_response import AppExceptionResponse
+from app.core.pagination_dto import Pagination
 from app.core.validation_rules import TWELVE_DIGITS_REGEX, EMAIL_REGEX, PHONE_REGEX
 from app.domain.models.user_model import UserModel
 from app.feature.role.role_repository import RoleRepository
 from app.feature.user.dtos.user_dto import UserCDTO, UserDTO, UserRDTO, UserRDTOWithRelations
+from app.feature.user.filter.user_filter import UserFilter
 from app.feature.user.user_repository import UserRepository
 from app.feature.user_type.user_type_repository import UserTypeRepository
 
@@ -48,8 +49,8 @@ class UserController:
             raise AppExceptionResponse.not_found(message="Пользователь не найден")
         return result
 
-    async def all(self, page: int = Query(gt=0,default=1), per_page: int = Query(gt=0,default=1,lt=30),search:Optional[str]=Query(default=""), repo: UserRepository = Depends(UserRepository)):
-        result = await repo.paginate_with_filter(page=page,per_page=per_page,filters=[or_(UserModel.email.like(f"%{search}%"))],options=[selectinload(UserModel.role),selectinload(UserModel.user_type)])
+    async def all(self,params:UserFilter = Depends(), repo: UserRepository = Depends(UserRepository)):
+        result = await repo.paginate_with_filter(dto=UserRDTOWithRelations,page=params.page,per_page=params.per_page,filters=params.apply(),options=[selectinload(UserModel.role),selectinload(UserModel.user_type)])
         return result
 
     async def get_by_iin(self, iin: str = Path(regex=TWELVE_DIGITS_REGEX,title='ИИН'), repo: UserRepository = Depends(UserRepository)):

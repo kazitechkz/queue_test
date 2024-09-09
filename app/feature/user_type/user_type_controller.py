@@ -46,7 +46,7 @@ class UserTypeController:
     async def update(self,UserType_dto: UserTypeCDTO,id: int = Path(gt=0), repo: UserTypeRepository = Depends(UserTypeRepository)):
         UserType = await repo.get(id=id)
         if UserType is None:
-            raise AppExceptionResponse.not_found(message="Роль не найдена")
+            raise AppExceptionResponse.not_found(message="Тип пользователя не найден")
         existed_UserType = await repo.get_by_unique_value(value=UserType_dto.value,id=id)
         if (existed_UserType is not None):
             raise AppExceptionResponse.bad_request(message="Такое значение для типа пользователя уже существует")

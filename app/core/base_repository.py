@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.core.app_exception_response import AppExceptionResponse
 from app.core.database import get_db
+from app.core.pagination_dto import Pagination
 
 # Определение типа модели
 T = TypeVar('T')
@@ -19,7 +20,7 @@ class BaseRepository(Generic[T]):
         self.db = db
 
 
-    async def paginate_with_filter(self,page: int = 1, per_page: int = 20,filters:list = [],options:list=[])-> List[T]:
+    async def paginate_with_filter(self,dto:BaseModel,page: int = 1, per_page: int = 20,filters:list = [],options:list=[]):
         query = select(self.model)
         if options:
             for option in options:
@@ -36,7 +37,9 @@ class BaseRepository(Generic[T]):
             query.limit(per_page).offset((page - 1) * per_page)
         )
         items = results.scalars().all()
-        return items
+        dto_items = [dto.from_orm(item) for item in items]
+        result = Pagination(items=dto_items,per_page=per_page,page=page,total=total_pages)
+        return result
     async def get(self, id: int,options:Optional[list]=None):
         query = select(self.model)
         if options:
@@ -46,7 +49,7 @@ class BaseRepository(Generic[T]):
         result = await self.db.execute(query)
         return result.scalars().first()
 
-    async def get_filtered(self, filters: Dict[str, Any],options:Optional[list]=None):
+    async def get_filtered(self,filters: Dict[str, Any],options:Optional[list]=None):
         query = select(self.model)
         if options:
             for option in options:
