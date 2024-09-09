@@ -27,3 +27,11 @@ class UserModel(Base):
     user_type: Mapped["UserTypeModel"] = relationship(
         back_populates="users"
     )
+
+    organizations: Mapped[list["OrganizationModel"]] = relationship(
+        back_populates="owner"
+    )
+
+    organization_employees:Mapped[list["OrganizationEmployeeModel"]] = relationship(
+        back_populates="employee"
+    )

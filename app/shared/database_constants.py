@@ -13,3 +13,7 @@ class AppTableNames():
     RoleTableName = "roles"
     UserTypeTableName = "user_types"
     UserTableName = "users"
+    OrganizationTypeTableName = "organization_types"
+    OrganizationTableName = "organizations"
+    OrganizationEmployeeTableName = "organization_employees"
+

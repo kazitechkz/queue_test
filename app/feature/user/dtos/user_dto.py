@@ -50,7 +50,6 @@ class UserRDTO(UserDTO):
     iin: str
     email: str
     phone: str
-    password_hash: str
     status: bool
 
     class Config:
