@@ -19,6 +19,10 @@ class AppTableNames():
     VehicleColorTableName = "vehicle_colors"
     VehicleCategoryTableName = "vehicle_categories"
     RegionTableName = "regions"
+    VehicleTableName = "vehicles"
+    FactoryTableName = "factories"
+    WorkshopTableName = "workshops"
+    MaterialTableName = "materials"
 
 
 class TableConstantsNames:
