@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field, EmailStr, field_validator
 
 from app.core.validation_rules import PHONE_REGEX, EMAIL_REGEX, TWELVE_DIGITS_REGEX
+from app.feature.organization_type.dtos.organization_type_dto import OrganizationTypeRDTO
 from app.feature.user.dtos.user_dto import UserRDTO
 
 
@@ -19,7 +20,7 @@ class OrganizationCDTO(BaseModel):
     address: str = Field(max_length=1000, description="Юридический адрес")
     status: bool = Field(default=True, description="Активен ли")
     owner_id: int = Field(description="Владелец компании", gt=0)
-    type_id: bool = Field(description="Тип компании", gt=0)
+    type_id: int = Field(description="Тип компании", gt=0)
 
     @field_validator('phone')
     def validate_phone(cls, v) -> str:
@@ -54,7 +55,7 @@ class OrganizationRDTO(OrganizationDTO):
     address: str
     status: bool
     owner_id: int
-    type_id: bool
+    type_id: int
 
     class Config:
         from_attributes = True
@@ -62,4 +63,4 @@ class OrganizationRDTO(OrganizationDTO):
 
 class OrganizationRDTOWithRelations(OrganizationRDTO):
     owner: UserRDTO
-    # Add Type
+    type:OrganizationTypeRDTO

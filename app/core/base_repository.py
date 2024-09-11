@@ -12,6 +12,7 @@ from app.core.pagination_dto import Pagination
 # Определение типа модели
 T = TypeVar('T')
 
+
 class BaseRepository(Generic[T]):
     _instance = None
 
@@ -19,8 +20,8 @@ class BaseRepository(Generic[T]):
         self.model = model
         self.db = db
 
-
-    async def paginate_with_filter(self,dto:BaseModel,page: int = 1, per_page: int = 20,filters:list = [],options:list=[]):
+    async def paginate_with_filter(self, dto: BaseModel, page: int = 1, per_page: int = 20, filters: list = [],
+                                   options: list = []):
         query = select(self.model)
         if options:
             for option in options:
@@ -38,22 +39,24 @@ class BaseRepository(Generic[T]):
         )
         items = results.scalars().all()
         dto_items = [dto.from_orm(item) for item in items]
-        result = Pagination(items=dto_items,per_page=per_page,page=page,total=total_pages)
+        result = Pagination(items=dto_items, per_page=per_page, page=page, total=total_pages)
         return result
-    async def get(self, id: int,options:Optional[list]=None):
+
+    async def get(self, id: int, options: Optional[list] = None):
         query = select(self.model)
-        if options:
+        if options is not None:
             for option in options:
                 query = query.options(option)
         query = query.filter(self.model.id == id)
         result = await self.db.execute(query)
         return result.scalars().first()
 
-    async def get_filtered(self,filters: Dict[str, Any],options:Optional[list]=None):
+    async def get_filtered(self, filters: Dict[str, Any], options: Optional[list] = None):
         query = select(self.model)
         if options:
             for option in options:
                 query = query.options(option)
+
         if filters:
             for key, value in filters.items():
                 column = getattr(self.model, key, None)
@@ -63,9 +66,22 @@ class BaseRepository(Generic[T]):
         result = await self.db.execute(query)
         return result.scalars().first()
 
+    async def get_first_with_filters(self, filters: list = [], options: Optional[list] = None):
+        query = select(self.model)
+        if options:
+            for option in options:
+                query = query.options(option)
+
+        if filters:
+            for filter_condition in filters:
+                query = query.filter(filter_condition)
+
+        result = await self.db.execute(query)
+        return result.scalars().first()
+
     async def get_all(self) -> List[T]:
-       result = await self.db.execute(select(self.model))
-       return result.scalars().all()
+        result = await self.db.execute(select(self.model))
+        return result.scalars().all()
 
     async def create(self, obj: T) -> T:
         try:
@@ -78,7 +94,7 @@ class BaseRepository(Generic[T]):
             await self.refresh_db()
             raise ValueError(self._parse_integrity_error(e))
 
-    async def update(self, obj: T,dto:BaseModel) -> T:
+    async def update(self, obj: T, dto: BaseModel) -> T:
         try:
             for field, value in dto.dict(exclude_unset=True).items():
                 setattr(obj, field, value)

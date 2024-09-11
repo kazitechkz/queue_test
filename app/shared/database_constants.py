@@ -16,4 +16,12 @@ class AppTableNames():
     OrganizationTypeTableName = "organization_types"
     OrganizationTableName = "organizations"
     OrganizationEmployeeTableName = "organization_employees"
+    VehicleColorTableName = "vehicle_colors"
+    VehicleCategoryTableName = "vehicle_categories"
+    RegionTableName = "regions"
+
+
+class TableConstantsNames:
+    UserLegalTypeId = 2
+    UserLegalTypeValue = "legal_entity"
 
