@@ -32,6 +32,10 @@ class UserModel(Base):
         back_populates="owner"
     )
 
-    organization_employees:Mapped[list["OrganizationEmployeeModel"]] = relationship(
+    organization_employees: Mapped[list["OrganizationEmployeeModel"]] = relationship(
         back_populates="employee"
+    )
+
+    vehicles: Mapped[list["VehicleModel"]] = relationship(
+        back_populates="owner"
     )

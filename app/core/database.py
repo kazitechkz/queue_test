@@ -35,6 +35,11 @@ async def init_db():
     from app.domain.models.organization_type_model import OrganizationTypeModel
     from app.domain.models.organization_model import OrganizationModel
     from app.domain.models.organization_employee_model import OrganizationEmployeeModel
+    from app.domain.models.vehicle_model import VehicleModel
+    from app.domain.models.factory_model import FactoryModel
+    from app.domain.models.workshop_model import WorkshopModel
+    from app.domain.models.material_model import MaterialModel
+
 
     async with engine_async.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
