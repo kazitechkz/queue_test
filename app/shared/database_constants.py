@@ -23,6 +23,10 @@ class AppTableNames():
     FactoryTableName = "factories"
     WorkshopTableName = "workshops"
     MaterialTableName = "materials"
+    OrderStatusTableName = "order_status"
+    OrderTableName = "orders"
+    SAPRequestTableName = "sap_requests"
+    KaspiPaymentsTableName = "kaspi_payments"
 
 
 class TableConstantsNames:

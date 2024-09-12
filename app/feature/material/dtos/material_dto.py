@@ -10,7 +10,7 @@ class MaterialCDTO(BaseModel):
     sap_id: str = Field(max_length=255,description="Уникальный идентификационный номер в SAP")
     status: bool = Field(default=True,description="Действует ли?")
     price_without_taxes: float = Field(description="Сумма без НДС")
-    price_taxes: float = Field(description="Сумма с НДС")
+    price_with_taxes: float = Field(description="Сумма с НДС")
     workshop_id: int = Field(description="Уникальный идентфикационный номер цеха")
     workshop_sap_id: str = Field(description="Уникальный идентфикационный номер цеха в SAP")
 
@@ -23,7 +23,7 @@ class MaterialRDTO(BaseModel):
     sap_id: str
     status: bool
     price_without_taxes: float
-    price_taxes: float
+    price_with_taxes: float
     workshop_id: int
     workshop_sap_id: str
 

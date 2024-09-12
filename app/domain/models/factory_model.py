@@ -1,15 +1,16 @@
-from typing import Text, List
+from typing import List
 
-from sqlalchemy import String
+from sqlalchemy import String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.core.database import Base
 from app.shared.database_constants import AppTableNames, ID, CreatedAt, UpdatedAt
 
 
-class FactoryModel:
-    __tablename__ = AppTableNames.FactoryTableName
+class FactoryModel(Base):
+    __tablename__=AppTableNames.FactoryTableName
     id: Mapped[ID]
-    title: Mapped[str] = mapped_column(Text())
+    title: Mapped[str] = mapped_column(Text(length=1000))
     sap_id: Mapped[str] = mapped_column(String(length=256), index=True, unique=True)
     status: Mapped[bool] = mapped_column(default=True)
     created_at: Mapped[CreatedAt]
