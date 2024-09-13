@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, Asyn
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 
 from app.core.app_settings import app_settings
+from app.core.seed_database import seed_database
 
 engine_async = create_async_engine(
     app_settings.DB_URL_ASYNC,
@@ -47,3 +48,9 @@ async def init_db():
 
     async with engine_async.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+
+    async with AsyncSessionLocal() as session:
+        await seed_database(session)
+
+
+

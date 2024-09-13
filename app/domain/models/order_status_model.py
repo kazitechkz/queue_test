@@ -20,12 +20,12 @@ class OrderStatusModel(Base):
     created_at: Mapped[CreatedAt]
     updated_at: Mapped[UpdatedAt]
 
-    prev_status: Mapped[Optional["OrderStatusModel"]] = relationship(
-                                                                remote_side=[id],
-                                                                foreign_keys=[prev_id],
-                                                                backref="next_status")
-
-    next_status: Mapped[Optional["OrderStatusModel"]] = relationship(
-                                                                remote_side=[id],
-                                                                foreign_keys=[next_id],
-                                                                backref="prev_status")
+    # prev_status: Mapped[Optional["OrderStatusModel"]] = relationship(
+    #                                                             remote_side=[id],
+    #                                                             foreign_keys=[prev_id],
+    #                                                             backref="next_status")
+    #
+    # next_status: Mapped[Optional["OrderStatusModel"]] = relationship(
+    #                                                             remote_side=[id],
+    #                                                             foreign_keys=[next_id],
+    #                                                             backref="prev_status")

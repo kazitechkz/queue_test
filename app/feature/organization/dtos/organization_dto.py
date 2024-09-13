@@ -25,7 +25,7 @@ class OrganizationCDTO(BaseModel):
     @field_validator('phone')
     def validate_phone(cls, v) -> str:
         if not PHONE_REGEX.match(v):
-            raise ValueError('Неверный формат телефона: +7(XXX) XXX-XX-XX')
+            raise ValueError('Неверный формат телефона: +77XXXXXXXXX')
         return v
 
     @field_validator('email')
