@@ -30,6 +30,29 @@ class AppTableNames():
 
 
 class TableConstantsNames:
-    UserLegalTypeId = 2
+    #Roles
+    RoleAdminValue = "admin"
+    RoleSecurityValue = "security"
+    RoleSecurityLoaderValue = "security_loader"
+    RoleLoaderValue = "loader"
+    RoleWeigherValue = "weigher"
+    RoleClientValue = "client"
+
+    #User Types
     UserLegalTypeValue = "legal_entity"
+    UserIndividualTypeValue = "individual"
+
+    #Organization Type
+    OrganizationLLCTypeValue = "llc"
+    OrganizationIPTypeValue = "ip"
+
+    #OrderStatus
+    OrderStatusWaitSap = "waiting_for_sup"
+    OrderStatusRejectSap = "reject_from_sup"
+    OrderStatusWaitPayment = "waiting_for_payment"
+    OrderStatusRejectPayment = "reject_from_payment"
+    OrderStatusPaid = "paid"
+    OrderStatusExecuted = "executed"
+    OrderStatusFinished = "finished"
+
 

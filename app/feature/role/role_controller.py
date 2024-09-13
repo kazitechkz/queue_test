@@ -3,9 +3,11 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, Path, HTTPException, Query
 
 from app.core.app_exception_response import AppExceptionResponse
+from app.core.auth_core import get_current_user, check_admin
 from app.domain.models.role_model import RoleModel
 from app.feature.role.dtos.role_dto import RoleRDTO, RoleCDTO, RoleUDTO
 from app.feature.role.role_repository import RoleRepository
+from app.feature.user.dtos.user_dto import UserRDTOWithRelations
 
 
 class RoleController:
@@ -21,7 +23,7 @@ class RoleController:
         self.router.put("/update/{id}", response_model=RoleRDTO)(self.update)
         self.router.delete("/delete/{id}")(self.delete)
 
-    async def get_all(self, repo: RoleRepository = Depends(RoleRepository)):
+    async def get_all(self, repo: RoleRepository = Depends(RoleRepository),current_user = Depends(check_admin)):
         result = await repo.get_all()
         return result
 

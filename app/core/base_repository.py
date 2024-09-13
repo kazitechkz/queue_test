@@ -94,6 +94,17 @@ class BaseRepository(Generic[T]):
             await self.refresh_db()
             raise ValueError(self._parse_integrity_error(e))
 
+    async def create_all(self, obj: [T]):
+        try:
+            self.db.add_all(obj)
+            await self.db.commit()
+            await self.db.refresh(obj)
+            return obj
+        except IntegrityError as e:
+            await self.db.rollback()
+            await self.refresh_db()
+            raise ValueError(self._parse_integrity_error(e))
+
     async def update(self, obj: T, dto: BaseModel) -> T:
         try:
             for field, value in dto.dict(exclude_unset=True).items():

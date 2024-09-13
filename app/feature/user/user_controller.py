@@ -5,6 +5,7 @@ from sqlalchemy import or_
 from sqlalchemy.orm import selectinload
 
 from app.core.app_exception_response import AppExceptionResponse
+from app.core.auth_core import get_current_user
 from app.core.pagination_dto import Pagination
 from app.core.validation_rules import TWELVE_DIGITS_REGEX, EMAIL_REGEX, PHONE_REGEX
 from app.domain.models.user_model import UserModel

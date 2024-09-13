@@ -24,7 +24,7 @@ class UserCDTO(BaseModel):
     @field_validator('phone')
     def validate_phone(cls, v)-> str:
         if not PHONE_REGEX.match(v):
-            raise ValueError('Неверный формат телефона: +7(XXX) XXX-XX-XX')
+            raise ValueError('Неверный формат телефона: +77XXXXXXXXX')
         return v
 
     @field_validator('iin')
@@ -58,3 +58,6 @@ class UserRDTO(UserDTO):
 class UserRDTOWithRelations(UserRDTO):
     role:RoleRDTO
     user_type:UserTypeRDTO
+
+    class Config:
+        from_attributes = True
