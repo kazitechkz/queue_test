@@ -136,3 +136,29 @@ def check_client(current_user: UserRDTOWithRelations = Depends(get_current_user)
             detail="Отказано в доступе",
         )
     return current_user
+
+def check_individual_client(current_user: UserRDTOWithRelations = Depends(get_current_user)):
+    if current_user.role.value != TableConstantsNames.RoleClientValue:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Отказано в доступе",
+        )
+    if current_user.user_type.value != TableConstantsNames.UserIndividualTypeValue:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Отказано в доступе",
+        )
+    return current_user
+
+def check_legal_client(current_user: UserRDTOWithRelations = Depends(get_current_user)):
+    if current_user.role.value != TableConstantsNames.RoleClientValue:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Отказано в доступе",
+        )
+    if current_user.user_type.value != TableConstantsNames.UserLegalTypeValue:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Отказано в доступе",
+        )
+    return current_user
