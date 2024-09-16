@@ -1,7 +1,7 @@
 from typing import List, Type, Generic, TypeVar, Optional, Any, Dict
 
 from pydantic import BaseModel
-from sqlalchemy import select, func
+from sqlalchemy import select, func, and_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -73,8 +73,15 @@ class BaseRepository(Generic[T]):
                 query = query.options(option)
 
         if filters:
+            conditions = []
             for filter_condition in filters:
-                query = query.filter(filter_condition)
+                for key, value in filter_condition.items():
+                    # Dynamically create the filter condition using getattr
+                    conditions.append(getattr(self.model, key) == value)
+
+            # Apply the filter conditions to the query
+            if conditions:
+                query = query.filter(and_(*conditions))
 
         result = await self.db.execute(query)
         return result.scalars().first()

@@ -6,6 +6,7 @@ from app.core.seed_database import seed_database
 from app.feature.auth.auth_controller import AuthController
 from app.feature.factory.factory_controller import FactoryController
 from app.feature.material.material_controller import MaterialController
+from app.feature.order.order_controller import OrderController
 from app.feature.organization.organization_controller import OrganizationController
 from app.feature.organization_employee.organization_employee_controller import OrganizationEmployeeController
 from app.feature.organization_type.organization_type_controller import OrganizationTypeController
@@ -47,6 +48,7 @@ factory_controller = FactoryController()
 workshop_controller = WorkshopController()
 material_controller = MaterialController()
 auth_controller = AuthController()
+order_controller = OrderController()
 
 app.include_router(role_controller.router, prefix="/role", tags=["role"])
 app.include_router(user_type_controller.router, prefix="/user-type", tags=["user-type"])
@@ -62,6 +64,7 @@ app.include_router(factory_controller.router, prefix="/factory", tags=["factory"
 app.include_router(workshop_controller.router, prefix="/workshop", tags=["workshop"])
 app.include_router(material_controller.router, prefix="/material", tags=["material"])
 app.include_router(auth_controller.router, prefix="/auth", tags=["auth"])
+app.include_router(order_controller.router, prefix="/order", tags=["order"])
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="localhost", port=5000,reload=True)

@@ -27,10 +27,12 @@ class SapRequestService:
                 "DATE": "",
                 "TIME": ""
             }
+
+
     async def request_to_sap_legal(self,werks:str,matnr:str,dogovor:str)->dict:
         zakaz = random.randint(1000000000, 9999999999);
         percentage = random.randint(0,100)
-        if percentage > 30:
+        if percentage > 10:
             return {
                 "STATUS":"1",
                 "ZAKAZ":f"{zakaz}",
