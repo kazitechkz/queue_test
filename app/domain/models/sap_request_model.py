@@ -2,7 +2,7 @@ import datetime
 from typing import Optional
 
 from sqlalchemy import String, Numeric, Date, Time, LargeBinary, Boolean, ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
 from app.shared.database_constants import AppTableNames, ID, CreatedAt, UpdatedAt
@@ -21,12 +21,12 @@ class SapRequestModel(Base):
     price: Mapped[Optional[float]] = mapped_column(Numeric(11, 2), nullable=True)  # Цена
     dogovor: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)
     # Поля для результата операции с SAP
-    status: Mapped[str] = mapped_column(String(1))  # Статус переноса
-    zakaz: Mapped[Optional[str]] = mapped_column(String(10),index=True)  # № заказа из SAP
-    text: Mapped[Optional[str]] = mapped_column(String(50))  # Описание ошибки при переносе
-    pdf: Mapped[Optional[bytes]] = mapped_column(LargeBinary)  # Счет на предоплату в формате PDF (Base64)
-    date: Mapped[Optional[datetime.date]] = mapped_column(Date)  # Дата переноса
-    time: Mapped[Optional[datetime.time]] = mapped_column(Time)
+    status: Mapped[Optional[str]] = mapped_column(String(1),nullable=True)  # Статус переноса
+    zakaz: Mapped[Optional[str]] = mapped_column(String(10),index=True,nullable=True)  # № заказа из SAP
+    text: Mapped[Optional[str]] = mapped_column(String(50),nullable=True)  # Описание ошибки при переносе
+    pdf: Mapped[Optional[bytes]] = mapped_column(LargeBinary,nullable=True)  # Счет на предоплату в формате PDF (Base64)
+    date: Mapped[Optional[datetime.date]] = mapped_column(Date,nullable=True)  # Дата переноса
+    time: Mapped[Optional[datetime.time]] = mapped_column(Time,nullable=True)
     #Статусы
     is_active: Mapped[bool] = mapped_column(Boolean(), default=True)
     is_failed: Mapped[bool] = mapped_column(Boolean(), default=False)
@@ -34,3 +34,17 @@ class SapRequestModel(Base):
     # Даты
     created_at: Mapped[CreatedAt]
     updated_at: Mapped[UpdatedAt]
+
+    order: Mapped["OrderModel"] = relationship(
+        "OrderModel",
+        back_populates="sap_request",
+        uselist=False,
+        foreign_keys=[order_id]
+    )
+
+    order_failed: Mapped["OrderModel"] = relationship(
+        "OrderModel",
+        back_populates="sap_request_failed",
+        uselist=False,
+        foreign_keys=[order_id]
+    )

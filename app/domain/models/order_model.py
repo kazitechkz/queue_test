@@ -1,8 +1,8 @@
 import datetime
-from typing import Optional
+from typing import Optional, List
 
 from sqlalchemy import Integer, Computed, Numeric, Boolean, Date, ForeignKey, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
 from app.shared.database_constants import AppTableNames, ID, CreatedAt, UpdatedAt
@@ -66,3 +66,24 @@ class OrderModel(Base):
 
     created_at: Mapped[CreatedAt]
     updated_at: Mapped[UpdatedAt]
+
+    # sap_requests: Mapped[list["SapRequestModel"]] = relationship(
+    #     back_populates="order",
+    #     foreign_keys="[SapRequestModel.order_id]"
+    # )
+
+    sap_request: Mapped["SapRequestModel"] = relationship(
+        "SapRequestModel",
+        back_populates="order",
+        primaryjoin="and_(SapRequestModel.order_id == OrderModel.id, SapRequestModel.is_failed == False)",
+        foreign_keys="[SapRequestModel.order_id]",
+        uselist=False,
+    )
+
+    sap_request_failed:Mapped[List["SapRequestModel"]] = relationship(
+        "SapRequestModel",
+        back_populates="order",
+        primaryjoin="and_(SapRequestModel.order_id == OrderModel.id, SapRequestModel.is_failed == True)",
+        foreign_keys="[SapRequestModel.order_id]",
+        uselist=True,
+    )
