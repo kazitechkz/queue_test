@@ -5,6 +5,7 @@ from app.core.database import init_db, get_db
 from app.core.seed_database import seed_database
 from app.feature.auth.auth_controller import AuthController
 from app.feature.factory.factory_controller import FactoryController
+from app.feature.kaspi_payment.kaspi_payment_controller import KaspiPaymentController
 from app.feature.material.material_controller import MaterialController
 from app.feature.order.order_controller import OrderController
 from app.feature.organization.organization_controller import OrganizationController
@@ -12,6 +13,7 @@ from app.feature.organization_employee.organization_employee_controller import O
 from app.feature.organization_type.organization_type_controller import OrganizationTypeController
 from app.feature.region.region_controller import RegionController
 from app.feature.role.role_controller import RoleController
+from app.feature.sap_request.sap_request_controller import SapRequestController
 from app.feature.user.user_controller import UserController
 from app.feature.user_type.user_type_controller import UserTypeController
 from app.feature.vehicle.vehicle_controller import VehicleController
@@ -49,6 +51,8 @@ workshop_controller = WorkshopController()
 material_controller = MaterialController()
 auth_controller = AuthController()
 order_controller = OrderController()
+sap_request_controller = SapRequestController()
+kaspi_payment_controller = KaspiPaymentController()
 
 app.include_router(role_controller.router, prefix="/role", tags=["role"])
 app.include_router(user_type_controller.router, prefix="/user-type", tags=["user-type"])
@@ -65,6 +69,8 @@ app.include_router(workshop_controller.router, prefix="/workshop", tags=["worksh
 app.include_router(material_controller.router, prefix="/material", tags=["material"])
 app.include_router(auth_controller.router, prefix="/auth", tags=["auth"])
 app.include_router(order_controller.router, prefix="/order", tags=["order"])
+app.include_router(sap_request_controller.router, prefix="/sap-request", tags=["sap-request"])
+app.include_router(kaspi_payment_controller.router, prefix="/kaspi", tags=["kaspi"])
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="localhost", port=5000,reload=True)

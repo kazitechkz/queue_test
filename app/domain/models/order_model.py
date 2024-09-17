@@ -41,7 +41,7 @@ class OrderModel(Base):
 
     kaspi_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey(AppTableNames.KaspiPaymentsTableName + ".id", onupdate="cascade", ondelete="set null"), nullable=True)
-    txn_id: Mapped[str] = mapped_column(String(length=20), index=True, nullable=True,unique=True)
+    txn_id: Mapped[str] = mapped_column(String(length=20), index=True, nullable=True)
 
 
     owner_id: Mapped[Optional[int]] = mapped_column(
@@ -67,10 +67,9 @@ class OrderModel(Base):
     created_at: Mapped[CreatedAt]
     updated_at: Mapped[UpdatedAt]
 
-    # sap_requests: Mapped[list["SapRequestModel"]] = relationship(
-    #     back_populates="order",
-    #     foreign_keys="[SapRequestModel.order_id]"
-    # )
+    organization: Mapped["OrganizationModel"] = relationship(
+        back_populates="orders",
+    )
 
     sap_request: Mapped["SapRequestModel"] = relationship(
         "SapRequestModel",

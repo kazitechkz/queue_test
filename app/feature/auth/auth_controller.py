@@ -36,7 +36,7 @@ class AuthController:
                        roleRepo: RoleRepository = Depends(RoleRepository)
                        ):
         existed_by_email = await repo.get_first_with_filters(
-            filters=[or_(UserModel.email == data.email, UserModel.phone == data.phone, UserModel.iin == data.iin)])
+            filters=[{"email":data.email},{"phone":data.phone},{"iin":data.iin}])
         if existed_by_email is not None:
             if existed_by_email.email == data.email:
                 raise AppExceptionResponse.bad_request("Пользователь с таким email уже существует")

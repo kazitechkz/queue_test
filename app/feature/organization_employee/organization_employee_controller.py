@@ -78,7 +78,9 @@ class OrganizationEmployeeController:
             organizationRepo: OrganizationRepository,
             id: Optional[int] = None):
 
-        existed_relation = await repo.get_first_with_filters(filters=[and_(OrganizationEmployeeModel.employee_id == dto.employee_id, OrganizationEmployeeModel.organization_id == dto.organization_id)])
+        existed_relation = await repo.get_first_with_filters(filters=[
+            {"employee_id": dto.employee_id}, {"organization_id": dto.organization_id}
+        ])
         if existed_relation is not None:
             if existed_relation.id != id:
                 raise AppExceptionResponse.bad_request(message="Работник уже прикреплен к организации")
