@@ -2,14 +2,18 @@ import base64
 from datetime import datetime
 
 from fastapi import Depends
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
+from app.core.app_exception_response import AppExceptionResponse
 from app.core.base_repository import BaseRepository
 from app.core.database import get_db
 from app.domain.models.order_model import OrderModel
 from app.domain.models.sap_request_model import SapRequestModel
+from app.feature.order.dtos.order_dto import OrderCDTO
 from app.feature.sap_request.dto.sap_request_dto import SapRequestCDTO
 from app.feature.sap_request.sap_request_service import SapRequestService
+from app.feature.user.dtos.user_dto import UserRDTOWithRelations
+from app.shared.database_constants import TableConstantsNames
 
 
 class SapRequestRepository(BaseRepository[SapRequestModel]):
@@ -69,4 +73,39 @@ class SapRequestRepository(BaseRepository[SapRequestModel]):
         except:
             return None
 
+
+    async def recreate_sap(
+            self,
+            order:OrderModel,
+            userRDTO:UserRDTOWithRelations ,
+            orderRepo,
+            sapRequestService: SapRequestService
+            ):
+        if order is None:
+            return AppExceptionResponse.bad_request(message="Заказ не найден")
+        if order.sap_id is not None:
+            return AppExceptionResponse.bad_request(message="Счет на предоплату уже создан")
+        if userRDTO.user_type.value == TableConstantsNames.UserLegalTypeValue:
+            if order.organization is not None:
+                if order.organization.owner_id != userRDTO.id:
+                    return AppExceptionResponse.forbidden(message="Нет доступа к заказу")
+            else:
+                return AppExceptionResponse.forbidden(message="Нет доступа к заказу")
+        else:
+            if order.owner_id != userRDTO.id:
+                return AppExceptionResponse.forbidden(message="Нет доступа к заказу")
+        sap_request_existed = await self.request_to_sap(order=order, sapService=sapRequestService)
+        if sap_request_existed is None:
+            return AppExceptionResponse.internal_error("При создании sap request произошла ошибка")
+        else:
+            sap_request = await self.request_to_sap(order=order, sapService=sapRequestService)
+            if sap_request is not None and not sap_request.is_failed:
+                order.zakaz = sap_request.zakaz
+                order.sap_id = sap_request.id
+                order.status_id = 3
+            else:
+                order.status_id = 2
+
+            order = await orderRepo.update(obj=order, dto=OrderCDTO.from_orm(order))
+            return await orderRepo.get(id=order.id, options=[selectinload(OrderModel.sap_request)])
 

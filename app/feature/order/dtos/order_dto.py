@@ -51,9 +51,9 @@ class OrderCDTO(BaseModel):
     is_failed: bool = Field(False, description="Есть ли ошибки по заказу?")
     is_paid: bool = Field(False, description="Оплачен ли заказ?")
     start_at: datetime = Field(..., description="Дата и время начала заказа")
-    end_at: date = Field(..., description="Дата завершения заказа")
-    finished_at: Optional[date] = Field(None, description="Дата фактического завершения заказа")
-    paid_at: Optional[date] = Field(None, description="Дата оплаты заказа")
+    end_at: datetime = Field(..., description="Дата завершения заказа")
+    finished_at: Optional[datetime] = Field(None, description="Дата фактического завершения заказа")
+    paid_at: Optional[datetime] = Field(None, description="Дата оплаты заказа")
 
     class Config:
         from_attributes = True  # Allows for easy conversion from ORM models

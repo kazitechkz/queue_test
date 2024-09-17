@@ -40,3 +40,7 @@ class OrganizationModel(Base):
     vehicles: Mapped[list["VehicleModel"]] = relationship(
         back_populates="organization"
     )
+
+    orders: Mapped[list["OrderModel"]] = relationship(
+        back_populates="organization",
+    )

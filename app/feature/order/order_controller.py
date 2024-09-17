@@ -21,6 +21,7 @@ class OrderController:
        self.router.post("/create-individual-order",)(self.create_individual)
        self.router.post("/create-legal-order",)(self.create_legal)
 
+
     async def create_individual(self,
                                 dto:CreateIndividualOrderDTO,
                                 repo: OrderRepository = Depends(OrderRepository),
