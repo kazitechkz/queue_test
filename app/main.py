@@ -7,6 +7,7 @@ from app.feature.auth.auth_controller import AuthController
 from app.feature.factory.factory_controller import FactoryController
 from app.feature.kaspi_payment.kaspi_payment_controller import KaspiPaymentController
 from app.feature.material.material_controller import MaterialController
+from app.feature.operation.operation_controller import OperationController
 from app.feature.order.order_controller import OrderController
 from app.feature.organization.organization_controller import OrganizationController
 from app.feature.organization_employee.organization_employee_controller import OrganizationEmployeeController
@@ -53,6 +54,7 @@ auth_controller = AuthController()
 order_controller = OrderController()
 sap_request_controller = SapRequestController()
 kaspi_payment_controller = KaspiPaymentController()
+operation_controller = OperationController()
 
 app.include_router(role_controller.router, prefix="/role", tags=["role"])
 app.include_router(user_type_controller.router, prefix="/user-type", tags=["user-type"])
@@ -71,6 +73,7 @@ app.include_router(auth_controller.router, prefix="/auth", tags=["auth"])
 app.include_router(order_controller.router, prefix="/order", tags=["order"])
 app.include_router(sap_request_controller.router, prefix="/sap-request", tags=["sap-request"])
 app.include_router(kaspi_payment_controller.router, prefix="/kaspi", tags=["kaspi"])
+app.include_router(operation_controller.router, prefix="/operation", tags=["operation"])
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="localhost", port=5000,reload=True)

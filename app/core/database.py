@@ -44,6 +44,13 @@ async def init_db():
     from app.domain.models.order_model import OrderModel
     from app.domain.models.sap_request_model import SapRequestModel
     from app.domain.models.kaspi_payment_model import KaspiPaymentModel
+    from app.domain.models.operation_model import OperationModel
+    from app.domain.models.workshop_schedule_model import WorkshopScheduleModel
+    from app.domain.models.schedule_model import ScheduleModel
+    from app.domain.models.schedule_history_model import ScheduleHistoryModel
+    from app.domain.models.initial_weight_model import InitialWeightModel
+    from app.domain.models.act_weight_model import ActWeightModel
+
 
 
     async with engine_async.begin() as conn:

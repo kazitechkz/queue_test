@@ -27,16 +27,28 @@ class AppTableNames():
     OrderTableName = "orders"
     SAPRequestTableName = "sap_requests"
     KaspiPaymentsTableName = "kaspi_payments"
+    OperationTableName = "operations"
+    WorkshopScheduleTableName = "workshop_schedules"
+    ScheduleTableName = "schedules"
+    ScheduleHistoryTableName = "schedule_histories"
+    InitialWeightTableName = "initial_weights"
+    ActWeightTableName = "act_weights"
 
 
 class TableConstantsNames:
     #Roles
     RoleAdminValue = "admin"
+    RoleAdminId = 1
     RoleSecurityValue = "security"
+    RoleSecurityId = 2
     RoleSecurityLoaderValue = "security_loader"
+    RoleSecurityLoaderId = 3
     RoleLoaderValue = "loader"
+    RoleLoaderId = 4
     RoleWeigherValue = "weigher"
+    RoleWeigherId = 5
     RoleClientValue = "client"
+    RoleClientId = 6
 
     #User Types
     UserLegalTypeValue = "legal_entity"
@@ -53,5 +65,16 @@ class TableConstantsNames:
     OrderStatusRejectPayment = "reject_from_payment"
     OrderStatusExecuted = "executed"
     OrderStatusFinished = "finished"
+
+    #Operations
+    EntryOperationName = "entry_operation"
+    InitialWeightOperationName = "initial_weight_operation"
+    LoadingEntryOperationName = "loading_entry_operation"
+    LoadingOperationName = "loading_operation"
+    FinalWeightOperationName = "final_weight_operation"
+    ExecutedOperationName = "executed_operation"
+    ReLoadingEntryOperationName = "re_loading_entry_operation"
+    ReLoadingOperationName = "re_loading_operation"
+
 
 
