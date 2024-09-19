@@ -35,6 +35,21 @@ class BaseRepository(Generic[T]):
         items = results.scalars().all()
         return items
 
+    async def get_first_with_filter(self, filters: list = [],
+                                  options: list = []):
+        query = select(self.model)
+        if options:
+            for option in options:
+                query = query.options(option)
+        # Применение фильтров к запросу
+        for filter_condition in filters:
+            query = query.filter(filter_condition)
+        results = await self.db.execute(
+            query
+        )
+        item = results.scalars().first()
+        return item
+
     async def paginate_with_filter(self, dto: BaseModel, page: int = 1, per_page: int = 20, filters: list = [],
                                    options: list = []):
         query = select(self.model)

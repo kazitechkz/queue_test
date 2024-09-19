@@ -39,7 +39,7 @@ class ScheduleModel(Base):
 
     trailer_id:Mapped[Optional[int]] = mapped_column(
         ForeignKey(AppTableNames.VehicleTableName + ".id", onupdate="cascade", ondelete="set null"), nullable=True)
-    trailer_info: Mapped[str] = mapped_column(Text(length=1000))
+    trailer_info: Mapped[Optional[str]] = mapped_column(Text(length=1000),nullable=True)
 
     workshop_schedule_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey(AppTableNames.WorkshopScheduleTableName + ".id", onupdate="cascade", ondelete="set null"), nullable=True)
