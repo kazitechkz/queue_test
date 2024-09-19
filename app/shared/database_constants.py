@@ -68,13 +68,21 @@ class TableConstantsNames:
 
     #Operations
     EntryOperationName = "entry_operation"
+    EntryOperationId = 1
     InitialWeightOperationName = "initial_weight_operation"
+    InitialWeightOperationId = 2
     LoadingEntryOperationName = "loading_entry_operation"
+    LoadingEntryOperationId = 3
     LoadingOperationName = "loading_operation"
+    LoadingOperationId = 4
     FinalWeightOperationName = "final_weight_operation"
+    FinalWeightOperationId = 5
     ExecutedOperationName = "executed_operation"
+    ExecutedOperationId = 6
     ReLoadingEntryOperationName = "re_loading_entry_operation"
+    ReLoadingEntryOperationId = 7
     ReLoadingOperationName = "re_loading_operation"
+    ReLoadingOperationId = 8
 
 
 

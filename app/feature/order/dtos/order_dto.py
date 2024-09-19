@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field, condecimal
 
 class CreateIndividualOrderDTO(BaseModel):
     material_sap_id:str = Field(max_length=255,description="Уникальный идентификационный номер материала в SAP")
-    quan:int = Field(gt=1,description="Кол-во материала в тоннах")
+    quan_t:int = Field(gt=1,description="Кол-во материала в тоннах")
 
     class Config:
         from_attributes = True
@@ -14,7 +14,7 @@ class CreateIndividualOrderDTO(BaseModel):
 
 class CreateLegalOrderDTO(BaseModel):
     material_sap_id:str = Field(max_length=255,description="Уникальный идентификационный номер материала в SAP")
-    quan:int = Field(gt=1,description="Кол-во материала в тоннах")
+    quan_t:int = Field(gt=1,description="Кол-во материала в тоннах")
     dogovor:str = Field(max_length=255,description="Номер договора в SAP")
     organization_id: int = Field(gt=0, description="Организация")
 
@@ -29,9 +29,10 @@ class OrderCDTO(BaseModel):
     workshop_sap_id: str = Field(..., max_length=256, description="SAP ID цеха")
     material_id: Optional[int] = Field(None, description="ID материала")
     material_sap_id: str = Field(..., max_length=256, description="SAP ID материала")
+    quan_t: int = Field(..., description="Количество материала в тоннах")
     quan: int = Field(..., description="Количество материала")
-    quan_released: int = Field(0, description="Количество выпущенного материала")
-    quan_booked: int = Field(0, description="Количество забронированного материала")
+    quan_released: int = Field(..., description="Количество выпущенного материала")
+    quan_booked: int = Field(..., description="Количество забронированного материала")
     quan_left: int = Field(..., description="Оставшееся количество материала")
     executed_cruise: int = Field(0, description="Количество выполненных рейсов")
     price_without_taxes: condecimal(max_digits=10, decimal_places=2) = Field(..., description="Цена без налогов")

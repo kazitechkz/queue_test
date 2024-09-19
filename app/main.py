@@ -15,12 +15,15 @@ from app.feature.organization_type.organization_type_controller import Organizat
 from app.feature.region.region_controller import RegionController
 from app.feature.role.role_controller import RoleController
 from app.feature.sap_request.sap_request_controller import SapRequestController
+from app.feature.schedule.schedule_controller import ScheduleController
+from app.feature.schedule_history.schedule_history_controller import ScheduleHistoryController
 from app.feature.user.user_controller import UserController
 from app.feature.user_type.user_type_controller import UserTypeController
 from app.feature.vehicle.vehicle_controller import VehicleController
 from app.feature.vehicle_category.vehicle_category_controller import VehicleCategoryController
 from app.feature.vehicle_color.vehicle_color_controller import VehicleColorController
 from app.feature.workshop.workshop_controller import WorkshopController
+from app.feature.workshop_schedule.workshop_schedule_controller import WorkshopScheduleController
 
 
 @asynccontextmanager
@@ -55,6 +58,9 @@ order_controller = OrderController()
 sap_request_controller = SapRequestController()
 kaspi_payment_controller = KaspiPaymentController()
 operation_controller = OperationController()
+workshop_schedule_controller = WorkshopScheduleController()
+schedule_controller = ScheduleController()
+schedule_history_controller = ScheduleHistoryController()
 
 app.include_router(role_controller.router, prefix="/role", tags=["role"])
 app.include_router(user_type_controller.router, prefix="/user-type", tags=["user-type"])
@@ -74,6 +80,9 @@ app.include_router(order_controller.router, prefix="/order", tags=["order"])
 app.include_router(sap_request_controller.router, prefix="/sap-request", tags=["sap-request"])
 app.include_router(kaspi_payment_controller.router, prefix="/kaspi", tags=["kaspi"])
 app.include_router(operation_controller.router, prefix="/operation", tags=["operation"])
+app.include_router(workshop_schedule_controller.router, prefix="/workshop-schedule", tags=["workshop-schedule"])
+app.include_router(schedule_controller.router, prefix="/schedule", tags=["schedule"])
+app.include_router(schedule_history_controller.router, prefix="/schedule-history", tags=["schedule-history"])
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="localhost", port=5000,reload=True)

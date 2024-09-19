@@ -36,7 +36,7 @@ class OrderRepository(BaseRepository[OrderModel]):
             is_individual: bool = True
     ):
         # Retrieve material information and validate workshop and factory
-        material_dict = await materialRepo.count_price(sap_id=dto.material_sap_id, quan=dto.quan)
+        material_dict = await materialRepo.count_price(sap_id=dto.material_sap_id, quan=dto.quan_t)
         material = material_dict["material"]
         workshop = await workshopRepo.get(id=material.workshop_id)
         if workshop is None:
@@ -54,7 +54,7 @@ class OrderRepository(BaseRepository[OrderModel]):
             "workshop_sap_id": workshop.sap_id,
             "material_id": material.id,
             "material_sap_id": material.sap_id,
-            "quan": dto.quan,
+            "quan_t": dto.quan_t,
             "price_without_taxes": material_dict["price_without_taxes"],
             "price_with_taxes": material_dict["price_with_taxes"],
             "end_at": datetime.datetime.now().replace(year=datetime.datetime.now().year + 1)

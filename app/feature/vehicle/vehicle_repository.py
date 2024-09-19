@@ -11,3 +11,4 @@ class VehicleRepository(BaseRepository[VehicleModel]):
     def __init__(self, db: Session = Depends(get_db)):
         super().__init__(VehicleModel, db)
 
+
