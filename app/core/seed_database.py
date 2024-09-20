@@ -1,8 +1,9 @@
-from datetime import date
+from datetime import date, time
 
 from sqlalchemy import select, func
 from sqlalchemy.orm import Session
 from app.shared.database_constants import TableConstantsNames
+
 
 async def seed_database(db: Session):
     await add_roles(session=db)
@@ -17,8 +18,10 @@ async def seed_database(db: Session):
     await add_users(session=db)
     await add_organizations(session=db)
     await add_vehicles(session=db)
+    await add_workshop_schedules(session=db)
 
-async def add_roles(session:Session):
+
+async def add_roles(session: Session):
     from app.domain.models.role_model import RoleModel
     count_query = select(func.count()).select_from(RoleModel)
     total_items = await session.scalar(count_query)
@@ -48,17 +51,21 @@ async def add_user_types(session: Session):
         session.add_all(data)
         await session.commit()
 
+
 async def add_organization_types(session: Session):
     from app.domain.models.organization_type_model import OrganizationTypeModel
     count_query = select(func.count()).select_from(OrganizationTypeModel)
     total_items = await session.scalar(count_query)
     if total_items == 0:
         data = [
-            OrganizationTypeModel(title="Товарищество с ограниченой ответственностью", value=TableConstantsNames.OrganizationLLCTypeValue),
-            OrganizationTypeModel(title="Индивидуальный предприниматель", value=TableConstantsNames.OrganizationIPTypeValue),
+            OrganizationTypeModel(title="Товарищество с ограниченой ответственностью",
+                                  value=TableConstantsNames.OrganizationLLCTypeValue),
+            OrganizationTypeModel(title="Индивидуальный предприниматель",
+                                  value=TableConstantsNames.OrganizationIPTypeValue),
         ]
         session.add_all(data)
         await session.commit()
+
 
 async def add_order_status(session: Session):
     from app.domain.models.order_status_model import OrderStatusModel
@@ -68,17 +75,17 @@ async def add_order_status(session: Session):
         data = [
             OrderStatusModel(
                 id=1,
-                title = "Ожидание создания счета предоплаты в SAP",
-                value = TableConstantsNames.OrderStatusWaitSap,
-                is_first =  True,
-                is_last = False,
+                title="Ожидание создания счета предоплаты в SAP",
+                value=TableConstantsNames.OrderStatusWaitSap,
+                is_first=True,
+                is_last=False,
             ),
             OrderStatusModel(
                 id=2,
-                title = "Отказ в системе в SAP",
-                value = TableConstantsNames.OrderStatusRejectSap,
-                is_first =  False,
-                is_last = False,
+                title="Отказ в системе в SAP",
+                value=TableConstantsNames.OrderStatusRejectSap,
+                is_first=False,
+                is_last=False,
             ),
             OrderStatusModel(
                 id=3,
@@ -112,7 +119,8 @@ async def add_order_status(session: Session):
         session.add_all(data)
         await session.commit()
         for item in data:
-            order_statuses = await session.execute(select(OrderStatusModel).filter(OrderStatusModel.value == item.value))
+            order_statuses = await session.execute(
+                select(OrderStatusModel).filter(OrderStatusModel.value == item.value))
             order_status = order_statuses.scalars().first()
             if order_status is not None:
                 if item.value == TableConstantsNames.OrderStatusWaitSap:
@@ -135,19 +143,20 @@ async def add_order_status(session: Session):
                     order_status.next_id = None
                 await session.commit()
 
-async def add_sap_data(session:Session):
+
+async def add_sap_data(session: Session):
     from app.domain.models.factory_model import FactoryModel
     from app.domain.models.workshop_model import WorkshopModel
     from app.domain.models.material_model import MaterialModel
-    #Factory
+    # Factory
     count_query = select(func.count()).select_from(FactoryModel)
     total_items = await session.scalar(count_query)
     if total_items == 0:
         data = [
             FactoryModel(
-                id = 1,
-                title = "Завод 1011",
-                sap_id = "1011"
+                id=1,
+                title="Завод 1011",
+                sap_id="1011"
             ),
             FactoryModel(
                 id=2,
@@ -158,17 +167,17 @@ async def add_sap_data(session:Session):
 
         session.add_all(data)
         await session.commit()
-    #Workshop
+    # Workshop
     count_query = select(func.count()).select_from(WorkshopModel)
     total_items = await session.scalar(count_query)
     if total_items == 0:
         data = [
             WorkshopModel(
                 id=1,
-                title = "Цех 5404",
-                sap_id = "5404",
-                factory_id = 1,
-                factory_sap_id = "1011"
+                title="Цех 5404",
+                sap_id="5404",
+                factory_id=1,
+                factory_sap_id="1011"
             ),
             WorkshopModel(
                 id=2,
@@ -182,19 +191,19 @@ async def add_sap_data(session:Session):
 
         session.add_all(data)
         await session.commit()
-    #Material
+    # Material
     count_query = select(func.count()).select_from(MaterialModel)
     total_items = await session.scalar(count_query)
     if total_items == 0:
         data = [
             MaterialModel(
                 id=1,
-                title= "ПЕСОК ИЗ ШЛАКОВ ВУ ФЕРРОХРОМА 0-5",
-                sap_id ="30012553",
-                price_without_taxes = 800.00,
-                price_with_taxes = 896.00,
-                workshop_id = 1,
-                workshop_sap_id = "5404"
+                title="ПЕСОК ИЗ ШЛАКОВ ВУ ФЕРРОХРОМА 0-5",
+                sap_id="30012553",
+                price_without_taxes=800.00,
+                price_with_taxes=896.00,
+                workshop_id=1,
+                workshop_sap_id="5404"
             ),
             MaterialModel(
                 id=2,
@@ -263,6 +272,7 @@ async def add_sap_data(session:Session):
         session.add_all(data)
         await session.commit()
 
+
 async def add_operations(session: Session):
     from app.domain.models.operation_model import OperationModel
     count_query = select(func.count()).select_from(OperationModel)
@@ -270,7 +280,7 @@ async def add_operations(session: Session):
     if total_items == 0:
         data = [
             OperationModel(
-                id = 1,
+                id=1,
                 title="Прохождение КПП",
                 value=TableConstantsNames.EntryOperationName,
                 role_id=TableConstantsNames.RoleSecurityId,
@@ -382,6 +392,8 @@ async def add_operations(session: Session):
                     operation.prev_id = 7
                     operation.next_id = 5
                 await session.commit()
+
+
 async def add_vehicle_colors(session: Session):
     from app.domain.models.vehicle_color_model import VehicleColorModel
     count_query = select(func.count()).select_from(VehicleColorModel)
@@ -415,8 +427,9 @@ async def add_vehicle_colors(session: Session):
             # Сохраняем изменения в базе данных
         await session.commit()
 
+
 async def add_vehicle_categories(session: Session):
-    from app.domain.models.vehicle_category_model import  VehicleCategoryModel
+    from app.domain.models.vehicle_category_model import VehicleCategoryModel
     count_query = select(func.count()).select_from(VehicleCategoryModel)
     total_items = await session.scalar(count_query)
     if total_items == 0:
@@ -430,7 +443,7 @@ async def add_vehicle_categories(session: Session):
         for category in categories:
             # Проверяем, существует ли уже цвет с таким значением
             result = await session.execute(select(VehicleCategoryModel).filter_by(value=category["value"]))
-            existing_category= result.scalars().first()
+            existing_category = result.scalars().first()
 
             if not existing_category:
                 # Если цвета нет в базе, добавляем его
@@ -439,6 +452,7 @@ async def add_vehicle_categories(session: Session):
 
             # Сохраняем изменения в базе данных
         await session.commit()
+
 
 async def add_regions(session: Session):
     from app.domain.models.region_model import RegionModel
@@ -465,12 +479,12 @@ async def add_regions(session: Session):
             {"title": "город Шымкент", "value": "17"}
         ]
         for region in regions:
-                result = await session.execute(select(RegionModel).filter_by(value=region["value"]))
-                existing_region = result.scalars().first()
-                if not existing_region:
-                    new_region = RegionModel(title=region["title"], value=region["value"])
-                    session.add(new_region)
-                    await session.commit()
+            result = await session.execute(select(RegionModel).filter_by(value=region["value"]))
+            existing_region = result.scalars().first()
+            if not existing_region:
+                new_region = RegionModel(title=region["title"], value=region["value"])
+                session.add(new_region)
+                await session.commit()
 
 
 async def add_users(session: Session):
@@ -527,6 +541,8 @@ async def add_users(session: Session):
         ]
         session.add_all(data)
         await session.commit()
+
+
 async def add_organizations(session: Session):
     from app.domain.models.organization_model import OrganizationModel
     count_query = select(func.count()).select_from(OrganizationModel)
@@ -534,19 +550,19 @@ async def add_organizations(session: Session):
     if total_items == 0:
         data = [
             OrganizationModel(
-                id = 1,
-                full_name = "ТОО 'KAZ ITECH'",
-                short_name = "KAZ ITECH",
-                bin= "230540028470",
+                id=1,
+                full_name="ТОО 'KAZ ITECH'",
+                short_name="KAZ ITECH",
+                bin="230540028470",
                 bik="BRKEKZKZ",
-                kbe= "KZ45914122203KZ00557",
-                email= "kazitech2023@gmail.com",
-                phone= "+77064205961",
-                address= "Астана Мангилик Ел",
-                status= True,
-                owner_id= 2,
-                type_id= 1
-             ),
+                kbe="KZ45914122203KZ00557",
+                email="kazitech2023@gmail.com",
+                phone="+77064205961",
+                address="Астана Мангилик Ел",
+                status=True,
+                owner_id=2,
+                type_id=1
+            ),
             OrganizationModel(
                 id=2,
                 full_name="ТОО 'I-UNION'",
@@ -564,6 +580,8 @@ async def add_organizations(session: Session):
         ]
         session.add_all(data)
         await session.commit()
+
+
 async def add_vehicles(session: Session):
     from app.domain.models.vehicle_model import VehicleModel
     count_query = select(func.count()).select_from(VehicleModel)
@@ -571,19 +589,19 @@ async def add_vehicles(session: Session):
     if total_items == 0:
         data = [
             VehicleModel(
-                document_number= "34345DD34453",
-                registration_number= "ABC123",
-                car_model ="MAN",
-                start_at =  date(2024, 9, 17),
-                vin = "12345678912345678",
-                produced_at = 2023,
-                engine_volume_sm = 14000,
-                weight_clean_kg = 9000,
-                weight_load_max_kg = 20000,
-                category_id= 1,
-                color_id = 2,
-                region_id = 1,
-                owner_id = 1
+                document_number="34345DD34453",
+                registration_number="ABC123",
+                car_model="MAN",
+                start_at=date(2024, 9, 17),
+                vin="12345678912345678",
+                produced_at=2023,
+                engine_volume_sm=14000,
+                weight_clean_kg=9000,
+                weight_load_max_kg=20000,
+                category_id=1,
+                color_id=2,
+                region_id=1,
+                owner_id=1
             ),
             VehicleModel(
                 document_number="34342HHHH453",
@@ -631,6 +649,41 @@ async def add_vehicles(session: Session):
                 owner_id=4
             ),
 
+        ]
+        session.add_all(data)
+        await session.commit()
+
+
+async def add_workshop_schedules(session: Session):
+    from app.domain.models.workshop_schedule_model import WorkshopScheduleModel
+    count_query = select(func.count()).select_from(WorkshopScheduleModel)
+    total_items = await session.scalar(count_query)
+    if total_items == 0:
+        data = [
+            WorkshopScheduleModel(
+                workshop_id=1,
+                workshop_sap_id="5404",
+                date_start=date(2024, 1, 1),
+                date_end=date(2024, 12, 31),
+                start_at=time(hour=9, minute=0, second=0, microsecond=0),
+                end_at=time(hour=20, minute=0, second=0, microsecond=0),
+                car_service_min=20,
+                break_between_service_min=5,
+                machine_at_one_time=4,
+                is_active=True
+            ),
+            WorkshopScheduleModel(
+                workshop_id=2,
+                workshop_sap_id="5407",
+                date_start=date(2024, 1, 1),
+                date_end=date(2024, 12, 31),
+                start_at=time(hour=9, minute=0, second=0, microsecond=0),
+                end_at=time(hour=18, minute=0, second=0, microsecond=0),
+                car_service_min=15,
+                break_between_service_min=0,
+                machine_at_one_time=2,
+                is_active=True
+            ),
         ]
         session.add_all(data)
         await session.commit()
