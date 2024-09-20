@@ -1,7 +1,7 @@
 from datetime import datetime, date, time
 from typing import Optional
 
-from pydantic import Field, BaseModel, model_validator
+from pydantic import Field, BaseModel, model_validator, field_validator
 
 
 class ScheduleDTO(BaseModel):
@@ -101,16 +101,17 @@ class ScheduleCDTO(BaseModel):
     is_executed: Optional[bool] = Field(False, description="Выполнено ли расписание")
     executed_at: Optional[datetime] = Field(None, description="Время выполнения")
 
+    canceled_by: Optional[int] = Field(None, description="Кто отменил")
+    cancel_reason: Optional[str] = Field(None, max_length=1000, description="Причина отмены")
+    canceled_at: Optional[datetime] = Field(None, description="Время отмены")
 
-    @model_validator(mode="before")
-    def check_dates_and_times(cls, values):
-        start_at = values.get('start_at')
-        end_at = values.get('end_at')
-        # Проверка, что время окончания больше времени начала
+    @model_validator(mode='after')
+    def check_dates_and_times(self):
+        start_at = self.start_at
+        end_at = self.end_at
         if start_at and end_at and end_at <= start_at:
             raise ValueError('Время окончания работы должна быть больше даты начала')
-
-        return values
+        return self
 
     class Config:
         from_attributes = True
@@ -124,19 +125,19 @@ class ScheduleIndividualCDTO(BaseModel):
     vehicle_id: Optional[int] = Field(None, description="ID транспортного средства")
     trailer_id: Optional[int] = Field(None, description="ID прицепа")
 
-    @model_validator(mode="before")
-    def check_dates_and_times(cls, values):
-        scheduled_data = values.get("scheduled_data")
-        start_at = values.get('start_at')
-        end_at = values.get('end_at')
-        if scheduled_data == date.today():
-            if start_at < datetime.now().time():
-                raise ValueError('Время начала работы должна быть больше чем текущее')
-        # Проверка, что время окончания больше времени начала
+    @model_validator(mode='after')
+    def check_dates_and_times(self):
+        start_at = self.start_at
+        end_at = self.end_at
         if start_at and end_at and end_at <= start_at:
             raise ValueError('Время окончания работы должна быть больше даты начала')
+        return self
 
-        return values
+    @field_validator('scheduled_data')
+    def validate_scheduled_data(cls, v):
+        if v < date.today():
+            raise ValueError('Время начала работы должна быть больше чем текущее')
+        return v
 
     class Config:
         from_attributes = True

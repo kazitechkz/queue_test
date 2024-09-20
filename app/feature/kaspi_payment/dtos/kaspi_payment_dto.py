@@ -21,6 +21,7 @@ class KaspiPaymentCDTO(BaseModel):
 
     class Config:
         from_attributes = True  # Allows Pydantic to work with SQLAlchemy ORM objects
+
 class KaspiPaymentCheckResponseDTO(BaseModel):
     txn_id:str = Field(max_length=20,description="Уникальный идентификатор в Kaspi")
     result:int = Field(ge=0, le=5,description="Ответ для каспи")

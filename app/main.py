@@ -17,6 +17,7 @@ from app.feature.role.role_controller import RoleController
 from app.feature.sap_request.sap_request_controller import SapRequestController
 from app.feature.schedule.schedule_controller import ScheduleController
 from app.feature.schedule_history.schedule_history_controller import ScheduleHistoryController
+from app.feature.test.test_controller import TestController
 from app.feature.user.user_controller import UserController
 from app.feature.user_type.user_type_controller import UserTypeController
 from app.feature.vehicle.vehicle_controller import VehicleController
@@ -61,6 +62,7 @@ operation_controller = OperationController()
 workshop_schedule_controller = WorkshopScheduleController()
 schedule_controller = ScheduleController()
 schedule_history_controller = ScheduleHistoryController()
+test_controller = TestController()
 
 app.include_router(role_controller.router, prefix="/role", tags=["role"])
 app.include_router(user_type_controller.router, prefix="/user-type", tags=["user-type"])
@@ -83,6 +85,7 @@ app.include_router(operation_controller.router, prefix="/operation", tags=["oper
 app.include_router(workshop_schedule_controller.router, prefix="/workshop-schedule", tags=["workshop-schedule"])
 app.include_router(schedule_controller.router, prefix="/schedule", tags=["schedule"])
 app.include_router(schedule_history_controller.router, prefix="/schedule-history", tags=["schedule-history"])
+app.include_router(test_controller.router, prefix="/test", tags=["test"])
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="localhost", port=5000,reload=True)

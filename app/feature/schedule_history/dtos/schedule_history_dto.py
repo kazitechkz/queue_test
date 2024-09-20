@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class ScheduleHistoryDTO(BaseModel):
@@ -45,3 +45,17 @@ class ScheduleHistoryRDTO(ScheduleHistoryDTO):
 class ScheduleHistoryEnterFactoryDTO(BaseModel):
     is_passed:bool =  Field(..., description="Пройдено ли")
     cancel_reason: Optional[str] = Field(None, max_length=1000, description="Причина отмены")
+
+class ScheduleHistoryInitialWeightDTO(BaseModel):
+    is_passed:bool =  Field(..., description="Пройдено ли")
+    cancel_reason: Optional[str] = Field(None, max_length=1000, description="Причина отмены")
+    vehicle_tara_kg: Optional[int] = Field(..., description="Вес тары транспорта в кг",gt=1000)
+
+    @model_validator(mode='after')
+    def check_is_passed_and_vehicle_tara_kg(self):
+        is_passed = self.is_passed
+        vehicle_tara_kg = self.vehicle_tara_kg
+        if is_passed:
+            if vehicle_tara_kg is None:
+                raise ValueError('Вес тары обязателен если транспорт проходит на следующий уровень')
+        return self
