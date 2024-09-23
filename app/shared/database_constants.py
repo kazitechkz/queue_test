@@ -77,12 +77,21 @@ class TableConstantsNames:
     LoadingOperationId = 4
     FinalWeightOperationName = "final_weight_operation"
     FinalWeightOperationId = 5
+    ExitCheckOperationName = "exit_check_operation"
+    ExitCheckOperationId = 6
+    ReLoadingEntryExitOperationName = "reloading_entry_exit_operation"
+    ReLoadingEntryExitOperationId = 7
+    ReLoadingExitOperationName = "reloading_exit_operation"
+    ReLoadingExitOperationId = 8
+    ReLoadingEntryWeightOperationName = "reloading_entry_weight_operation"
+    ReLoadingEntryWeightOperationId = 9
+    ReLoadingWeightOperationName = "reloading_weight_operation"
+    ReLoadingWeightOperationId = 10
     ExecutedOperationName = "executed_operation"
-    ExecutedOperationId = 6
-    ReLoadingEntryOperationName = "re_loading_entry_operation"
-    ReLoadingEntryOperationId = 7
-    ReLoadingOperationName = "re_loading_operation"
-    ReLoadingOperationId = 8
+    ExecutedOperationId = 11
+
+    RELOAD_OPERATIONS = [ReLoadingEntryExitOperationName,ReLoadingEntryWeightOperationName]
+
 
 
 

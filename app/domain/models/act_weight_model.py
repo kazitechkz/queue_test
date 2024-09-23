@@ -1,7 +1,7 @@
 import datetime
 from typing import Optional
 
-from sqlalchemy import ForeignKey, String, Integer
+from sqlalchemy import ForeignKey, String, Integer, Computed
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -26,7 +26,7 @@ class ActWeightModel(Base):
     responsible_iin: Mapped[str] = mapped_column(String(256), nullable=True)
 
     vehicle_tara_kg: Mapped[int] = mapped_column(Integer())
-    vehicle_netto_kg: Mapped[int] = mapped_column(Integer())
+    vehicle_netto_kg: Mapped[int] = mapped_column(Computed("vehicle_brutto_kg - vehicle_tara_kg"))
     vehicle_brutto_kg: Mapped[int] = mapped_column(Integer())
 
     measured_at: Mapped[datetime.datetime] = mapped_column()

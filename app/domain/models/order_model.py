@@ -26,11 +26,15 @@ class OrderModel(Base):
         ForeignKey(AppTableNames.MaterialTableName + ".id", onupdate="cascade", ondelete="set null"), nullable=True)
     material_sap_id: Mapped[str] = mapped_column(String(length=256), index=True)
 
-    quan_t: Mapped[int] = mapped_column(Integer())
+    quan_t: Mapped[float] = mapped_column(Numeric(precision=10, scale=2))
     quan: Mapped[int] = mapped_column(Computed("quan_t * 1000"))
     quan_released: Mapped[int] = mapped_column(Integer(), default=0)
+    quan_released_t: Mapped[float] = mapped_column(Computed("quan_released / 1000"))
     quan_booked: Mapped[int] = mapped_column(Integer(), default=0)
+    quan_booked_t: Mapped[float] = mapped_column(Computed("quan_booked / 1000"))
     quan_left: Mapped[int] = mapped_column(Computed("quan - quan_booked - quan_released"))
+    quan_left_t: Mapped[float] = mapped_column(Computed("quan_left / 1000"))
+
     executed_cruise: Mapped[int] = mapped_column(Integer(), default=0)
 
     price_without_taxes: Mapped[float] = mapped_column(Numeric(precision=10, scale=2))

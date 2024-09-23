@@ -88,4 +88,4 @@ app.include_router(schedule_history_controller.router, prefix="/schedule-history
 app.include_router(test_controller.router, prefix="/test", tags=["test"])
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="localhost", port=5000,reload=True)
+    uvicorn.run("main:app", host="localhost", port=8000,reload=True)
