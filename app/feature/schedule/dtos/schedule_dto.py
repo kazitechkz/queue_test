@@ -1,4 +1,4 @@
-from datetime import datetime, date, time
+from datetime import datetime, date, time, timezone
 from typing import Optional
 
 from pydantic import Field, BaseModel, model_validator, field_validator
@@ -49,6 +49,9 @@ class ScheduleRDTO(ScheduleDTO):
     vehicle_brutto_kg: Optional[int] = Field(None, description="Брутто транспортного средства в кг")
     vehicle_netto_kg: Optional[int] = Field(None, description="Нетто транспортного средства в кг")
 
+    responsible_id: Optional[int] = Field(None, description="ID ответственного")
+    responsible_name: Optional[str] = Field(None, max_length=256, description="Имя ответственного")
+
     is_active: bool = Field(..., description="Активно ли расписание")
     is_used: bool = Field(..., description="Использовано ли расписание")
     is_canceled: bool = Field(..., description="Отменено ли расписание")
@@ -95,6 +98,9 @@ class ScheduleCDTO(BaseModel):
     vehicle_brutto_kg: Optional[int] = Field(None, description="Брутто транспортного средства в кг")
     vehicle_netto_kg: Optional[int] = Field(None, description="Нетто транспортного средства в кг")
 
+    responsible_id: Optional[int] = Field(None, description="ID ответственного")
+    responsible_name: Optional[str] = Field(None, max_length=256, description="Имя ответственного")
+
     is_active: Optional[bool] = Field(True, description="Активно ли расписание")
     is_used: Optional[bool] = Field(False, description="Использовано ли расписание")
     is_canceled: Optional[bool] = Field(False, description="Отменено ли расписание")
@@ -129,9 +135,38 @@ class ScheduleIndividualCDTO(BaseModel):
     def check_dates_and_times(self):
         start_at = self.start_at
         end_at = self.end_at
+        scheduled_data = self.scheduled_data
+        current_time = datetime.now(timezone.utc)
         if start_at and end_at and end_at <= start_at:
             raise ValueError('Время окончания работы должна быть больше даты начала')
+        # if scheduled_data == date.today():
+        #     if start_at < current_time.time() or end_at < current_time.time():
+        #         raise ValueError('Время начала и конца работы должны быть больше текущего времени')
         return self
+
+class ScheduleLegalCDTO(BaseModel):
+    order_id: int = Field(description="ID заказа")
+    driver_id: int = Field(description="ID водителя"),
+    workshop_id: int = Field(description="Шаблон расписания цеха")
+    scheduled_data: date = Field(description="Дата бронирования", ge=date.today())
+    start_at: time = Field(description="Начало бронирования")
+    end_at: time = Field(description="Конец бронирования")
+    vehicle_id: Optional[int] = Field(None, description="ID транспортного средства")
+    trailer_id: Optional[int] = Field(None, description="ID прицепа")
+
+    @model_validator(mode='after')
+    def check_dates_and_times(self):
+        start_at = self.start_at
+        end_at = self.end_at
+        scheduled_data = self.scheduled_data
+        current_time = datetime.now(timezone.utc)
+        if start_at and end_at and end_at <= start_at:
+            raise ValueError('Время окончания работы должна быть больше даты начала')
+        # if scheduled_data == date.today():
+        #     if start_at < current_time.time() or end_at < current_time.time():
+        #         raise ValueError('Время начала и конца работы должны быть больше текущего времени')
+        return self
+
 
     @field_validator('scheduled_data')
     def validate_scheduled_data(cls, v):

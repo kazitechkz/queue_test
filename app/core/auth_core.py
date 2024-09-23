@@ -162,3 +162,13 @@ def check_legal_client(current_user: UserRDTOWithRelations = Depends(get_current
             detail="Отказано в доступе",
         )
     return current_user
+
+
+def check_employee(current_user: UserRDTOWithRelations = Depends(get_current_user)):
+    if current_user.role.value not in [TableConstantsNames.RoleSecurityValue, TableConstantsNames.RoleSecurityLoaderValue, TableConstantsNames.RoleLoaderValue, TableConstantsNames.RoleWeigherValue]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Отказано в доступе",
+        )
+
+    return current_user

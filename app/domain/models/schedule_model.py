@@ -1,7 +1,7 @@
 import datetime
 from typing import Optional
 
-from sqlalchemy import ForeignKey, Integer, Boolean, Text, String
+from sqlalchemy import ForeignKey, Integer, Boolean, Text, String, Computed
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -53,7 +53,11 @@ class ScheduleModel(Base):
     loading_volume_kg:Mapped[int] = mapped_column(Integer())
     vehicle_tara_kg:Mapped[int] = mapped_column(Integer(),nullable=True)
     vehicle_brutto_kg:Mapped[int] = mapped_column(Integer(),nullable=True)
-    vehicle_netto_kg:Mapped[int] = mapped_column(Integer(),nullable=True)
+    vehicle_netto_kg:Mapped[int] = mapped_column(Computed("vehicle_brutto_kg - vehicle_tara_kg"),nullable=True)
+
+    responsible_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey(AppTableNames.UserTableName + ".id", onupdate="cascade", ondelete="set null"), nullable=True)
+    responsible_name: Mapped[str] = mapped_column(String(256), nullable=True)
 
     is_active:Mapped[bool] = mapped_column(Boolean(),default=True)
     is_used:Mapped[bool] = mapped_column(Boolean(),default=False)

@@ -281,7 +281,7 @@ async def add_operations(session: Session):
         data = [
             OperationModel(
                 id=1,
-                title="Прохождение КПП",
+                title="Въезд - Прохождение КПП",
                 value=TableConstantsNames.EntryOperationName,
                 role_id=TableConstantsNames.RoleSecurityId,
                 role_value=TableConstantsNames.RoleSecurityValue,
@@ -331,33 +331,63 @@ async def add_operations(session: Session):
             ),
             OperationModel(
                 id=6,
-                title="Завершено",
-                value=TableConstantsNames.ExecutedOperationName,
-                role_id=TableConstantsNames.RoleWeigherId,
-                role_value=TableConstantsNames.RoleWeigherValue,
-                can_cancel=False,
+                title="Выезд - Контрольная проверка товара (СБ КПП)",
+                value=TableConstantsNames.ExitCheckOperationName,
+                role_id=TableConstantsNames.RoleSecurityId,
+                role_value=TableConstantsNames.RoleSecurityValue,
+                can_cancel=True,
                 is_first=False,
-                is_last=True,
+                is_last=False,
             ),
             OperationModel(
                 id=7,
-                title="Валидация перед разгрузкой (СБ)",
-                value=TableConstantsNames.ReLoadingEntryOperationName,
+                title="Служба безопасности:Валидация перед разгрузкой и отменой",
+                value=TableConstantsNames.ReLoadingEntryExitOperationName,
                 role_id=TableConstantsNames.RoleSecurityLoaderId,
                 role_value=TableConstantsNames.RoleSecurityLoaderValue,
-                can_cancel=True,
+                can_cancel=False,
                 is_first=False,
                 is_last=False,
             ),
             OperationModel(
                 id=8,
-                title="Разгрузка излишнего товара",
-                value=TableConstantsNames.ReLoadingOperationName,
+                title="Разгрузка излишнего товара и выход",
+                value=TableConstantsNames.ReLoadingExitOperationName,
                 role_id=TableConstantsNames.RoleLoaderId,
                 role_value=TableConstantsNames.RoleLoaderValue,
-                can_cancel=True,
+                can_cancel=False,
+                is_first=False,
+                is_last=True,
+            ),
+            OperationModel(
+                id=9,
+                title="Служба безопасности:Валидация перед разгрузкой и взвешиванием",
+                value=TableConstantsNames.ReLoadingEntryWeightOperationName,
+                role_id=TableConstantsNames.RoleSecurityLoaderId,
+                role_value=TableConstantsNames.RoleSecurityLoaderValue,
+                can_cancel=False,
                 is_first=False,
                 is_last=False,
+            ),
+            OperationModel(
+                id=10,
+                title="Разгрузка излишнего товара и взвешиванием",
+                value=TableConstantsNames.ReLoadingWeightOperationName,
+                role_id=TableConstantsNames.RoleLoaderId,
+                role_value=TableConstantsNames.RoleLoaderValue,
+                can_cancel=False,
+                is_first=False,
+                is_last=False,
+            ),
+            OperationModel(
+                id=11,
+                title="Успешное завершение",
+                value=TableConstantsNames.ExecutedOperationName,
+                role_id=TableConstantsNames.RoleSecurityId,
+                role_value=TableConstantsNames.RoleSecurityValue,
+                can_cancel=False,
+                is_first=False,
+                is_last=True,
             ),
         ]
         session.add_all(data)
@@ -382,15 +412,24 @@ async def add_operations(session: Session):
                 if item.value == TableConstantsNames.FinalWeightOperationName:
                     operation.prev_id = 4
                     operation.next_id = 6
-                if item.value == TableConstantsNames.ExecutedOperationName:
+                if item.value == TableConstantsNames.ExitCheckOperationName:
                     operation.prev_id = 5
-                    operation.next_id = None
-                if item.value == TableConstantsNames.ReLoadingEntryOperationName:
+                    operation.next_id = 11
+                if item.value == TableConstantsNames.ReLoadingEntryExitOperationName:
                     operation.prev_id = 5
                     operation.next_id = 8
-                if item.value == TableConstantsNames.ReLoadingOperationName:
+                if item.value == TableConstantsNames.ReLoadingExitOperationName:
                     operation.prev_id = 7
+                    operation.next_id = None
+                if item.value == TableConstantsNames.ReLoadingEntryWeightOperationName:
+                    operation.prev_id = 5
+                    operation.next_id = 10
+                if item.value == TableConstantsNames.ReLoadingWeightOperationName:
+                    operation.prev_id = 9
                     operation.next_id = 5
+                if item.value == TableConstantsNames.ExecutedOperationName:
+                    operation.prev_id = 6
+                    operation.next_id = None
                 await session.commit()
 
 
@@ -535,6 +574,50 @@ async def add_users(session: Session):
                 iin="961011256524",
                 email="nurbakit@gmail.com",
                 phone="+77064171796",
+                password_hash=get_password_hash("admin123"),
+                status=True
+            ),
+            UserModel(
+                id=5,
+                role_id=2,
+                type_id=1,
+                name="Охраник Охранников",
+                iin="222222222222",
+                email="security@gmail.com",
+                phone="+77062222222",
+                password_hash=get_password_hash("admin123"),
+                status=True
+            ),
+            UserModel(
+                id=6,
+                role_id=3,
+                type_id=1,
+                name="Охраник Погрузчиков",
+                iin="333333333333",
+                email="security_loader@gmail.com",
+                phone="+77063333333",
+                password_hash=get_password_hash("admin123"),
+                status=True
+            ),
+            UserModel(
+                id=7,
+                role_id=4,
+                type_id=1,
+                name="Погрузчик Погрузчиков",
+                iin="444444444444",
+                email="loader@gmail.com",
+                phone="+770644444444",
+                password_hash=get_password_hash("admin123"),
+                status=True
+            ),
+            UserModel(
+                id=8,
+                role_id=5,
+                type_id=1,
+                name="Весовщик Весовщиков",
+                iin="555555555555",
+                email="weigher@gmail.com",
+                phone="+77065555555",
                 password_hash=get_password_hash("admin123"),
                 status=True
             ),
