@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 
 from fastapi import APIRouter
 
@@ -12,4 +12,4 @@ class TestController:
         self.router.get("/test")(self.test)
 
     async def test(self):
-        return datetime.datetime.now()
+        return datetime.now()

@@ -15,17 +15,16 @@ class KaspiPaymentModel(Base):
         ForeignKey(AppTableNames.OrderTableName + ".id", onupdate="cascade", ondelete="set null"), nullable=True)
     zakaz: Mapped[str] = mapped_column(String(length=20), index=True, nullable=False)
     account: Mapped[str] = mapped_column(String(length=20), index=True, nullable=False)
-    txn_id:Mapped[Optional[str]] = mapped_column(String(length=20), index=True, nullable=True)
-    txn_check_id:Mapped[Optional[str]] = mapped_column(String(length=20),  nullable=True)
-    txn_pay_id:Mapped[Optional[str]] = mapped_column(String(length=20), nullable=True)
-    txn_date:Mapped[Optional[str]] = mapped_column(String(length=256), nullable=True)
-    command:Mapped[Optional[str]] = mapped_column(String(length=20), index=True, nullable=True)
+    txn_id: Mapped[Optional[str]] = mapped_column(String(length=20), index=True, nullable=True)
+    txn_check_id: Mapped[Optional[str]] = mapped_column(String(length=20), nullable=True)
+    txn_pay_id: Mapped[Optional[str]] = mapped_column(String(length=20), nullable=True)
+    txn_date: Mapped[Optional[str]] = mapped_column(String(length=256), nullable=True)
+    command: Mapped[Optional[str]] = mapped_column(String(length=20), index=True, nullable=True)
     sum: Mapped[float] = mapped_column(Numeric(precision=10, scale=2))
-    amount:Mapped[int] = mapped_column()
+    amount: Mapped[int] = mapped_column()
     is_failed: Mapped[bool] = mapped_column(Boolean(), default=False)
     is_paid: Mapped[bool] = mapped_column(Boolean(), default=False)
     is_qr_generate: Mapped[bool] = mapped_column(Boolean(), default=False)
     paid_at: Mapped[Optional[datetime]] = mapped_column(default=None, nullable=True)
     created_at: Mapped[CreatedAt]
     updated_at: Mapped[UpdatedAt]
-

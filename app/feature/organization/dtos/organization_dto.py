@@ -1,8 +1,7 @@
 from pydantic import BaseModel, Field, EmailStr, field_validator
-
+from app.feature.user.dtos.user_dto import UserRDTO
 from app.core.validation_rules import PHONE_REGEX, EMAIL_REGEX, TWELVE_DIGITS_REGEX
 from app.feature.organization_type.dtos.organization_type_dto import OrganizationTypeRDTO
-from app.feature.user.dtos.user_dto import UserRDTO
 
 
 class OrganizationDTO(BaseModel):
@@ -61,6 +60,4 @@ class OrganizationRDTO(OrganizationDTO):
         from_attributes = True
 
 
-class OrganizationRDTOWithRelations(OrganizationRDTO):
-    owner: UserRDTO
-    type:OrganizationTypeRDTO
+

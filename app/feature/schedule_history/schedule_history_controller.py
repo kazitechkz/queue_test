@@ -6,10 +6,10 @@ from app.feature.initial_weight.initial_weight_repository import InitialWeightRe
 from app.feature.operation.operation_repository import OperationRepository
 from app.feature.order.order_repository import OrderRepository
 from app.feature.schedule.schedule_repository import ScheduleRepository
-from app.feature.schedule_history.dtos.schedule_history_dto import ScheduleHistoryRDTO, ScheduleHistoryAnswerDTO
+from app.feature.schedule_history.dtos.schedule_history_dto import ScheduleHistoryAnswerDTO
 from app.feature.schedule_history.schedule_history_repository import ScheduleHistoryRepository
-from app.feature.user.dtos.user_dto import UserRDTOWithRelations
 from app.feature.vehicle.vehicle_repository import VehicleRepository
+from app.shared.relation_dtos.user_organization import UserRDTOWithRelations
 
 
 class ScheduleHistoryController:
@@ -19,23 +19,24 @@ class ScheduleHistoryController:
         self._add_routes()
 
     def _add_routes(self):
-        self.router.get("/take-request/{schedule_id}",)(self.take_request)
+        self.router.get("/take-request/{schedule_id}", )(self.take_request)
         self.router.put("/create-individual/{schedule_id}")(self.accept_or_cancel)
 
     async def take_request(
             self,
-            schedule_id:int = Path(description="ID расписания", gt=0),
+            schedule_id: int = Path(description="ID расписания", gt=0),
             userRDTO: UserRDTOWithRelations = Depends(check_employee),
             repo: ScheduleHistoryRepository = Depends(ScheduleHistoryRepository),
             scheduleRepo: ScheduleRepository = Depends(ScheduleRepository),
             operationRepo: OperationRepository = Depends(OperationRepository),
     ):
-        return await repo.take_request(schedule_id=schedule_id, userRDTO=userRDTO, scheduleRepo=scheduleRepo, operationRepo=operationRepo)
+        return await repo.take_request(schedule_id=schedule_id, userRDTO=userRDTO, scheduleRepo=scheduleRepo,
+                                       operationRepo=operationRepo)
 
     async def accept_or_cancel(
             self,
             dto: ScheduleHistoryAnswerDTO,
-            schedule_id:int = Path(description="ID расписания", gt=0),
+            schedule_id: int = Path(description="ID расписания", gt=0),
             userRDTO: UserRDTOWithRelations = Depends(check_employee),
             repo: ScheduleHistoryRepository = Depends(ScheduleHistoryRepository),
             scheduleRepo: ScheduleRepository = Depends(ScheduleRepository),
@@ -45,4 +46,7 @@ class ScheduleHistoryController:
             orderRepo: OrderRepository = Depends(OrderRepository),
             operationRepo: OperationRepository = Depends(OperationRepository),
     ):
-        return await repo.accept_or_cancel(schedule_id=schedule_id, dto=dto, userRDTO=userRDTO, scheduleRepo=scheduleRepo, initialWeightRepo=initialWeightRepo, actWeightRepo=actWeightRepo, vehicleRepo=vehicleRepo, orderRepo=orderRepo, operationRepo=operationRepo)
+        return await repo.accept_or_cancel(schedule_id=schedule_id, dto=dto, userRDTO=userRDTO,
+                                           scheduleRepo=scheduleRepo, initialWeightRepo=initialWeightRepo,
+                                           actWeightRepo=actWeightRepo, vehicleRepo=vehicleRepo, orderRepo=orderRepo,
+                                           operationRepo=operationRepo)

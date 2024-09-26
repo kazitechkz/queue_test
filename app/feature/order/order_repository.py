@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from typing import Optional
 
 from fastapi import Depends
@@ -10,13 +10,12 @@ from app.core.database import get_db
 from app.domain.models.order_model import OrderModel
 from app.feature.factory.factory_repository import FactoryRepository
 from app.feature.material.material_repository import MaterialRepository
-from app.feature.order.dtos.order_dto import CreateIndividualOrderDTO, OrderCDTO, CreateLegalOrderDTO
+from app.feature.order.dtos.order_dto import OrderCDTO
 from app.feature.organization.organization_repository import OrganizationRepository
-from app.feature.sap_request.dto.sap_request_dto import SapRequestCDTO
 from app.feature.sap_request.sap_request_repository import SapRequestRepository
 from app.feature.sap_request.sap_request_service import SapRequestService
-from app.feature.user.dtos.user_dto import UserRDTOWithRelations
 from app.feature.workshop.workshop_repository import WorkshopRepository
+from app.shared.relation_dtos.user_organization import UserRDTOWithRelations
 
 
 class OrderRepository(BaseRepository[OrderModel]):
@@ -57,7 +56,7 @@ class OrderRepository(BaseRepository[OrderModel]):
             "quan_t": dto.quan_t,
             "price_without_taxes": material_dict["price_without_taxes"],
             "price_with_taxes": material_dict["price_with_taxes"],
-            "end_at": datetime.datetime.now().replace(year=datetime.datetime.now().year + 1)
+            "end_at": datetime.now().replace(year=datetime.now().year + 1)
         }
 
         # Additional fields for individual or legal order
@@ -91,5 +90,3 @@ class OrderRepository(BaseRepository[OrderModel]):
 
         order = await self.update(obj=order, dto=OrderCDTO.from_orm(order))
         return await self.get(id=order.id, options=[selectinload(self.model.sap_request)])
-
-

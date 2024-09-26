@@ -1,8 +1,12 @@
 from contextlib import asynccontextmanager
+from typing import Optional
+
 import uvicorn
-from fastapi import FastAPI, Depends
-from app.core.database import init_db, get_db
-from app.core.seed_database import seed_database
+from fastapi import FastAPI, Depends, HTTPException, Request
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from starlette import status
+
+from app.core.database import init_db
 from app.feature.auth.auth_controller import AuthController
 from app.feature.factory.factory_controller import FactoryController
 from app.feature.kaspi_payment.kaspi_payment_controller import KaspiPaymentController
@@ -27,6 +31,23 @@ from app.feature.workshop.workshop_controller import WorkshopController
 from app.feature.workshop_schedule.workshop_schedule_controller import WorkshopScheduleController
 
 
+# Реализация схемы аутентификации с HTTP Bearer
+class AuthBearer(HTTPBearer):
+    async def __call__(self, request: Request) -> Optional[str]:
+        try:
+            credentials: HTTPAuthorizationCredentials = await super().__call__(request)
+            return credentials.credentials  # Возвращаем Bearer токен
+        except HTTPException as ex:
+            if ex.status_code == status.HTTP_403_FORBIDDEN:
+                return None  # Если токена нет, возвращаем None
+            else:
+                raise ex
+
+
+# Создаем экземпляр AuthBearer
+auth_scheme = AuthBearer()
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
@@ -34,12 +55,13 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-        title="DIGITAL QUEUE TEST",
-        description="Электронно-цифровая очередь",
-        version="0.1",
-        lifespan=lifespan,
-        debug=True
-    )
+    title="DIGITAL QUEUE TEST",
+    description="Электронно-цифровая очередь",
+    version="0.1",
+    lifespan=lifespan,
+    debug=True,
+    dependencies=[Depends(auth_scheme)]
+)
 
 role_controller = RoleController()
 user_type_controller = UserTypeController()
@@ -69,7 +91,8 @@ app.include_router(user_type_controller.router, prefix="/user-type", tags=["user
 app.include_router(user_controller.router, prefix="/user", tags=["user"])
 app.include_router(organization_type_controller.router, prefix="/organization-type", tags=["organization-type"])
 app.include_router(organization_controller.router, prefix="/organization", tags=["organization"])
-app.include_router(organization_employee_controller.router, prefix="/organization-employee", tags=["organization-employee"])
+app.include_router(organization_employee_controller.router, prefix="/organization-employee",
+                   tags=["organization-employee"])
 app.include_router(vehicle_color_controller.router, prefix="/vehicle-color", tags=["vehicle-color"])
 app.include_router(vehicle_category_controller.router, prefix="/vehicle-category", tags=["vehicle-category"])
 app.include_router(region_controller.router, prefix="/region", tags=["region"])
@@ -88,4 +111,4 @@ app.include_router(schedule_history_controller.router, prefix="/schedule-history
 app.include_router(test_controller.router, prefix="/test", tags=["test"])
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="localhost", port=8000,reload=True)
+    uvicorn.run("main:app", host="localhost", port=8000, reload=True)

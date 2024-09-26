@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from typing import Optional, List
 
 from sqlalchemy import Integer, Computed, Numeric, Boolean, Date, ForeignKey, String
@@ -42,12 +42,12 @@ class OrderModel(Base):
 
     sap_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey(AppTableNames.SAPRequestTableName + ".id", onupdate="cascade", ondelete="set null"), nullable=True)
-    zakaz: Mapped[str] = mapped_column(String(length=20), index=True,nullable=True)
+    zakaz: Mapped[str] = mapped_column(String(length=20), index=True, nullable=True)
 
     kaspi_id: Mapped[Optional[int]] = mapped_column(
-        ForeignKey(AppTableNames.KaspiPaymentsTableName + ".id", onupdate="cascade", ondelete="set null"), nullable=True)
+        ForeignKey(AppTableNames.KaspiPaymentsTableName + ".id", onupdate="cascade", ondelete="set null"),
+        nullable=True)
     txn_id: Mapped[str] = mapped_column(String(length=20), index=True, nullable=True)
-
 
     owner_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey(AppTableNames.UserTableName + ".id", onupdate="cascade", ondelete="set null"), nullable=True)
@@ -84,7 +84,7 @@ class OrderModel(Base):
         uselist=False,
     )
 
-    sap_request_failed:Mapped[List["SapRequestModel"]] = relationship(
+    sap_request_failed: Mapped[List["SapRequestModel"]] = relationship(
         "SapRequestModel",
         back_populates="order",
         primaryjoin="and_(SapRequestModel.order_id == OrderModel.id, SapRequestModel.is_failed == True)",

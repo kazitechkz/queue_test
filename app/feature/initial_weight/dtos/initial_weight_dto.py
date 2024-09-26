@@ -13,6 +13,7 @@ class InitialWeightDTO(BaseModel):
     class Config:
         from_attributes = True
 
+
 class InitialWeightRDTO(InitialWeightDTO):
     history_id: Optional[int] = Field(None, description="ID истории")
     order_id: Optional[int] = Field(None, description="ID заказа")
@@ -34,6 +35,7 @@ class InitialWeightRDTO(InitialWeightDTO):
 
     class Config:
         from_attributes = True
+
 
 class InitialWeightCDTO(BaseModel):
     history_id: Optional[int] = Field(None, description="ID истории")

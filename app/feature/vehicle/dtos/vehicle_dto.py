@@ -1,7 +1,7 @@
-import datetime
+from datetime import datetime, timezone
 from typing import Optional
-from pydantic import Field, BaseModel, validator, field_validator, root_validator, model_validator
-from sqlalchemy.orm import Mapped
+
+from pydantic import Field, BaseModel, field_validator, model_validator
 
 from app.feature.organization.dtos.organization_dto import OrganizationRDTO
 from app.feature.region.dtos.region_dto import RegionRDTO
@@ -18,9 +18,9 @@ class VehicleCDTO(BaseModel):
     document_number: str = Field(max_length=255, description="Номер свидетельства")
     registration_number: str = Field(max_length=255, description="Регистрационный номер")
     car_model: str = Field(max_length=1000, description="Марка Машины")
-    start_at: datetime.datetime = Field(description="Дата выдачи свидетельства")
+    start_at: datetime = Field(description="Дата выдачи свидетельства")
     vin: str = Field(description="VIN 17 значный уникальный код")
-    produced_at: int = Field(gt=1950, le=datetime.datetime.now().year, description="Год выпуска технического средства")
+    produced_at: int = Field(gt=1950, le=datetime.now().year, description="Год выпуска технического средства")
     engine_volume_sm: int = Field(gt=0, description="Объем двигателя в сантиметрах кубических")
     weight_clean_kg: int = Field(gt=0, description="Масса без нагрузки в кг")
     weight_load_max_kg: int = Field(gt=0, description="Масса с максимальной нагрузкой в кг")
@@ -56,15 +56,15 @@ class VehicleCDTO(BaseModel):
 
     @field_validator("start_at")
     def validate_start_at(cls, value: datetime):
-        min_date = datetime.datetime(1900, 1, 1, tzinfo=datetime.timezone.utc)  # Приведение к offset-aware
-        current_date = datetime.datetime.now(datetime.timezone.utc)  # Текущая дата также offset-aware
+        min_date = datetime(1900, 1, 1, tzinfo=timezone.utc)  # Приведение к offset-aware
+        current_date = datetime.now(timezone.utc)  # Текущая дата также offset-aware
 
         if not (min_date < value < current_date):
             raise ValueError(f"Дата должна быть больше {min_date} и меньше текущей даты {current_date}.")
         return value
 
     @field_validator("vin")
-    def validate_start_at(cls, value):
+    def validate_vin(cls, value):
         if not (len(value) != 17):
             raise ValueError(f"Вин номер должен быть длиной в 17 знаков.")
         return value
@@ -77,9 +77,9 @@ class VehicleRDTO(VehicleDTO):
     document_number: str = Field(max_length=255, description="Номер свидетельства")
     registration_number: str = Field(max_length=255, description="Регистрационный номер")
     car_model: str = Field(max_length=1000, description="Марка Машины")
-    start_at: datetime.datetime = Field(description="Дата выдачи свидетельства")
+    start_at: datetime = Field(description="Дата выдачи свидетельства")
     vin: str = Field(description="VIN 17 значный уникальный код")
-    produced_at: int = Field(gt=1950, le=datetime.datetime.now().year, description="Год выпуска технического средства")
+    produced_at: int = Field(gt=1950, le=datetime.now().year, description="Год выпуска технического средства")
     engine_volume_sm: int = Field(gt=0, description="Объем двигателя в сантиметрах кубических")
     weight_clean_kg: int = Field(gt=0, description="Масса без нагрузки в кг")
     weight_load_max_kg: int = Field(gt=0, description="Масса с максимальной нагрузкой в кг")
@@ -91,8 +91,8 @@ class VehicleRDTO(VehicleDTO):
     region_id: int = Field(gt=0, description="Место жительства")
     owner_id: Optional[int] = Field(description="Физическое лицо - владелей транспортного средства")
     organization_id: Optional[int] = Field(description="Юридическое лицо - владелей транспортного средства")
-    created_at: datetime.datetime
-    updated_at: datetime.datetime
+    created_at: datetime
+    updated_at: datetime
 
     class Config:
         from_attributes = True

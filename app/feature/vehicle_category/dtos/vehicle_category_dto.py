@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 
 from pydantic import Field, BaseModel
 
@@ -26,8 +26,8 @@ class VehicleCategoryUDTO(VehicleCategoryDTO):
 class VehicleCategoryRDTO(VehicleCategoryDTO):
     title: str
     value: str
-    created_at: datetime.datetime
-    updated_at: datetime.datetime
+    created_at: datetime
+    updated_at: datetime
 
     class Config:
         from_attributes = True

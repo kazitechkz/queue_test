@@ -115,6 +115,13 @@ async def add_order_status(session: Session):
                 is_first=False,
                 is_last=True,
             ),
+            OrderStatusModel(
+                id=7,
+                title="Отклонен",
+                value=TableConstantsNames.OrderStatusCanceled,
+                is_first=False,
+                is_last=True,
+            ),
         ]
         session.add_all(data)
         await session.commit()

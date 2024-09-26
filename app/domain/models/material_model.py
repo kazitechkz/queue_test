@@ -1,5 +1,3 @@
-import decimal
-
 from sqlalchemy import Text, String, ForeignKey, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 

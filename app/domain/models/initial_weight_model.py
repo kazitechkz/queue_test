@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from typing import Optional
 
 from sqlalchemy import ForeignKey, Text, Integer, String
@@ -13,7 +13,8 @@ class InitialWeightModel(Base):
     id: Mapped[ID]
 
     history_id: Mapped[Optional[int]] = mapped_column(
-        ForeignKey(AppTableNames.ScheduleHistoryTableName + ".id", onupdate="cascade", ondelete="set null"), nullable=True)
+        ForeignKey(AppTableNames.ScheduleHistoryTableName + ".id", onupdate="cascade", ondelete="set null"),
+        nullable=True)
 
     order_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey(AppTableNames.OrderTableName + ".id", onupdate="cascade", ondelete="set null"), nullable=True)
@@ -26,7 +27,7 @@ class InitialWeightModel(Base):
 
     trailer_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey(AppTableNames.VehicleTableName + ".id", onupdate="cascade", ondelete="set null"), nullable=True)
-    trailer_info: Mapped[Optional[str]] = mapped_column(Text(length=1000),nullable=True)
+    trailer_info: Mapped[Optional[str]] = mapped_column(Text(length=1000), nullable=True)
 
     responsible_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey(AppTableNames.UserTableName + ".id", onupdate="cascade", ondelete="set null"), nullable=True)
@@ -34,7 +35,7 @@ class InitialWeightModel(Base):
     responsible_iin: Mapped[str] = mapped_column(String(256), nullable=True)
 
     vehicle_tara_kg: Mapped[int] = mapped_column(Integer())
-    measured_at: Mapped[datetime.datetime] = mapped_column()
+    measured_at: Mapped[datetime] = mapped_column()
 
     created_at: Mapped[CreatedAt]
     updated_at: Mapped[UpdatedAt]
