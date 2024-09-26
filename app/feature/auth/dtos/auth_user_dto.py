@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field, field_validator, EmailStr
 
 from app.core.validation_rules import TWELVE_DIGITS_REGEX, EMAIL_REGEX, PHONE_REGEX
-from app.feature.user.dtos.user_dto import UserRDTOWithRelations
+from app.shared.relation_dtos.user_organization import UserRDTOWithRelations
 
 
 class AuthRegDTO(BaseModel):

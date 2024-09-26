@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from typing import Optional
 
 from sqlalchemy import ForeignKey, Integer, Boolean, Text, String, Computed
@@ -47,8 +47,8 @@ class ScheduleModel(Base):
     current_operation_id:Mapped[Optional[int]] = mapped_column(
         ForeignKey(AppTableNames.OperationTableName + ".id", onupdate="cascade", ondelete="set null"), nullable=True)
 
-    start_at:Mapped[datetime.datetime] = mapped_column()
-    end_at:Mapped[datetime.datetime] = mapped_column()
+    start_at:Mapped[datetime] = mapped_column()
+    end_at:Mapped[datetime] = mapped_column()
 
     loading_volume_kg:Mapped[int] = mapped_column(Integer())
     vehicle_tara_kg:Mapped[int] = mapped_column(Integer(),nullable=True)
@@ -63,12 +63,12 @@ class ScheduleModel(Base):
     is_used:Mapped[bool] = mapped_column(Boolean(),default=False)
     is_canceled:Mapped[bool] = mapped_column(Boolean(),default=False)
     is_executed:Mapped[bool] = mapped_column(Boolean(),default=False)
-    executed_at: Mapped[Optional[datetime.datetime]] = mapped_column(nullable=True)
+    executed_at: Mapped[Optional[datetime]] = mapped_column(nullable=True)
 
     canceled_by:Mapped[Optional[int]] = mapped_column(
         ForeignKey(AppTableNames.UserTableName + ".id", onupdate="cascade", ondelete="set null"), nullable=True)
     cancel_reason:Mapped[str] = mapped_column(Text(length=1000),nullable=True)
-    canceled_at: Mapped[Optional[datetime.datetime]] = mapped_column(nullable=True)
+    canceled_at: Mapped[Optional[datetime]] = mapped_column(nullable=True)
 
     created_at: Mapped[CreatedAt]
     updated_at: Mapped[UpdatedAt]

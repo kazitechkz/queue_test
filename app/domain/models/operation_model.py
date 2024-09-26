@@ -10,16 +10,16 @@ from app.shared.database_constants import CreatedAt, UpdatedAt, ID, AppTableName
 class OperationModel(Base):
     __tablename__ = AppTableNames.OperationTableName
     id: Mapped[ID]
-    title:Mapped[str] = mapped_column(String(length=255))
-    value:Mapped[str] = mapped_column(String(length=255),unique=True,index=True)
+    title: Mapped[str] = mapped_column(String(length=255))
+    value: Mapped[str] = mapped_column(String(length=255), unique=True, index=True)
     role_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey(AppTableNames.RoleTableName + ".id", onupdate="cascade", ondelete="set null"),
         nullable=True)
-    role_value:Mapped[str] = mapped_column(String(length=255))
-    is_first:Mapped[bool] = mapped_column(Boolean(),default=False)
-    is_last:Mapped[bool] = mapped_column(Boolean(),default=False)
+    role_value: Mapped[str] = mapped_column(String(length=255))
+    is_first: Mapped[bool] = mapped_column(Boolean(), default=False)
+    is_last: Mapped[bool] = mapped_column(Boolean(), default=False)
     prev_id: Mapped[Optional[int]] = mapped_column(ForeignKey(AppTableNames.OperationTableName + ".id"), nullable=True)
     next_id: Mapped[Optional[int]] = mapped_column(ForeignKey(AppTableNames.OperationTableName + ".id"), nullable=True)
-    can_cancel:Mapped[bool] = mapped_column(Boolean())
+    can_cancel: Mapped[bool] = mapped_column(Boolean())
     created_at: Mapped[CreatedAt]
     updated_at: Mapped[UpdatedAt]

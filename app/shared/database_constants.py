@@ -9,7 +9,7 @@ CreatedAt = Annotated[datetime, mapped_column(server_default=text("CURRENT_TIMES
 UpdatedAt = Annotated[datetime, mapped_column(server_default=text("CURRENT_TIMESTAMP"), onupdate=datetime.now())]
 
 
-class AppTableNames():
+class AppTableNames:
     RoleTableName = "roles"
     UserTypeTableName = "user_types"
     UserTableName = "users"
@@ -36,7 +36,7 @@ class AppTableNames():
 
 
 class TableConstantsNames:
-    #Roles
+    # Roles
     RoleAdminValue = "admin"
     RoleAdminId = 1
     RoleSecurityValue = "security"
@@ -50,23 +50,24 @@ class TableConstantsNames:
     RoleClientValue = "client"
     RoleClientId = 6
 
-    #User Types
+    # User Types
     UserLegalTypeValue = "legal_entity"
     UserIndividualTypeValue = "individual"
 
-    #Organization Type
+    # Organization Type
     OrganizationLLCTypeValue = "llc"
     OrganizationIPTypeValue = "ip"
 
-    #OrderStatus
+    # OrderStatus
     OrderStatusWaitSap = "waiting_for_sup"
     OrderStatusRejectSap = "reject_from_sup"
     OrderStatusWaitPayment = "waiting_for_payment"
     OrderStatusRejectPayment = "reject_from_payment"
     OrderStatusExecuted = "executed"
     OrderStatusFinished = "finished"
+    OrderStatusCanceled = "canceled"
 
-    #Operations
+    # Operations
     EntryOperationName = "entry_operation"
     EntryOperationId = 1
     InitialWeightOperationName = "initial_weight_operation"
@@ -90,8 +91,4 @@ class TableConstantsNames:
     ExecutedOperationName = "executed_operation"
     ExecutedOperationId = 11
 
-    RELOAD_OPERATIONS = [ReLoadingEntryExitOperationName,ReLoadingEntryWeightOperationName]
-
-
-
-
+    RELOAD_OPERATIONS = [ReLoadingEntryExitOperationName, ReLoadingEntryWeightOperationName]

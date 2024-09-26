@@ -1,20 +1,20 @@
 from datetime import datetime, timedelta
-from typing import Optional
 
 from fastapi import Depends, HTTPException
-from fastapi.security import OAuth2PasswordBearer,HTTPBearer
+from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
 from passlib.context import CryptContext
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import selectinload
 from starlette import status
-import bcrypt
+
 from app.core.app_settings import app_settings
 from app.core.database import get_db
+from app.domain.models.organization_model import OrganizationModel
 from app.domain.models.user_model import UserModel
-from app.feature.user.dtos.user_dto import UserRDTOWithRelations
 from app.shared.database_constants import TableConstantsNames
+from app.shared.relation_dtos.user_organization import UserRDTOWithRelations
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/auth/login')
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -37,7 +37,8 @@ def create_access_token(data: int):
     encoded_jwt = jwt.encode(to_encode, app_settings.SECRET_KEY, algorithm=app_settings.ALGORITHM)
     return encoded_jwt
 
-def verify_jwt_token(token:str = Depends(oauth2_scheme)) -> dict:
+
+def verify_jwt_token(token: str = Depends(oauth2_scheme)) -> dict:
     try:
         decoded_data = jwt.decode(token, app_settings.SECRET_KEY, algorithms=app_settings.ALGORITHM)
         return decoded_data
@@ -47,9 +48,11 @@ def verify_jwt_token(token:str = Depends(oauth2_scheme)) -> dict:
             detail=f"Не удалось проверить токен {str(jwtError)}",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+
 async def get_current_user(
-    token: str = Depends(verify_jwt_token),
-    db: AsyncSession = Depends(get_db)
+        token: str = Depends(verify_jwt_token),
+        db: AsyncSession = Depends(get_db)
 ) -> UserRDTOWithRelations:
     # Проверка истечения срока действия токена
     expire = token.get("exp")
@@ -72,7 +75,8 @@ async def get_current_user(
     # Запрос к базе данных для получения пользователя
     query = select(UserModel).options(
         selectinload(UserModel.role),
-        selectinload(UserModel.user_type)
+        selectinload(UserModel.user_type),
+        selectinload(UserModel.organizations)
     ).filter(UserModel.id == user_id)
 
     result = await db.execute(query)
@@ -88,7 +92,6 @@ async def get_current_user(
     return UserRDTOWithRelations.from_orm(user)
 
 
-
 def check_admin(current_user: UserRDTOWithRelations = Depends(get_current_user)):
     if current_user.role.value != TableConstantsNames.RoleAdminValue:
         raise HTTPException(
@@ -96,6 +99,7 @@ def check_admin(current_user: UserRDTOWithRelations = Depends(get_current_user))
             detail="Отказано в доступе",
         )
     return current_user
+
 
 def check_security(current_user: UserRDTOWithRelations = Depends(get_current_user)):
     if current_user.role.value != TableConstantsNames.RoleSecurityValue:
@@ -105,6 +109,7 @@ def check_security(current_user: UserRDTOWithRelations = Depends(get_current_use
         )
     return current_user
 
+
 def check_security_loader(current_user: UserRDTOWithRelations = Depends(get_current_user)):
     if current_user.role.value != TableConstantsNames.RoleSecurityLoaderValue:
         raise HTTPException(
@@ -112,6 +117,7 @@ def check_security_loader(current_user: UserRDTOWithRelations = Depends(get_curr
             detail="Отказано в доступе",
         )
     return current_user
+
 
 def check_loader(current_user: UserRDTOWithRelations = Depends(get_current_user)):
     if current_user.role.value != TableConstantsNames.RoleLoaderValue:
@@ -121,6 +127,7 @@ def check_loader(current_user: UserRDTOWithRelations = Depends(get_current_user)
         )
     return current_user
 
+
 def check_weigher(current_user: UserRDTOWithRelations = Depends(get_current_user)):
     if current_user.role.value != TableConstantsNames.RoleWeigherValue:
         raise HTTPException(
@@ -129,6 +136,7 @@ def check_weigher(current_user: UserRDTOWithRelations = Depends(get_current_user
         )
     return current_user
 
+
 def check_client(current_user: UserRDTOWithRelations = Depends(get_current_user)):
     if current_user.role.value != TableConstantsNames.RoleClientValue:
         raise HTTPException(
@@ -136,6 +144,7 @@ def check_client(current_user: UserRDTOWithRelations = Depends(get_current_user)
             detail="Отказано в доступе",
         )
     return current_user
+
 
 def check_individual_client(current_user: UserRDTOWithRelations = Depends(get_current_user)):
     if current_user.role.value != TableConstantsNames.RoleClientValue:
@@ -149,6 +158,7 @@ def check_individual_client(current_user: UserRDTOWithRelations = Depends(get_cu
             detail="Отказано в доступе",
         )
     return current_user
+
 
 def check_legal_client(current_user: UserRDTOWithRelations = Depends(get_current_user)):
     if current_user.role.value != TableConstantsNames.RoleClientValue:
@@ -165,7 +175,9 @@ def check_legal_client(current_user: UserRDTOWithRelations = Depends(get_current
 
 
 def check_employee(current_user: UserRDTOWithRelations = Depends(get_current_user)):
-    if current_user.role.value not in [TableConstantsNames.RoleSecurityValue, TableConstantsNames.RoleSecurityLoaderValue, TableConstantsNames.RoleLoaderValue, TableConstantsNames.RoleWeigherValue]:
+    if current_user.role.value not in [TableConstantsNames.RoleSecurityValue,
+                                       TableConstantsNames.RoleSecurityLoaderValue, TableConstantsNames.RoleLoaderValue,
+                                       TableConstantsNames.RoleWeigherValue]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Отказано в доступе",

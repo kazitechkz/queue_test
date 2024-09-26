@@ -4,22 +4,30 @@ from typing import Optional
 from pydantic import BaseModel, Field, condecimal
 
 
+class OrderRDTO(BaseModel):
+    status_id: int = Field(description="Статус заказа")
+
+    class Config:
+        from_attributes = True
+
+
 class CreateIndividualOrderDTO(BaseModel):
-    material_sap_id:str = Field(max_length=255,description="Уникальный идентификационный номер материала в SAP")
-    quan_t:int = Field(gt=1,description="Кол-во материала в тоннах")
+    material_sap_id: str = Field(max_length=255, description="Уникальный идентификационный номер материала в SAP")
+    quan_t: int = Field(gt=1, description="Кол-во материала в тоннах")
 
     class Config:
         from_attributes = True
 
 
 class CreateLegalOrderDTO(BaseModel):
-    material_sap_id:str = Field(max_length=255,description="Уникальный идентификационный номер материала в SAP")
-    quan_t:int = Field(gt=1,description="Кол-во материала в тоннах")
-    dogovor:str = Field(max_length=255,description="Номер договора в SAP")
+    material_sap_id: str = Field(max_length=255, description="Уникальный идентификационный номер материала в SAP")
+    quan_t: int = Field(gt=1, description="Кол-во материала в тоннах")
+    dogovor: str = Field(max_length=255, description="Номер договора в SAP")
     organization_id: int = Field(gt=0, description="Организация")
 
     class Config:
         from_attributes = True
+
 
 class OrderCDTO(BaseModel):
     status_id: Optional[int] = Field(None, description="ID статуса заказа")
@@ -32,11 +40,14 @@ class OrderCDTO(BaseModel):
     quan_t: condecimal(max_digits=10, decimal_places=2) = Field(..., description="Количество материала в тоннах")
     quan: int = Field(..., description="Количество материала")
     quan_released: int = Field(..., description="Количество выпущенного материала")
-    quan_released_t: condecimal(max_digits=10, decimal_places=2) = Field(None, description="Количество выпущенного материала")
+    quan_released_t: condecimal(max_digits=10, decimal_places=2) = Field(None,
+                                                                         description="Количество выпущенного материала")
     quan_booked: int = Field(..., description="Количество забронированного материала")
-    quan_booked_t: condecimal(max_digits=10, decimal_places=2) = Field(None, description="Количество забронированного материала")
+    quan_booked_t: condecimal(max_digits=10, decimal_places=2) = Field(None,
+                                                                       description="Количество забронированного материала")
     quan_left: int = Field(..., description="Оставшееся количество материала")
-    quan_left_t: condecimal(max_digits=10, decimal_places=2) = Field(None, description="Оставшееся количество материала")
+    quan_left_t: condecimal(max_digits=10, decimal_places=2) = Field(None,
+                                                                     description="Оставшееся количество материала")
     executed_cruise: int = Field(0, description="Количество выполненных рейсов")
     price_without_taxes: condecimal(max_digits=10, decimal_places=2) = Field(..., description="Цена без налогов")
     price_with_taxes: condecimal(max_digits=10, decimal_places=2) = Field(..., description="Цена с налогами")
@@ -61,6 +72,3 @@ class OrderCDTO(BaseModel):
 
     class Config:
         from_attributes = True  # Allows for easy conversion from ORM models
-
-
-

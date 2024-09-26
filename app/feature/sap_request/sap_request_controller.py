@@ -1,14 +1,12 @@
 from fastapi import APIRouter, Path, Depends
 from sqlalchemy.orm import selectinload
 
-from app.core.app_exception_response import AppExceptionResponse
 from app.core.auth_core import check_client
 from app.domain.models.order_model import OrderModel
 from app.feature.order.order_repository import OrderRepository
 from app.feature.sap_request.sap_request_repository import SapRequestRepository
 from app.feature.sap_request.sap_request_service import SapRequestService
-from app.feature.user.dtos.user_dto import UserRDTOWithRelations
-from app.shared.database_constants import TableConstantsNames
+from app.shared.relation_dtos.user_organization import UserRDTOWithRelations
 
 
 class SapRequestController:

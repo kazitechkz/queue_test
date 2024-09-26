@@ -1,4 +1,4 @@
-import datetime
+from datetime import date, time
 from typing import Optional
 
 from sqlalchemy import String, Numeric, Date, Time, LargeBinary, Boolean, ForeignKey
@@ -21,13 +21,14 @@ class SapRequestModel(Base):
     price: Mapped[Optional[float]] = mapped_column(Numeric(11, 2), nullable=True)  # Цена
     dogovor: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)
     # Поля для результата операции с SAP
-    status: Mapped[Optional[str]] = mapped_column(String(1),nullable=True)  # Статус переноса
-    zakaz: Mapped[Optional[str]] = mapped_column(String(10),index=True,nullable=True)  # № заказа из SAP
-    text: Mapped[Optional[str]] = mapped_column(String(50),nullable=True)  # Описание ошибки при переносе
-    pdf: Mapped[Optional[bytes]] = mapped_column(LargeBinary,nullable=True)  # Счет на предоплату в формате PDF (Base64)
-    date: Mapped[Optional[datetime.date]] = mapped_column(Date,nullable=True)  # Дата переноса
-    time: Mapped[Optional[datetime.time]] = mapped_column(Time,nullable=True)
-    #Статусы
+    status: Mapped[Optional[str]] = mapped_column(String(1), nullable=True)  # Статус переноса
+    zakaz: Mapped[Optional[str]] = mapped_column(String(10), index=True, nullable=True)  # № заказа из SAP
+    text: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)  # Описание ошибки при переносе
+    pdf: Mapped[Optional[bytes]] = mapped_column(LargeBinary,
+                                                 nullable=True)  # Счет на предоплату в формате PDF (Base64)
+    date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)  # Дата переноса
+    time: Mapped[Optional[time]] = mapped_column(Time, nullable=True)
+    # Статусы
     is_active: Mapped[bool] = mapped_column(Boolean(), default=True)
     is_failed: Mapped[bool] = mapped_column(Boolean(), default=False)
     is_paid: Mapped[bool] = mapped_column(Boolean(), default=False)

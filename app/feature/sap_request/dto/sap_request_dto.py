@@ -1,4 +1,5 @@
-from datetime import datetime
+from datetime import date as shedule_date
+from datetime import time as shedule_time
 from typing import Optional
 
 from pydantic import BaseModel, Field
@@ -6,6 +7,7 @@ from pydantic import BaseModel, Field
 
 class SapRequestDTO(BaseModel):
     id: int
+
 
 class SapRequestCDTO(BaseModel):
     order_id: Optional[int] = Field(None, description="Внешний ключ к таблице заказов, может быть пустым")
@@ -20,12 +22,12 @@ class SapRequestCDTO(BaseModel):
     zakaz: Optional[str] = Field(None, max_length=10, description="Номер заказа из SAP")
     text: Optional[str] = Field(None, max_length=50, description="Описание ошибки при переносе")
     pdf: Optional[bytes] = Field(None, description="Счет на предоплату в формате PDF (Base64)")
-    date: Optional[datetime.date] = Field(None, description="Дата переноса")
-    time: Optional[datetime.time] = Field(None, description="Время переноса")
+    date: Optional[shedule_date] = Field(None, description="Дата переноса")
+    time: Optional[shedule_time] = Field(None, description="Время переноса")
     is_active: bool = Field(default=True, description="Активен ли запрос?")
     is_failed: bool = Field(default=False, description="Произошел ли сбой при переносе?")
     is_paid: bool = Field(default=False, description="Оплачен ли запрос?")
 
     class Config:
-        from_attributes=True
+        from_attributes = True
         arbitrary_types_allowed = True

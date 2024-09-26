@@ -23,10 +23,10 @@ from app.feature.organization.organization_repository import OrganizationReposit
 from app.feature.organization_employee.organization_employee_repository import OrganizationEmployeeRepository
 from app.feature.schedule.dtos.schedule_dto import ScheduleIndividualCDTO, ScheduleCDTO, ScheduleLegalCDTO, \
     ScheduleSpaceDTO
-from app.feature.user.dtos.user_dto import UserRDTOWithRelations
 from app.feature.user.user_repository import UserRepository
 from app.feature.vehicle.vehicle_repository import VehicleRepository
 from app.feature.workshop_schedule.workshop_schedule_repository import WorkshopScheduleRepository
+from app.shared.relation_dtos.user_organization import UserRDTOWithRelations
 
 
 class ScheduleRepository(BaseRepository[ScheduleModel]):
@@ -66,7 +66,7 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
         if dto.trailer_id is not None:
             trailer = await vehicleRepo.get(id=dto.trailer_id)
         self.check_individual_form(dto=dto, order=order, vehicle=vehicle, trailer=trailer, userDTO=userDTO,
-                        workshopSchedule=workshopSchedule)
+                                   workshopSchedule=workshopSchedule)
         scheduleDTO = self.prepare_dto_individual(dto=dto, order=order, userDTO=userDTO,
                                                   vehicle=vehicle, trailer=trailer)
         schedule = await self.create(obj=ScheduleModel(**scheduleDTO.dict()))
@@ -81,20 +81,22 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
             userRepo: UserRepository,
             vehicleRepo: VehicleRepository,
             workshopScheduleRepo: WorkshopScheduleRepository,
-            organizationRepo:OrganizationRepository,
-            organizationEmployeeRepo:OrganizationEmployeeRepository,
+            organizationRepo: OrganizationRepository,
+            organizationEmployeeRepo: OrganizationEmployeeRepository,
     ):
         trailer = None
         organization = None
         organizationEmployee = None
-        driver:Union[UserRDTOWithRelations,UserModel] = userDTO
+        driver: Union[UserRDTOWithRelations, UserModel] = userDTO
         order = await orderRepo.get(id=dto.order_id)
         if order is not None:
-            organization = await organizationRepo.get_first_with_filters(filters=[{"owner_id":userDTO.id},{"id":dto.order_id}])
+            organization = await organizationRepo.get_first_with_filters(
+                filters=[{"owner_id": userDTO.id}, {"id": dto.order_id}])
         vehicle = await vehicleRepo.get(id=dto.vehicle_id)
         workshopSchedule = await workshopScheduleRepo.get(id=dto.workshop_id)
         if organization is not None and dto.driver_id != userDTO.id:
-            organizationEmployee = await organizationEmployeeRepo.get_first_with_filters(filters=[{"organization_id":organization.id, "employee_id":dto.driver_id}])
+            organizationEmployee = await organizationEmployeeRepo.get_first_with_filters(
+                filters=[{"organization_id": organization.id, "employee_id": dto.driver_id}])
             if organizationEmployee is not None:
                 driver = await userRepo.get(id=dto.driver_id)
         if dto.trailer_id is not None:
@@ -107,7 +109,8 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
                               organization=organization,
                               organizationEmployee=organizationEmployee,
                               workshopSchedule=workshopSchedule)
-        scheduleDTO = self.prepare_dto_legal(dto=dto, order=order, userDTO=userDTO,vehicle=vehicle, trailer=trailer,organization=organization,driver=driver)
+        scheduleDTO = self.prepare_dto_legal(dto=dto, order=order, userDTO=userDTO, vehicle=vehicle, trailer=trailer,
+                                             organization=organization, driver=driver)
         schedule = await self.create(obj=ScheduleModel(**scheduleDTO.dict()))
         await self.calculate_order(order=order, orderRepo=orderRepo)
         return schedule
@@ -117,7 +120,8 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
             schedule_date: datetime.date,
             workshopScheduleRepo: WorkshopScheduleRepository,
     ):
-        active_schedule = await workshopScheduleRepo.get_first_with_filters(filters=[{"workshop_sap_id":workshop_sap_id}])
+        active_schedule = await workshopScheduleRepo.get_first_with_filters(
+            filters=[{"workshop_sap_id": workshop_sap_id}])
         if active_schedule is None:
             raise AppExceptionResponse.not_found("Активное расписание не найдено")
         time_start = time(0, 0, 59)
@@ -165,17 +169,17 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
                 break
 
             filtered_items = [item for item in schedules if
-                              item.start_at == datetime.combine(schedule_date,current_time_dt.time())]
+                              item.start_at == datetime.combine(schedule_date, current_time_dt.time())]
             space = 0
             if filtered_items is not None:
                 space = len(filtered_items)
             free_space = active_schedule.machine_at_one_time - space
             if free_space >= 1:
                 scheduled_time_dto = ScheduleSpaceDTO(
-                    scheduled_data = schedule_date,
-                    start_at = current_time_dt.time(),
-                    end_at = service_end_time.time(),
-                    free_space = free_space
+                    scheduled_data=schedule_date,
+                    start_at=current_time_dt.time(),
+                    end_at=service_end_time.time(),
+                    free_space=free_space
                 )
                 # Добавляем в расписание интервал работы
                 planned_schedules.append(scheduled_time_dto)
@@ -224,7 +228,7 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
             dto: ScheduleIndividualCDTO,
             order: Optional[OrderModel],
             userDTO: UserRDTOWithRelations,
-            organization:OrganizationModel,
+            organization: OrganizationModel,
             driver: Union[UserRDTOWithRelations, UserModel],
             vehicle: Optional[VehicleModel],
             trailer: Optional[VehicleModel],
@@ -250,9 +254,9 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
             driver_id=driver.id,
             driver_name=driver.name,
             driver_iin=driver.iin,
-            organization_id = organization.id,
-            organization_full_name = organization.full_name,
-            organization_bin = organization.bin,
+            organization_id=organization.id,
+            organization_full_name=organization.full_name,
+            organization_bin=organization.bin,
             vehicle_id=vehicle.id,
             vehicle_info=get_vehicle_information(vehicle),
             trailer_id=trailer_id,
@@ -266,9 +270,9 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
 
     @staticmethod
     def check_individual_form(dto: ScheduleIndividualCDTO, order: Optional[OrderModel], userDTO: UserRDTOWithRelations,
-                   vehicle: Optional[VehicleModel], trailer: Optional[VehicleModel],
-                   workshopSchedule: Optional[WorkshopScheduleModel]
-                   ):
+                              vehicle: Optional[VehicleModel], trailer: Optional[VehicleModel],
+                              workshopSchedule: Optional[WorkshopScheduleModel]
+                              ):
         if order is None:
             raise AppExceptionResponse.bad_request("Заказ не найден")
         if order.owner_id != userDTO.id:
@@ -299,9 +303,9 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
             vehicle: Optional[VehicleModel],
             trailer: Optional[VehicleModel],
             organization: Optional[OrganizationModel],
-            organizationEmployee:Optional[OrganizationEmployeeModel],
+            organizationEmployee: Optional[OrganizationEmployeeModel],
             workshopSchedule: Optional[WorkshopScheduleModel]
-            ):
+    ):
         if organization is None:
             raise AppExceptionResponse.bad_request("Организация не найдена")
         if order is None:

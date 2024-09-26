@@ -22,24 +22,24 @@ class VehicleController:
         self._add_routes()
 
     def _add_routes(self):
-        self.router.get("/",)(self.all)
+        self.router.get("/", )(self.all)
         self.router.post("/create", response_model=VehicleRDTO)(self.create)
         self.router.get("/get/{id}", response_model=VehicleWithRelationsDTO)(self.get)
         self.router.put("/update/{id}", response_model=VehicleRDTO)(self.update)
         self.router.delete("/delete/{id}")(self.delete)
 
-    async def all(self,params:VehicleFilter = Depends(),
+    async def all(self, params: VehicleFilter = Depends(),
                   repo: VehicleRepository = Depends(VehicleRepository)
                   ):
-        result = await repo.paginate_with_filter(dto=VehicleWithRelationsDTO,page=params.page,per_page=params.per_page,filters=params.apply(),options=[
-            selectinload(VehicleModel.category),
-            selectinload(VehicleModel.color),
-            selectinload(VehicleModel.region),
-            selectinload(VehicleModel.owner),
-            selectinload(VehicleModel.organization),
-        ])
+        result = await repo.paginate_with_filter(dto=VehicleWithRelationsDTO, page=params.page,
+                                                 per_page=params.per_page, filters=params.apply(), options=[
+                selectinload(VehicleModel.category),
+                selectinload(VehicleModel.color),
+                selectinload(VehicleModel.region),
+                selectinload(VehicleModel.owner),
+                selectinload(VehicleModel.organization),
+            ])
         return result
-
 
     async def get(self, id: int = Path(gt=0), repo: VehicleRepository = Depends(VehicleRepository)):
         result = await repo.get(id=id, options=[

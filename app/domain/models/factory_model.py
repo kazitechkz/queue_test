@@ -8,7 +8,7 @@ from app.shared.database_constants import AppTableNames, ID, CreatedAt, UpdatedA
 
 
 class FactoryModel(Base):
-    __tablename__=AppTableNames.FactoryTableName
+    __tablename__ = AppTableNames.FactoryTableName
     id: Mapped[ID]
     title: Mapped[str] = mapped_column(Text(length=1000))
     sap_id: Mapped[str] = mapped_column(String(length=256), index=True, unique=True)

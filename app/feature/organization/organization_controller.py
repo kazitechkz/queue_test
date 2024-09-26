@@ -7,13 +7,13 @@ from app.core.app_exception_response import AppExceptionResponse
 from app.core.validation_rules import TWELVE_DIGITS_REGEX
 from app.domain.models.organization_model import OrganizationModel
 from app.domain.models.user_model import UserModel
-from app.feature.organization.dtos.organization_dto import OrganizationRDTO, OrganizationCDTO, \
-    OrganizationRDTOWithRelations
+from app.feature.organization.dtos.organization_dto import OrganizationRDTO, OrganizationCDTO
 from app.feature.organization.filter.organization_filter import OrganizationFilter
 from app.feature.organization.organization_repository import OrganizationRepository
 from app.feature.organization_type.organization_type_repository import OrganizationTypeRepository
 from app.feature.user.user_repository import UserRepository
 from app.shared.database_constants import TableConstantsNames
+from app.shared.relation_dtos.user_organization import OrganizationRDTOWithRelations
 
 
 class OrganizationController:

@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from typing import Optional
 
 from sqlalchemy import ForeignKey, Text, String
@@ -17,13 +17,13 @@ class ScheduleHistoryModel(Base):
         ForeignKey(AppTableNames.OperationTableName + ".id", onupdate="cascade", ondelete="set null"), nullable=True)
     responsible_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey(AppTableNames.UserTableName + ".id", onupdate="cascade", ondelete="set null"), nullable=True)
-    responsible_name: Mapped[str] = mapped_column(String(256),nullable=True)
-    responsible_iin: Mapped[str] = mapped_column(String(256),nullable=True)
+    responsible_name: Mapped[str] = mapped_column(String(256), nullable=True)
+    responsible_iin: Mapped[str] = mapped_column(String(256), nullable=True)
 
-    is_passed:Mapped[Optional[bool]] = mapped_column(nullable=True)
-    start_at: Mapped[datetime.datetime] = mapped_column(nullable=True)
-    end_at: Mapped[datetime.datetime] = mapped_column(nullable=True)
-    canceled_at: Mapped[Optional[datetime.datetime]] = mapped_column(nullable=True)
-    cancel_reason:Mapped[str] = mapped_column(Text(length=1000),nullable=True)
+    is_passed: Mapped[Optional[bool]] = mapped_column(nullable=True)
+    start_at: Mapped[datetime] = mapped_column(nullable=True)
+    end_at: Mapped[datetime] = mapped_column(nullable=True)
+    canceled_at: Mapped[Optional[datetime]] = mapped_column(nullable=True)
+    cancel_reason: Mapped[str] = mapped_column(Text(length=1000), nullable=True)
     created_at: Mapped[CreatedAt]
     updated_at: Mapped[UpdatedAt]

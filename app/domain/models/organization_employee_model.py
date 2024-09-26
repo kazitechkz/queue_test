@@ -6,10 +6,12 @@ from app.shared.database_constants import AppTableNames, ID, CreatedAt, UpdatedA
 
 
 class OrganizationEmployeeModel(Base):
-    __tablename__=AppTableNames.OrganizationEmployeeTableName
-    id:Mapped[ID]
-    organization_id:Mapped[int] = mapped_column(ForeignKey(AppTableNames.OrganizationTableName + ".id",ondelete="CASCADE",onupdate="CASCADE"))
-    employee_id:Mapped[int] = mapped_column(ForeignKey(AppTableNames.UserTableName + ".id",ondelete="CASCADE",onupdate="CASCADE"))
+    __tablename__ = AppTableNames.OrganizationEmployeeTableName
+    id: Mapped[ID]
+    organization_id: Mapped[int] = mapped_column(
+        ForeignKey(AppTableNames.OrganizationTableName + ".id", ondelete="CASCADE", onupdate="CASCADE"))
+    employee_id: Mapped[int] = mapped_column(
+        ForeignKey(AppTableNames.UserTableName + ".id", ondelete="CASCADE", onupdate="CASCADE"))
     created_at: Mapped[CreatedAt]
     updated_at: Mapped[UpdatedAt]
 

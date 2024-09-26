@@ -24,9 +24,9 @@ from app.feature.order.order_repository import OrderRepository
 from app.feature.schedule.dtos.schedule_dto import ScheduleCDTO, ScheduleRDTO
 from app.feature.schedule.schedule_repository import ScheduleRepository
 from app.feature.schedule_history.dtos.schedule_history_dto import ScheduleHistoryAnswerDTO, ScheduleHistoryCDTO
-from app.feature.user.dtos.user_dto import UserRDTOWithRelations
 from app.feature.vehicle.vehicle_repository import VehicleRepository
 from app.shared.database_constants import TableConstantsNames
+from app.shared.relation_dtos.user_organization import UserRDTOWithRelations
 
 
 class ScheduleHistoryRepository(BaseRepository[ScheduleHistoryModel]):
