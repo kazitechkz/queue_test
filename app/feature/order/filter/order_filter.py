@@ -30,11 +30,27 @@ class OrderFilter(BaseFilter):
             filters.append(and_(self.model.owner_id == userDTO.id))
         elif userDTO.user_type.value == TableConstantsNames.UserLegalTypeValue:
             # Извлекаем все owner_id из userDTO.organizations
-            owner_ids = [1]
+            owner_ids = [org.id for org in userDTO.organizations]
 
+            print(f"ownerIDS is: {owner_ids}")
             # Проверяем, что список owner_ids не пустой
             if owner_ids:
+                # Добавляем фильтр для organization_id
                 filters.append(and_(self.model.organization_id.in_(owner_ids)))
+            else:
+                print("Список owner_ids пуст!")
+        if self.status_id:
+            filters.append(and_(self.model.status_id == self.status_id))
+        return filters
+
+
+class DetailOrderFilter:
+    def __init__(self):
+        self.model = OrderModel
+
+    def apply(self):
+        filters = []
+
         if self.status_id:
             filters.append(and_(self.model.status_id == self.status_id))
         return filters

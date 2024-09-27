@@ -9,6 +9,9 @@ class OrganizationRDTOWithRelations(OrganizationRDTO):
     owner: UserRDTO
     type: OrganizationTypeRDTO
 
+    class Config:
+        from_attributes = True
+
 
 class UserRDTOWithRelations(UserRDTO):
     role: RoleRDTO

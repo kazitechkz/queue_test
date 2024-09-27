@@ -20,7 +20,7 @@ class ScheduleHistoryController:
 
     def _add_routes(self):
         self.router.get("/take-request/{schedule_id}", )(self.take_request)
-        self.router.put("/create-individual/{schedule_id}")(self.accept_or_cancel)
+        self.router.put("/make-decision/{schedule_id}")(self.accept_or_cancel)
 
     async def take_request(
             self,

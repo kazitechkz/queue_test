@@ -1,15 +1,17 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Path
+from sqlalchemy.orm import selectinload
 
+from app.core.app_exception_response import AppExceptionResponse
 from app.core.auth_core import check_individual_client, check_legal_client, check_client
+from app.domain.models.order_model import OrderModel
 from app.feature.factory.factory_repository import FactoryRepository
 from app.feature.material.material_repository import MaterialRepository
-from app.feature.order.dtos.order_dto import CreateIndividualOrderDTO, CreateLegalOrderDTO, OrderRDTO
+from app.feature.order.dtos.order_dto import CreateIndividualOrderDTO, CreateLegalOrderDTO, OrderRDTOWithRelations
 from app.feature.order.filter.order_filter import OrderFilter
 from app.feature.order.order_repository import OrderRepository
 from app.feature.organization.organization_repository import OrganizationRepository
 from app.feature.sap_request.sap_request_repository import SapRequestRepository
 from app.feature.sap_request.sap_request_service import SapRequestService
-
 from app.feature.workshop.workshop_repository import WorkshopRepository
 from app.shared.relation_dtos.user_organization import UserRDTOWithRelations
 
@@ -20,7 +22,8 @@ class OrderController:
         self._add_routes()
 
     def _add_routes(self):
-        self.router.post("/get-all-order", )(self.get_all)
+        self.router.get("/get-all-order", )(self.get_all)
+        self.router.get("/get-detail-order/{order_id}", )(self.get_detail_order)
         self.router.post("/create-individual-order", )(self.create_individual)
         self.router.post("/create-legal-order", )(self.create_legal)
 
@@ -30,12 +33,28 @@ class OrderController:
             repo: OrderRepository = Depends(OrderRepository),
             userRDTO: UserRDTOWithRelations = Depends(check_client)
     ):
-        # owner_ids = [org.owner_id for org in userRDTO.organizations]
-        # return owner_ids
-        # return params.apply(userRDTO)
-        result = await repo.paginate_with_filter(dto=OrderRDTO, page=params.page, per_page=params.per_page,
-                                                 filters=params.apply(userRDTO))
+        result = await repo.paginate_with_filter(dto=OrderRDTOWithRelations, page=params.page, per_page=params.per_page,
+                                                 filters=params.apply(userRDTO), options=[
+                selectinload(OrderModel.material),
+                selectinload(OrderModel.organization),
+                selectinload(OrderModel.factory),
+                selectinload(OrderModel.workshop),
+                selectinload(OrderModel.kaspi),
+            ])
+
         return result
+
+    async def get_detail_order(self, order_id: int = Path(gt=0), repo: OrderRepository = Depends(OrderRepository)):
+        result = await repo.get(id=order_id, options=[
+            selectinload(OrderModel.factory),
+            selectinload(OrderModel.workshop),
+            selectinload(OrderModel.kaspi),
+            selectinload(OrderModel.organization),
+        ])
+        if result is None:
+            raise AppExceptionResponse.not_found(message="Заказ не найден")
+        return result
+
 
     async def create_individual(self,
                                 dto: CreateIndividualOrderDTO,

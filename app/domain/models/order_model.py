@@ -5,6 +5,12 @@ from sqlalchemy import Integer, Computed, Numeric, Boolean, Date, ForeignKey, St
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+from app.domain.models.factory_model import FactoryModel
+from app.domain.models.kaspi_payment_model import KaspiPaymentModel
+from app.domain.models.material_model import MaterialModel
+from app.domain.models.organization_model import OrganizationModel
+from app.domain.models.sap_request_model import SapRequestModel
+from app.domain.models.workshop_model import WorkshopModel
 from app.shared.database_constants import AppTableNames, ID, CreatedAt, UpdatedAt
 
 
@@ -72,22 +78,33 @@ class OrderModel(Base):
     created_at: Mapped[CreatedAt]
     updated_at: Mapped[UpdatedAt]
 
+    material: Mapped["MaterialModel"] = relationship(
+        "MaterialModel"
+    )
+
     organization: Mapped["OrganizationModel"] = relationship(
         back_populates="orders",
     )
 
+    factory: Mapped["FactoryModel"] = relationship("FactoryModel", back_populates="order")
+    workshop: Mapped["WorkshopModel"] = relationship("WorkshopModel", foreign_keys=[workshop_id])
+    kaspi: Mapped["KaspiPaymentModel"] = relationship("KaspiPaymentModel", foreign_keys=[kaspi_id])
+
+    # Связь с SapRequestModel для "успешного" запроса
     sap_request: Mapped["SapRequestModel"] = relationship(
         "SapRequestModel",
         back_populates="order",
-        primaryjoin="and_(SapRequestModel.order_id == OrderModel.id, SapRequestModel.is_failed == False)",
-        foreign_keys="[SapRequestModel.order_id]",
+        foreign_keys=[SapRequestModel.order_id],
         uselist=False,
+        overlaps="sap_request_failed"  # Указываем, что эта связь перекрывается с sap_request_failed
     )
 
+    # Связь с SapRequestModel для "неудачного" запроса
     sap_request_failed: Mapped[List["SapRequestModel"]] = relationship(
         "SapRequestModel",
-        back_populates="order",
-        primaryjoin="and_(SapRequestModel.order_id == OrderModel.id, SapRequestModel.is_failed == True)",
-        foreign_keys="[SapRequestModel.order_id]",
+        back_populates="order_failed",
+        foreign_keys=[SapRequestModel.order_id],
         uselist=True,
+        overlaps="sap_request",  # Указываем, что эта связь перекрывается с sap_request
+        viewonly=True
     )

@@ -36,16 +36,19 @@ class SapRequestModel(Base):
     created_at: Mapped[CreatedAt]
     updated_at: Mapped[UpdatedAt]
 
+    # Связь для "успешного" заказа
     order: Mapped["OrderModel"] = relationship(
         "OrderModel",
         back_populates="sap_request",
-        uselist=False,
-        foreign_keys=[order_id]
+        foreign_keys=[order_id],
+        overlaps="order_failed"  # Указываем перекрытие с order_failed
     )
 
+    # Связь для "неудачного" заказа
     order_failed: Mapped["OrderModel"] = relationship(
         "OrderModel",
         back_populates="sap_request_failed",
-        uselist=False,
-        foreign_keys=[order_id]
+        foreign_keys=[order_id],
+        overlaps="order",  # Указываем перекрытие с order
+        viewonly=True
     )
