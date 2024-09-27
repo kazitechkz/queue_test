@@ -148,7 +148,7 @@ class ScheduleLegalCDTO(BaseModel):
     organization_id:int = Field(description="ID организации")
     order_id: int = Field(description="ID заказа")
     driver_id: int = Field(description="ID водителя"),
-    workshop_id: int = Field(description="Шаблон расписания цеха")
+    workshop_schedule_id: int = Field(description="Шаблон расписания цеха")
     scheduled_data: date = Field(description="Дата бронирования", ge=date.today())
     start_at: time = Field(description="Начало бронирования")
     end_at: time = Field(description="Конец бронирования")

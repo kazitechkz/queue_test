@@ -19,3 +19,5 @@ class FactoryModel(Base):
     workshops: Mapped[List["WorkshopModel"]] = relationship(
         back_populates="factory"
     )
+
+    order: Mapped["OrderModel"] = relationship("OrderModel", back_populates="factory")

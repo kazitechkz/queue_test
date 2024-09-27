@@ -26,6 +26,7 @@ class OrganizationModel(Base):
     updated_at: Mapped[UpdatedAt]
 
     owner: Mapped["UserModel"] = relationship(
+        "UserModel",
         back_populates="organizations"
     )
 

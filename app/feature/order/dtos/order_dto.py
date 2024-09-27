@@ -3,9 +3,77 @@ from typing import Optional
 
 from pydantic import BaseModel, Field, condecimal
 
+from app.feature.factory.dtos.factory_dto import FactoryRDTO
+from app.feature.kaspi_payment.dtos.kaspi_payment_dto import KaspiPaymentRDTO
+from app.feature.material.dtos.material_dto import MaterialRDTO
+from app.feature.organization.dtos.organization_dto import OrganizationRDTO
+from app.feature.workshop.dtos.workshop_dto import WorkshopRDTO
+
 
 class OrderRDTO(BaseModel):
+    id: int = Field(description="ID заказа")
     status_id: int = Field(description="Статус заказа")
+
+    factory_id: Optional[int] = Field(description="Идентификатор завода")
+    factory_sap_id: int = Field(description="Идентификатор завода в системе SAP")
+
+    workshop_id: Optional[int] = Field(description="Идентификатор цеха")
+    workshop_sap_id: int = Field(description="Идентификатор цеха в системе SAP")
+
+    material_id: Optional[int] = Field(description="Идентификатор материала")
+    material_sap_id: int = Field(description="Идентификатор материала в системе SAP")
+
+    quan_t: float = Field(description="Общая масса в т")
+    quan: int = Field(description="Общая масса в кг")
+    quan_released: int = Field(description="Реализованная масса в кг")
+    quan_released_t: float = Field(description="Реализованная масса в т")
+    quan_booked: int = Field(description="Забронированная масса в кг")
+    quan_booked_t: float = Field(description="Забронированная масса в т")
+    quan_left: int = Field(description="Увезенная масса в кг")
+    quan_left_t: float = Field(description="Увезенная масса в т")
+
+    executed_cruise: int = Field(description="Количество рейсов")
+
+    price_without_taxes: float = Field(description="Цена без НДС")
+    price_with_taxes: float = Field(description="Цена с НДС")
+
+    sap_id: Optional[int] = Field(description="Идентификатор заказа в системе SAP")
+    zakaz: Optional[str] = Field(description="Сгенерированный счет на предоплату в системе SAP")
+
+    kaspi_id: Optional[int] = Field(description="Идентификатор Каспи")
+    txn_id: Optional[str] = Field(description="Сгенерированный номер в системе Каспи")
+
+    owner_id: Optional[int] = Field(description="Идентификатор физ лица")
+    iin: Optional[str] = Field(description="ИИН физ лица")
+    name: Optional[str] = Field(description="Имя физ лица")
+
+    organization_id: Optional[int] = Field(description="Идентификатор организации")
+    bin: Optional[str] = Field(description="БИН/БИК юр лица")
+    dogovor: Optional[str] = Field(description="Номер договора")
+
+    is_active: bool = Field(description="Активный заказ")
+    is_finished: bool = Field(description="Завершенный заказ")
+    is_failed: bool = Field(description="Проваленный заказ")
+    is_paid: bool = Field(description="Оплаченный заказ")
+
+    start_at: datetime = Field(description="Начала договора")
+    end_at: datetime = Field(description="Конец договора")
+    finished_at: Optional[datetime] = Field(description="Время завершения заказа")
+    paid_at: Optional[datetime] = Field(description="Время оплаты заказа")
+
+    created_at: datetime = Field(description="Дата создания заказа")
+    updated_at: datetime = Field(description="Дата обновления заказа")
+
+    class Config:
+        from_attributes = True
+
+
+class OrderRDTOWithRelations(OrderRDTO):
+    material: MaterialRDTO
+    organization: Optional[OrganizationRDTO]
+    factory: Optional[FactoryRDTO]
+    workshop: Optional[WorkshopRDTO]
+    kaspi: Optional[KaspiPaymentRDTO]
 
     class Config:
         from_attributes = True
@@ -13,7 +81,7 @@ class OrderRDTO(BaseModel):
 
 class CreateIndividualOrderDTO(BaseModel):
     material_sap_id: str = Field(max_length=255, description="Уникальный идентификационный номер материала в SAP")
-    quan_t: int = Field(gt=1, description="Кол-во материала в тоннах")
+    quan_t: int = Field(ge=1, description="Кол-во материала в тоннах")
 
     class Config:
         from_attributes = True

@@ -88,12 +88,16 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
         organization = None
         organizationEmployee = None
         driver: Union[UserRDTOWithRelations, UserModel] = userDTO
+        print(f"Driver is: {driver}")
+        print(f"userDTO is: {userDTO}")
+        print(f"dto is: {dto}")
         order = await orderRepo.get(id=dto.order_id)
         if order is not None:
             organization = await organizationRepo.get_first_with_filters(
-                filters=[{"owner_id": userDTO.id}, {"id": dto.order_id}])
+                filters=[{"owner_id": userDTO.id}, {"id": dto.organization_id}])
+            print(f"Org is: {organization}")
         vehicle = await vehicleRepo.get(id=dto.vehicle_id)
-        workshopSchedule = await workshopScheduleRepo.get(id=dto.workshop_id)
+        workshopSchedule = await workshopScheduleRepo.get(id=dto.workshop_schedule_id)
         if organization is not None and dto.driver_id != userDTO.id:
             organizationEmployee = await organizationEmployeeRepo.get_first_with_filters(
                 filters=[{"organization_id": organization.id, "employee_id": dto.driver_id}])
@@ -225,7 +229,7 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
 
     @staticmethod
     def prepare_dto_legal(
-            dto: ScheduleIndividualCDTO,
+            dto: ScheduleLegalCDTO,
             order: Optional[OrderModel],
             userDTO: UserRDTOWithRelations,
             organization: OrganizationModel,
@@ -261,7 +265,7 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
             vehicle_info=get_vehicle_information(vehicle),
             trailer_id=trailer_id,
             trailer_info=trailer_info,
-            workshop_schedule_id=dto.workshop_id,
+            workshop_schedule_id=dto.workshop_schedule_id,
             current_operation_id=1,
             start_at=datetime.combine(dto.scheduled_data, dto.start_at),
             end_at=datetime.combine(dto.scheduled_data, dto.end_at),

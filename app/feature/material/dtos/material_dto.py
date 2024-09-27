@@ -6,9 +6,9 @@ class MaterialDTO(BaseModel):
 
 
 class MaterialCDTO(BaseModel):
-    title: str = Field(max_length=1000,description="Наименование")
-    sap_id: str = Field(max_length=255,description="Уникальный идентификационный номер в SAP")
-    status: bool = Field(default=True,description="Действует ли?")
+    title: str = Field(max_length=1000, description="Наименование")
+    sap_id: str = Field(max_length=255, description="Уникальный идентификационный номер в SAP")
+    status: bool = Field(default=True, description="Действует ли?")
     price_without_taxes: float = Field(description="Сумма без НДС")
     price_with_taxes: float = Field(description="Сумма с НДС")
     workshop_id: int = Field(description="Уникальный идентфикационный номер цеха")
@@ -29,6 +29,7 @@ class MaterialRDTO(BaseModel):
 
     class Config:
         from_attributes = True
+
 
 class MaterialWithRelationsDTO(MaterialRDTO):
     pass

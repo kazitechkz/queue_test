@@ -29,6 +29,7 @@ class UserModel(Base):
     )
 
     organizations: Mapped[list["OrganizationModel"]] = relationship(
+        "OrganizationModel",
         back_populates="owner"
     )
 
