@@ -20,19 +20,25 @@ class BaseRepository(Generic[T]):
         self.model = model
         self.db = db
 
-    async def get_all_with_filter(self, filters: list = [],
-                                  options: list = []):
+    async def get_all_with_filter(self, filters: list = [], options: list = []):
+        # Создаем запрос
         query = select(self.model)
+
+        # Применяем опции (например, связанные данные)
         if options:
             for option in options:
                 query = query.options(option)
-        # Применение фильтров к запросу
+
+        # Применяем фильтры
         for filter_condition in filters:
             query = query.filter(filter_condition)
-        results = await self.db.execute(
-            query
-        )
+
+        # Выполняем запрос
+        results = await self.db.execute(query)
+
+        # Получаем все записи
         items = results.scalars().all()
+
         return items
 
     async def get_first_with_filter(self, filters: list = [],

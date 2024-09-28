@@ -1,4 +1,6 @@
 from fastapi import HTTPException, status
+
+
 class AppExceptionResponse:
 
     @staticmethod
