@@ -1,9 +1,10 @@
 from datetime import date, time
 
 from sqlalchemy import ForeignKey, String, Date, Time, Integer, Boolean
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+from app.domain.models.workshop_model import WorkshopModel
 from app.shared.database_constants import AppTableNames, ID, UpdatedAt, CreatedAt
 
 
@@ -23,3 +24,5 @@ class WorkshopScheduleModel(Base):
     is_active: Mapped[bool] = mapped_column(Boolean())
     created_at: Mapped[CreatedAt]
     updated_at: Mapped[UpdatedAt]
+
+    workshop: Mapped[WorkshopModel] = relationship("WorkshopModel")

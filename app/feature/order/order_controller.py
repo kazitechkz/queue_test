@@ -4,6 +4,10 @@ from sqlalchemy.orm import selectinload
 from app.core.app_exception_response import AppExceptionResponse
 from app.core.auth_core import check_individual_client, check_legal_client, check_client
 from app.domain.models.order_model import OrderModel
+from app.domain.models.schedule_history_model import ScheduleHistoryModel
+from app.domain.models.schedule_model import ScheduleModel
+from app.domain.models.workshop_model import WorkshopModel
+from app.domain.models.workshop_schedule_model import WorkshopScheduleModel
 from app.feature.factory.factory_repository import FactoryRepository
 from app.feature.material.material_repository import MaterialRepository
 from app.feature.order.dtos.order_dto import CreateIndividualOrderDTO, CreateLegalOrderDTO, OrderRDTOWithRelations
@@ -12,6 +16,8 @@ from app.feature.order.order_repository import OrderRepository
 from app.feature.organization.organization_repository import OrganizationRepository
 from app.feature.sap_request.sap_request_repository import SapRequestRepository
 from app.feature.sap_request.sap_request_service import SapRequestService
+from app.feature.schedule.schedule_repository import ScheduleRepository
+from app.feature.schedule_history.schedule_history_repository import ScheduleHistoryRepository
 from app.feature.workshop.workshop_repository import WorkshopRepository
 from app.shared.relation_dtos.user_organization import UserRDTOWithRelations
 
@@ -24,6 +30,8 @@ class OrderController:
     def _add_routes(self):
         self.router.get("/get-all-order", )(self.get_all)
         self.router.get("/get-detail-order/{order_id}", )(self.get_detail_order)
+        self.router.get("/get-detail-schedule/{order_id}", )(self.get_detail_schedule)
+        self.router.get("/get-detail-schedule-history/{schedule_id}", )(self.get_detail_schedule_history)
         self.router.post("/create-individual-order", )(self.create_individual)
         self.router.post("/create-legal-order", )(self.create_legal)
 
@@ -55,6 +63,29 @@ class OrderController:
             raise AppExceptionResponse.not_found(message="Заказ не найден")
         return result
 
+    async def get_detail_schedule(self, order_id: int = Path(gt=0),
+                                  repo: ScheduleRepository = Depends(ScheduleRepository)):
+        result = await repo.get(id=order_id, options=[
+            selectinload(ScheduleModel.workshop_schedule)
+                                .selectinload(WorkshopScheduleModel.workshop)
+                                .selectinload(WorkshopModel.factory),
+            selectinload(ScheduleModel.current_operation),
+            selectinload(ScheduleModel.vehicle),
+        ])
+        if result is None:
+            raise AppExceptionResponse.not_found(message="Заказ не найден")
+        return result
+
+    async def get_detail_schedule_history(self, schedule_id: int = Path(gt=0),
+                                          repo: ScheduleHistoryRepository = Depends(ScheduleHistoryRepository)):
+        result = await repo.get(id=schedule_id, options=[
+            selectinload(ScheduleHistoryModel.operation),
+            selectinload(ScheduleHistoryModel.schedule).selectinload(ScheduleModel.vehicle),
+            selectinload(ScheduleHistoryModel.schedule).selectinload(ScheduleModel.order).selectinload(OrderModel.material)
+        ])
+        if result is None:
+            raise AppExceptionResponse.not_found(message="Заказ не найден")
+        return result
 
     async def create_individual(self,
                                 dto: CreateIndividualOrderDTO,

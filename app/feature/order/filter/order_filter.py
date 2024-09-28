@@ -32,7 +32,6 @@ class OrderFilter(BaseFilter):
             # Извлекаем все owner_id из userDTO.organizations
             owner_ids = [org.id for org in userDTO.organizations]
 
-            print(f"ownerIDS is: {owner_ids}")
             # Проверяем, что список owner_ids не пустой
             if owner_ids:
                 # Добавляем фильтр для organization_id

@@ -6,6 +6,8 @@ from sqlalchemy import or_
 
 from app.core.base_filter import BaseFilter
 from app.domain.models.vehicle_model import VehicleModel
+from app.shared.database_constants import TableConstantsNames
+from app.shared.relation_dtos.user_organization import UserRDTOWithRelations
 
 
 class VehicleFilter(BaseFilter):
@@ -54,4 +56,26 @@ class VehicleFilter(BaseFilter):
             filters.append(and_(self.model.owner_id == self.owner_id))
         if self.organization_id:
             filters.append(and_(self.model.organization_id == self.organization_id))
+        return filters
+
+
+class OwnVehicleFilter:
+    def __init__(self):
+        self.model = VehicleModel
+
+    def apply(self, userDTO: UserRDTOWithRelations):
+        filters = []
+        if userDTO.user_type.value == TableConstantsNames.UserIndividualTypeValue:
+            filters.append(self.model.owner_id == userDTO.id)
+        elif userDTO.user_type.value == TableConstantsNames.UserLegalTypeValue:
+            # Извлекаем все owner_id из userDTO.organizations
+            owner_ids = [org.id for org in userDTO.organizations]
+
+            # Проверяем, что список owner_ids не пустой
+            if owner_ids:
+                print(f"Owner ids: {owner_ids}")
+                # Добавляем фильтр для organization_id
+                filters.append(self.model.organization_id.in_(owner_ids))
+            else:
+                print("Список owner_ids пуст!")
         return filters

@@ -1,18 +1,21 @@
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Path
+from sqlalchemy import and_
 from sqlalchemy.orm import selectinload
 
 from app.core.app_exception_response import AppExceptionResponse
+from app.core.auth_core import check_client
 from app.domain.models.vehicle_model import VehicleModel
 from app.feature.organization.organization_repository import OrganizationRepository
 from app.feature.region.region_repository import RegionRepository
 from app.feature.user.user_repository import UserRepository
 from app.feature.vehicle.dtos.vehicle_dto import VehicleRDTO, VehicleWithRelationsDTO, VehicleCDTO
-from app.feature.vehicle.filter.vehicle_filter import VehicleFilter
+from app.feature.vehicle.filter.vehicle_filter import VehicleFilter, OwnVehicleFilter
 from app.feature.vehicle.vehicle_repository import VehicleRepository
 from app.feature.vehicle_category.vehicle_category_repository import VehicleCategoryRepository
 from app.feature.vehicle_color.vehicle_color_repository import VehicleColorRepository
+from app.shared.relation_dtos.user_organization import UserRDTOWithRelations
 
 
 class VehicleController:
@@ -25,6 +28,7 @@ class VehicleController:
         self.router.get("/", )(self.all)
         self.router.post("/create", response_model=VehicleRDTO)(self.create)
         self.router.get("/get/{id}", response_model=VehicleWithRelationsDTO)(self.get)
+        self.router.get("/get-own-cars")(self.get_own_cars)
         self.router.put("/update/{id}", response_model=VehicleRDTO)(self.update)
         self.router.delete("/delete/{id}")(self.delete)
 
@@ -49,6 +53,18 @@ class VehicleController:
             selectinload(VehicleModel.owner),
             selectinload(VehicleModel.organization),
         ])
+        if result is None:
+            raise AppExceptionResponse.not_found(message="ТС не найдено")
+        return result
+
+    async def get_own_cars(
+            self,
+            params: OwnVehicleFilter = Depends(),
+            repo: VehicleRepository = Depends(VehicleRepository),
+            userRDTO: UserRDTOWithRelations = Depends(check_client)
+    ):
+        result = await repo.get_all_with_filter(filters=params.apply(userRDTO))
+
         if result is None:
             raise AppExceptionResponse.not_found(message="ТС не найдено")
         return result

@@ -2,9 +2,10 @@ from datetime import datetime
 from typing import Optional
 
 from sqlalchemy import ForeignKey, Text, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+
 from app.shared.database_constants import AppTableNames, ID, CreatedAt, UpdatedAt
 
 
@@ -27,3 +28,6 @@ class ScheduleHistoryModel(Base):
     cancel_reason: Mapped[str] = mapped_column(Text(length=1000), nullable=True)
     created_at: Mapped[CreatedAt]
     updated_at: Mapped[UpdatedAt]
+
+    schedule: Mapped["ScheduleModel"] = relationship("ScheduleModel")
+    operation: Mapped["OperationModel"] = relationship("OperationModel")
