@@ -3,7 +3,8 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, Query
 
-from app.core.auth_core import check_individual_client, check_legal_client
+from app.core.auth_core import check_individual_client, check_legal_client, check_employee
+from app.feature.operation.operation_repository import OperationRepository
 from app.feature.order.order_repository import OrderRepository
 from app.feature.organization.organization_repository import OrganizationRepository
 from app.feature.organization_employee.organization_employee_repository import OrganizationEmployeeRepository
@@ -25,6 +26,8 @@ class ScheduleController:
         self.router.post("/create-individual", response_model=ScheduleRDTO)(self.create_individual)
         self.router.post("/create-legal", response_model=ScheduleRDTO)(self.create_legal)
         self.router.get("/get_schedule")(self.get_schedule)
+        self.router.get("/get-active-schedules")(self.get_active_schedules)
+        self.router.get("/get-canceled-schedules")(self.get_canceled_schedules)
 
     async def create_individual(self,
                                 dto: ScheduleIndividualCDTO,
@@ -66,3 +69,18 @@ class ScheduleController:
                            ):
         result = await repo.get_schedule(workshop_sap_id=workshop_sap_id,schedule_date=schedule_date,workshopScheduleRepo=workshopScheduleRepo)
         return result
+
+    async def get_active_schedules(self,
+                                 userDTO: UserRDTOWithRelations = Depends(check_employee),
+                                 repo: ScheduleRepository = Depends(ScheduleRepository),
+                                 operationRepo: OperationRepository = Depends(OperationRepository)
+                                 ):
+        return await repo.get_active_schedules(userDTO=userDTO, operationRepo=operationRepo)
+
+
+    async def get_canceled_schedules(self,
+                                 userDTO: UserRDTOWithRelations = Depends(check_employee),
+                                 repo: ScheduleRepository = Depends(ScheduleRepository),
+                                 operationRepo: OperationRepository = Depends(OperationRepository)
+                                 ):
+        return await repo.get_canceled_schedules(userDTO=userDTO, operationRepo=operationRepo)
