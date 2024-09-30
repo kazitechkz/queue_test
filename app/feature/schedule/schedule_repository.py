@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, time
 from typing import Optional, Union
 
 from fastapi import Depends
-from sqlalchemy import and_
+from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session
 
 from app.core.app_exception_response import AppExceptionResponse
@@ -17,6 +17,7 @@ from app.domain.models.user_model import UserModel
 from app.domain.models.vehicle_model import VehicleModel
 from app.domain.models.workshop_model import WorkshopModel
 from app.domain.models.workshop_schedule_model import WorkshopScheduleModel
+from app.feature.operation.operation_repository import OperationRepository
 from app.feature.order.dtos.order_dto import OrderCDTO
 from app.feature.order.order_repository import OrderRepository
 from app.feature.organization.organization_repository import OrganizationRepository
@@ -26,6 +27,7 @@ from app.feature.schedule.dtos.schedule_dto import ScheduleIndividualCDTO, Sched
 from app.feature.user.user_repository import UserRepository
 from app.feature.vehicle.vehicle_repository import VehicleRepository
 from app.feature.workshop_schedule.workshop_schedule_repository import WorkshopScheduleRepository
+from app.shared.database_constants import TableConstantsNames
 from app.shared.relation_dtos.user_organization import UserRDTOWithRelations
 
 
@@ -33,6 +35,54 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
 
     def __init__(self, db: Session = Depends(get_db)):
         super().__init__(ScheduleModel, db)
+
+    async def get_active_schedules(self, userDTO: UserRDTOWithRelations, operationRepo: OperationRepository):
+        operations = await operationRepo.get_all_with_filter(filters=[and_(operationRepo.model.role_value == userDTO.role.value)])
+        operation_ids = [operation.id for operation in operations]
+        filters = []
+        exclude_id = None
+        entry_filter = None
+        for operation in operations:
+            if operation.value == TableConstantsNames.EntryOperationName:
+                entry_filter = and_(
+                    self.model.current_operation_id == operation.id,
+                    self.model.start_at <= datetime.now(),
+                    self.model.end_at >= datetime.now(),
+                    self.model.responsible_id == None,
+                    self.model.responsible_name == None,
+                    self.model.is_active == True
+                )
+                exclude_id = operation.id
+            else:
+                if entry_filter is not None:
+                    if exclude_id in operation_ids:
+                        operation_ids.remove(exclude_id)
+                    filters.append(or_(
+                                entry_filter,
+                                and_(
+                                    self.model.current_operation_id == TableConstantsNames.ExitCheckOperationId,
+                                    self.model.responsible_id == None,
+                                    self.model.responsible_name == None,
+                                    self.model.is_active == True
+                                )
+                    ))
+                else:
+                    filters.append(and_(self.model.current_operation_id.in_(operation_ids),
+                                        self.model.responsible_id == None,
+                                        self.model.responsible_name == None,
+                                        self.model.is_active == True ))
+
+        return await self.get_all_with_filter(filters=filters)
+    async def get_canceled_schedules(self, userDTO: UserRDTOWithRelations, operationRepo: OperationRepository):
+        operations = await operationRepo.get_all_with_filter(filters=[and_(operationRepo.model.role_value == userDTO.role.value)])
+        operation_ids = [operation.id for operation in operations]
+        filters = []
+        exclude_id = None
+        entry_filter = None
+
+
+
+
 
     async def calculate_order(self, order: OrderModel, orderRepo: OrderRepository, ):
         schedule_booked = await self.get_all_with_filter(filters=[
