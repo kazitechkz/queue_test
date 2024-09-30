@@ -5,7 +5,7 @@ from sqlalchemy import and_
 from sqlalchemy.orm import selectinload
 
 from app.core.app_exception_response import AppExceptionResponse
-from app.core.auth_core import check_client
+from app.core.auth_core import check_client, check_legal_client
 from app.domain.models.vehicle_model import VehicleModel
 from app.feature.organization.organization_repository import OrganizationRepository
 from app.feature.region.region_repository import RegionRepository
@@ -15,6 +15,7 @@ from app.feature.vehicle.filter.vehicle_filter import VehicleFilter, OwnVehicleF
 from app.feature.vehicle.vehicle_repository import VehicleRepository
 from app.feature.vehicle_category.vehicle_category_repository import VehicleCategoryRepository
 from app.feature.vehicle_color.vehicle_color_repository import VehicleColorRepository
+from app.shared.database_constants import TableConstantsNames
 from app.shared.relation_dtos.user_organization import UserRDTOWithRelations
 
 
@@ -27,8 +28,10 @@ class VehicleController:
     def _add_routes(self):
         self.router.get("/", )(self.all)
         self.router.post("/create", response_model=VehicleRDTO)(self.create)
+        self.router.post("/add-vehicle", response_model=VehicleRDTO)(self.add_vehicle)
         self.router.get("/get/{id}", response_model=VehicleWithRelationsDTO)(self.get)
         self.router.get("/get-own-cars")(self.get_own_cars)
+        self.router.get("/get-organization-cars/{organization_id}",)(self.get_organization_cars)
         self.router.put("/update/{id}", response_model=VehicleRDTO)(self.update)
         self.router.delete("/delete/{id}")(self.delete)
 
@@ -69,6 +72,18 @@ class VehicleController:
             raise AppExceptionResponse.not_found(message="ТС не найдено")
         return result
 
+
+    async def get_organization_cars(
+            self,
+            organization_id:int = Path(gt=0),
+            userRDTO: UserRDTOWithRelations = Depends(check_legal_client),
+            repo: VehicleRepository = Depends(VehicleRepository),
+    ):
+        organization_ids = [organization.id for organization in userRDTO.organizations]
+        if organization_id not in organization_ids:
+            raise AppExceptionResponse.not_found(message="Организация не найдена")
+        return await repo.get_all_with_filter(filters=[repo.model.organization_id.in_(organization_ids)])
+
     async def create(self,
                      dto: VehicleCDTO,
                      repo: VehicleRepository = Depends(VehicleRepository),
@@ -77,10 +92,24 @@ class VehicleController:
                      regionRepo: RegionRepository = Depends(RegionRepository),
                      userRepo: UserRepository = Depends(UserRepository),
                      organizationRepo: OrganizationRepository = Depends(OrganizationRepository),
-
                      ):
         await self.check_form(dto, repo, vehicleColorRepos, vehicleCategoryRepos,
                               regionRepo, userRepo, organizationRepo, )
+        result = await repo.create(VehicleModel(**dto.dict()))
+        return result
+
+    async def add_vehicle(self,
+                     dto: VehicleCDTO,
+                     userRDTO: UserRDTOWithRelations = Depends(check_client),
+                     repo: VehicleRepository = Depends(VehicleRepository),
+                     vehicleColorRepos: VehicleColorRepository = Depends(VehicleColorRepository),
+                     vehicleCategoryRepos: VehicleCategoryRepository = Depends(VehicleCategoryRepository),
+                     regionRepo: RegionRepository = Depends(RegionRepository),
+                     userRepo: UserRepository = Depends(UserRepository),
+                     organizationRepo: OrganizationRepository = Depends(OrganizationRepository),
+                     ):
+        await self.check_form(dto, repo, vehicleColorRepos, vehicleCategoryRepos,
+                              regionRepo, userRepo, organizationRepo, userRDTO=userRDTO)
         result = await repo.create(VehicleModel(**dto.dict()))
         return result
 
@@ -114,7 +143,9 @@ class VehicleController:
             regionRepo: RegionRepository,
             userRepo: UserRepository,
             organizationRepo: OrganizationRepository,
-            id: Optional[int] = None):
+            id: Optional[int] = None,
+            userRDTO: Optional[UserRDTOWithRelations] = None
+    ):
         existed_document_number = await repo.get_filtered({"document_number": dto.document_number})
 
         if existed_document_number is not None:
@@ -145,11 +176,26 @@ class VehicleController:
             raise AppExceptionResponse.bad_request(message="Такого региона не существует")
 
         if dto.owner_id is not None:
-            owner = await userRepo.get(id=dto.owner_id)
-            if owner is None:
-                raise AppExceptionResponse.bad_request(message="Такого пользователя не существует")
+            if userRDTO is not None:
+                if userRDTO.user_type.value == TableConstantsNames.UserIndividualTypeValue:
+                    if dto.owner_id != userRDTO.id:
+                        raise AppExceptionResponse.bad_request(message="Такого пользователя не существует")
+                else:
+                    raise AppExceptionResponse.bad_request(message="Данные владельца только для физических лиц")
+            else:
+                owner = await userRepo.get(id=dto.owner_id)
+                if owner is None:
+                    raise AppExceptionResponse.bad_request(message="Такого пользователя не существует")
 
         if dto.organization_id is not None:
-            organization = await organizationRepo.get(id=dto.organization_id)
-            if organization is None:
-                raise AppExceptionResponse.bad_request(message="Такой организации не существует")
+            if userRDTO is not None:
+                if userRDTO.user_type.value == TableConstantsNames.UserLegalTypeValue:
+                    organization_ids = [organization.id for organization in userRDTO.organizations]
+                    if dto.organization_id not in organization_ids:
+                        raise AppExceptionResponse.bad_request(message="У вас нет такой организации")
+                else:
+                    raise AppExceptionResponse.bad_request(message="Данные организации только для юридических лиц")
+            else:
+                organization = await organizationRepo.get(id=dto.organization_id)
+                if organization is None:
+                    raise AppExceptionResponse.bad_request(message="Такой организации не существует")

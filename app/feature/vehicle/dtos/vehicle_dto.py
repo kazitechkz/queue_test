@@ -31,8 +31,8 @@ class VehicleCDTO(BaseModel):
     category_id: int = Field(gt=0, description="Категория Транспортного Средства")
     color_id: int = Field(gt=0, description="Цвет Транспортного Средства")
     region_id: int = Field(gt=0, description="Место жительства")
-    owner_id: Optional[int] = Field(description="Физическое лицо - владелей транспортного средства")
-    organization_id: Optional[int] = Field(description="Юридическое лицо - владелей транспортного средства")
+    owner_id: Optional[int] = Field(description="Физическое лицо - владелец транспортного средства")
+    organization_id: Optional[int] = Field(description="Юридическое лицо - владелец транспортного средства")
 
     @model_validator(mode="before")
     def check_owner_or_organization(cls, values):
@@ -65,7 +65,7 @@ class VehicleCDTO(BaseModel):
 
     @field_validator("vin")
     def validate_vin(cls, value):
-        if not (len(value) != 17):
+        if len(value) != 17:
             raise ValueError(f"Вин номер должен быть длиной в 17 знаков.")
         return value
 
