@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Path
 from sqlalchemy.orm import selectinload
 
 from app.core.app_exception_response import AppExceptionResponse
-from app.core.auth_core import check_individual_client, check_legal_client, check_client
+from app.core.auth_core import check_individual_client, check_legal_client, get_current_user
 from app.domain.models.order_model import OrderModel
 from app.domain.models.schedule_history_model import ScheduleHistoryModel
 from app.domain.models.schedule_model import ScheduleModel
@@ -28,18 +28,18 @@ class OrderController:
         self._add_routes()
 
     def _add_routes(self):
-        self.router.get("/get-all-order", )(self.get_all)
-        self.router.get("/get-detail-order/{order_id}", )(self.get_detail_order)
-        self.router.get("/get-detail-schedule/{order_id}", )(self.get_detail_schedule)
-        self.router.get("/get-detail-schedule-history/{schedule_id}", )(self.get_detail_schedule_history)
-        self.router.post("/create-individual-order", )(self.create_individual)
-        self.router.post("/create-legal-order", )(self.create_legal)
+        self.router.get("/get-all-order")(self.get_all)
+        self.router.get("/get-detail-order/{order_id}")(self.get_detail_order)
+        self.router.get("/get-detail-schedule/{order_id}")(self.get_detail_schedule)
+        self.router.get("/get-detail-schedule-history/{schedule_id}")(self.get_detail_schedule_history)
+        self.router.post("/create-individual-order")(self.create_individual)
+        self.router.post("/create-legal-order")(self.create_legal)
 
     async def get_all(
             self,
             params: OrderFilter = Depends(),
             repo: OrderRepository = Depends(OrderRepository),
-            userRDTO: UserRDTOWithRelations = Depends(check_client)
+            userRDTO: UserRDTOWithRelations = Depends(get_current_user)
     ):
         result = await repo.paginate_with_filter(dto=OrderRDTOWithRelations, page=params.page, per_page=params.per_page,
                                                  filters=params.apply(userRDTO), options=[

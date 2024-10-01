@@ -75,7 +75,8 @@ class BaseRepository(Generic[T]):
         )
         items = results.scalars().all()
         dto_items = [dto.from_orm(item) for item in items]
-        result = Pagination(items=dto_items, per_page=per_page, page=page, total=total_pages)
+        result = Pagination(items=dto_items, per_page=per_page, page=page,
+                            total_pages=total_pages, total_items=total_items)
         return result
 
     async def get(self, id: int, options: Optional[list] = None):
