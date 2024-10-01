@@ -26,18 +26,20 @@ class OrderFilter(BaseFilter):
 
     def apply(self, userDTO: UserRDTOWithRelations) -> list:
         filters = []
-        if userDTO.user_type.value == TableConstantsNames.UserIndividualTypeValue:
-            filters.append(and_(self.model.owner_id == userDTO.id))
-        elif userDTO.user_type.value == TableConstantsNames.UserLegalTypeValue:
-            # Извлекаем все owner_id из userDTO.organizations
-            owner_ids = [org.id for org in userDTO.organizations]
+        if userDTO.role.value == TableConstantsNames.RoleClientValue:
+            if userDTO.user_type.value == TableConstantsNames.UserIndividualTypeValue:
+                filters.append(and_(self.model.owner_id == userDTO.id))
+            elif userDTO.user_type.value == TableConstantsNames.UserLegalTypeValue:
+                # Извлекаем все owner_id из userDTO.organizations
+                owner_ids = [org.id for org in userDTO.organizations]
 
-            # Проверяем, что список owner_ids не пустой
-            if owner_ids:
-                # Добавляем фильтр для organization_id
-                filters.append(and_(self.model.organization_id.in_(owner_ids)))
-            else:
-                print("Список owner_ids пуст!")
+                # Проверяем, что список owner_ids не пустой
+                if owner_ids:
+                    # Добавляем фильтр для organization_id
+                    filters.append(and_(self.model.organization_id.in_(owner_ids)))
+                else:
+                    print("Список owner_ids пуст!")
+
         if self.status_id:
             filters.append(and_(self.model.status_id == self.status_id))
         return filters

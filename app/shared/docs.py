@@ -4,8 +4,7 @@ from fastapi.openapi.utils import get_openapi
 
 
 def custom_openapi(app, role: str):
-    routes = [route for route in app.routes if hasattr(route, 'role') and route.role == role]
-    print(f"Found {len(routes)} routes for role {role}")
+    routes = [route for route in app.routes if hasattr(route, 'roles') and role in route.roles]
     openapi_schema = get_openapi(
         title=f"DIGITAL QUEUE TEST - {role.capitalize()}",
         version="0.1",

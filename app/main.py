@@ -5,8 +5,9 @@ from contextlib import asynccontextmanager
 from app.core.database import init_db
 from app.shared.auth import AuthBearer
 from app.shared.docs import setup_documentation
-from app.shared.roles import assign_roles
 from app.shared.controllers import include_routers  # Новый файл для регистрации всех роутеров
+from app.shared.roles import assign_roles
+
 
 # Реализация lifespan для инициализации базы данных
 @asynccontextmanager

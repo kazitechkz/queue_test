@@ -7,6 +7,7 @@ from app.feature.order.order_controller import OrderController
 from app.feature.organization.organization_controller import OrganizationController
 from app.feature.organization_employee.organization_employee_controller import OrganizationEmployeeController
 from app.feature.organization_type.organization_type_controller import OrganizationTypeController
+from app.feature.qr.qr_controller import QrController
 from app.feature.region.region_controller import RegionController
 from app.feature.role.role_controller import RoleController
 from app.feature.sap_request.sap_request_controller import SapRequestController
@@ -45,4 +46,5 @@ def include_routers(app):
     app.include_router(WorkshopScheduleController().router, prefix="/workshop-schedule", tags=["workshop-schedule"])
     app.include_router(ScheduleController().router, prefix="/schedule", tags=["schedule"])
     app.include_router(ScheduleHistoryController().router, prefix="/schedule-history", tags=["schedule-history"])
+    app.include_router(QrController().router, prefix="/get-qr", tags=["get QR"])
     app.include_router(TestController().router, prefix="/test", tags=["test"])
