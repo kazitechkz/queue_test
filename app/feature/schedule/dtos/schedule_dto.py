@@ -183,3 +183,8 @@ class ScheduleSpaceDTO(BaseModel):
     start_at: time = Field(description="Начало бронирования")
     end_at: time = Field(description="Конец бронирования")
     free_space:int = Field("Кол-во свободных мест")
+
+class ScheduleCalendarDTO(BaseModel):
+    scheduled_at:date = Field(description="Дата бронирования", ge=date.today())
+    total:int = Field(description="Общее количество бронирований")
+    total_active:int = Field(description="Общее количество активных бронирований")

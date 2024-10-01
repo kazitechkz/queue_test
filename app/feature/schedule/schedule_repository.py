@@ -76,13 +76,15 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
     async def get_canceled_schedules(self, userDTO: UserRDTOWithRelations, operationRepo: OperationRepository):
         operations = await operationRepo.get_all_with_filter(filters=[and_(operationRepo.model.role_value == userDTO.role.value)])
         operation_ids = [operation.id for operation in operations]
-        filters = []
-        exclude_id = None
-        entry_filter = None
-
-
-
-
+        start_of_day = datetime.combine(datetime.today(), time(0, 0, 0))
+        end_of_day = datetime.combine(datetime.today(), time(23, 59, 59))
+        schedules = await self.get_all_with_filter(filters=[and_(
+            self.model.current_operation_id.in_(operation_ids),
+            self.model.is_canceled == True,
+            self.model.start_at > start_of_day,
+            self.model.end_at < end_of_day
+        )])
+        return schedules
 
     async def calculate_order(self, order: OrderModel, orderRepo: OrderRepository, ):
         schedule_booked = await self.get_all_with_filter(filters=[

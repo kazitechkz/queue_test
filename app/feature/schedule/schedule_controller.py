@@ -2,13 +2,16 @@ from datetime import date, time
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Query
+from sqlalchemy import and_
 
-from app.core.auth_core import check_individual_client, check_legal_client, check_employee
+from app.core.auth_core import check_individual_client, check_legal_client, check_employee, check_client
 from app.feature.operation.operation_repository import OperationRepository
 from app.feature.order.order_repository import OrderRepository
 from app.feature.organization.organization_repository import OrganizationRepository
 from app.feature.organization_employee.organization_employee_repository import OrganizationEmployeeRepository
 from app.feature.schedule.dtos.schedule_dto import ScheduleRDTO, ScheduleIndividualCDTO, ScheduleLegalCDTO
+from app.feature.schedule.filter.schedule_filter import ScheduleFilter, ScheduleClientScheduledFilter, \
+    ScheduleClientFromToFilter
 from app.feature.schedule.schedule_repository import ScheduleRepository
 from app.feature.user.user_repository import UserRepository
 from app.feature.vehicle.vehicle_repository import VehicleRepository
@@ -28,6 +31,10 @@ class ScheduleController:
         self.router.get("/get_schedule")(self.get_schedule)
         self.router.get("/get-active-schedules")(self.get_active_schedules)
         self.router.get("/get-canceled-schedules")(self.get_canceled_schedules)
+        self.router.get("/get-all-schedules")(self.get_all_schedules)
+        self.router.get("/my-active-schedules")(self.my_active_schedules)
+        self.router.get("/my-schedules")(self.my_schedules)
+        self.router.get("/my-schedules-count")(self.my_schedules_count)
 
     async def create_individual(self,
                                 dto: ScheduleIndividualCDTO,
@@ -84,3 +91,38 @@ class ScheduleController:
                                  operationRepo: OperationRepository = Depends(OperationRepository)
                                  ):
         return await repo.get_canceled_schedules(userDTO=userDTO, operationRepo=operationRepo)
+
+    async def get_all_schedules(self,
+                                 params: ScheduleFilter = Depends(),
+                                 userDTO: UserRDTOWithRelations = Depends(check_employee),
+                                 repo: ScheduleRepository = Depends(ScheduleRepository),
+                                 ):
+        return await repo.paginate_with_filter(
+            dto=ScheduleRDTO, page=params.page, per_page=params.per_page,
+            filters=params.apply()
+        )
+
+    async def my_active_schedules(self,
+                                 userDTO: UserRDTOWithRelations = Depends(check_employee),
+                                 repo: ScheduleRepository = Depends(ScheduleRepository),
+                           ):
+
+        return await repo.get_all_with_filter(filters=[
+            and_(repo.model.is_active == True,repo.model.responsible_id == userDTO.id)
+        ])
+
+    async def my_schedules(
+            self,
+            params: ScheduleClientScheduledFilter = Depends(),
+            userDTO: UserRDTOWithRelations = Depends(check_client),
+            repo: ScheduleRepository = Depends(ScheduleRepository),
+    ):
+        return await repo.get_all_with_filter(filters=params.apply(userRDTO=userDTO))
+
+    async def my_schedules_count(
+            self,
+            params: ScheduleClientFromToFilter = Depends(),
+            userDTO: UserRDTOWithRelations = Depends(check_client),
+            repo: ScheduleRepository = Depends(ScheduleRepository),
+    ):
+        return params.apply(userRDTO=userDTO)
