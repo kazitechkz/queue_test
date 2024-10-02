@@ -11,7 +11,7 @@ from app.domain.models.workshop_schedule_model import WorkshopScheduleModel
 from app.feature.factory.factory_repository import FactoryRepository
 from app.feature.material.material_repository import MaterialRepository
 from app.feature.order.dtos.order_dto import CreateIndividualOrderDTO, CreateLegalOrderDTO, OrderRDTOWithRelations
-from app.feature.order.filter.order_filter import OrderFilter
+from app.feature.order.filter.order_filter import OrderFilter, DetailOrderFilter
 from app.feature.order.order_repository import OrderRepository
 from app.feature.organization.organization_repository import OrganizationRepository
 from app.feature.sap_request.sap_request_repository import SapRequestRepository
@@ -29,7 +29,7 @@ class OrderController:
 
     def _add_routes(self):
         self.router.get("/get-all-order")(self.get_all)
-        self.router.get("/get-detail-order/{order_id}")(self.get_detail_order)
+        self.router.get("/get-detail-order")(self.get_detail_order)
         self.router.get("/get-detail-schedule/{order_id}")(self.get_detail_schedule)
         self.router.get("/get-detail-schedule-history/{schedule_id}")(self.get_detail_schedule_history)
         self.router.post("/create-individual-order")(self.create_individual)
@@ -52,8 +52,13 @@ class OrderController:
 
         return result
 
-    async def get_detail_order(self, order_id: int = Path(gt=0), repo: OrderRepository = Depends(OrderRepository)):
-        result = await repo.get(id=order_id, options=[
+    async def get_detail_order(
+            self,
+            filters: DetailOrderFilter = Depends(DetailOrderFilter),
+            repo: OrderRepository = Depends(OrderRepository),
+            userRDTO: UserRDTOWithRelations = Depends(get_current_user)
+    ):
+        result = await repo.get_with_filter(filters=filters.apply(userDTO=userRDTO), options=[
             selectinload(OrderModel.factory),
             selectinload(OrderModel.workshop),
             selectinload(OrderModel.kaspi),

@@ -42,7 +42,7 @@ class BaseRepository(Generic[T]):
         return items
 
     async def get_first_with_filter(self, filters: list = [],
-                                  options: list = []):
+                                    options: list = []):
         query = select(self.model)
         if options:
             for option in options:
@@ -99,6 +99,18 @@ class BaseRepository(Generic[T]):
                 column = getattr(self.model, key, None)
                 if column is not None:
                     query = query.filter(column == value)
+
+        result = await self.db.execute(query)
+        return result.scalars().first()
+
+    async def get_with_filter(self, filters: [], options: Optional[list] = None):
+        query = select(self.model)
+        if options:
+            for option in options:
+                query = query.options(option)
+        # Применение фильтров к запросу
+        for filter_condition in filters:
+            query = query.filter(filter_condition)
 
         result = await self.db.execute(query)
         return result.scalars().first()
