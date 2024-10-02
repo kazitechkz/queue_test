@@ -1,7 +1,7 @@
 from typing import Optional
 
 from sqlalchemy import String, ForeignKey, Boolean
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
 from app.shared.database_constants import CreatedAt, UpdatedAt, ID, AppTableNames
@@ -23,3 +23,9 @@ class OperationModel(Base):
     can_cancel: Mapped[bool] = mapped_column(Boolean())
     created_at: Mapped[CreatedAt]
     updated_at: Mapped[UpdatedAt]
+
+    role:Mapped["RoleModel"] = relationship(
+        "RoleModel",
+        back_populates="operations",
+        foreign_keys=[role_id]
+    )

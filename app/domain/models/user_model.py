@@ -40,3 +40,21 @@ class UserModel(Base):
     vehicles: Mapped[list["VehicleModel"]] = relationship(
         back_populates="owner"
     )
+
+    act_weights:Mapped[list["ActWeightModel"]] = relationship(
+        "ActWeightModel",
+        back_populates="responsible",
+        foreign_keys="[ActWeightModel.responsible_id]"
+    )
+
+    initial_weights: Mapped[list["InitialWeightModel"]] = relationship(
+        "InitialWeightModel",
+        back_populates="responsible",
+        foreign_keys="[InitialWeightModel.responsible_id]"
+    )
+
+    orders:Mapped[list["OrderModel"]] = relationship(
+        "OrderModel",
+        back_populates="owner",
+        foreign_keys="[OrderModel.owner_id]"
+    )

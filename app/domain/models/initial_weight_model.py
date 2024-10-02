@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 
 from sqlalchemy import ForeignKey, Text, Integer, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
 from app.shared.database_constants import AppTableNames, ID, CreatedAt, UpdatedAt
@@ -39,3 +39,33 @@ class InitialWeightModel(Base):
 
     created_at: Mapped[CreatedAt]
     updated_at: Mapped[UpdatedAt]
+
+    history:Mapped["ScheduleHistoryModel"] = relationship(
+        "ScheduleHistoryModel",
+        back_populates="initial_weights",
+        foreign_keys=[history_id]
+    )
+
+    order:Mapped["OrderModel"] = relationship(
+        "OrderModel",
+        back_populates="initial_weights",
+        foreign_keys=[order_id]
+    )
+
+    vehicle:Mapped["VehicleModel"] = relationship(
+        "VehicleModel",
+        back_populates="initial_weights_vehicle",
+        foreign_keys=[vehicle_id]
+    )
+
+    trailer: Mapped["VehicleModel"] = relationship(
+        "VehicleModel",
+        back_populates="initial_weights_trailer",
+        foreign_keys=[trailer_id]
+    )
+
+    responsible:Mapped["UserModel"] = relationship(
+        "UserModel",
+        back_populates="initial_weights",
+        foreign_keys=[responsible_id]
+    )

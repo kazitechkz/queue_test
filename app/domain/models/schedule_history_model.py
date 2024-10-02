@@ -31,3 +31,15 @@ class ScheduleHistoryModel(Base):
 
     schedule: Mapped["ScheduleModel"] = relationship("ScheduleModel")
     operation: Mapped["OperationModel"] = relationship("OperationModel")
+
+    act_weights:Mapped[list["ActWeightModel"]] = relationship(
+        "ActWeightModel",
+        back_populates="history",
+        foreign_keys="[ActWeightModel.history_id]"
+    )
+
+    initial_weights:Mapped[list["InitialWeightModel"]] = relationship(
+        "InitialWeightModel",
+        back_populates="history",
+        foreign_keys="[InitialWeightModel.history_id]"
+    )

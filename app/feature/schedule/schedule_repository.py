@@ -23,7 +23,8 @@ from app.feature.order.order_repository import OrderRepository
 from app.feature.organization.organization_repository import OrganizationRepository
 from app.feature.organization_employee.organization_employee_repository import OrganizationEmployeeRepository
 from app.feature.schedule.dtos.schedule_dto import ScheduleIndividualCDTO, ScheduleCDTO, ScheduleLegalCDTO, \
-    ScheduleSpaceDTO
+    ScheduleSpaceDTO, ScheduleCalendarDTO
+from app.feature.schedule.filter.schedule_filter import ScheduleClientFromToFilter
 from app.feature.user.user_repository import UserRepository
 from app.feature.vehicle.vehicle_repository import VehicleRepository
 from app.feature.workshop_schedule.workshop_schedule_repository import WorkshopScheduleRepository
@@ -35,6 +36,66 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
 
     def __init__(self, db: Session = Depends(get_db)):
         super().__init__(ScheduleModel, db)
+
+
+    async def my_schedules_count(self,
+                                 userDTO: UserRDTOWithRelations,
+                                 filter:ScheduleClientFromToFilter,
+                                 date_filters:list,
+                                 orderRepo:OrderRepository
+                                 ) -> list[ScheduleCalendarDTO]:
+        filters = []
+
+        if filter.order_id:
+            order = await orderRepo.get(id=filter.order_id)
+            if order is None:
+                raise AppExceptionResponse.bad_request("Заказ не найден")
+            if userDTO.user_type.value == TableConstantsNames.UserLegalTypeValue:
+                organization_ids = [organization.id for organization in userDTO.organizations]
+                if order.organization_id not in organization_ids:
+                    raise AppExceptionResponse.bad_request("Заказ не найден или не принадлежит компании")
+            if userDTO.user_type.value == TableConstantsNames.UserIndividualTypeValue:
+                if order.owner_id != userDTO.id:
+                    raise AppExceptionResponse.bad_request("Заказ не найден или не принадлежит физическому лицу")
+            filters.append(and_(self.model.order_id == filter.order_id))
+        if userDTO.user_type.value == TableConstantsNames.UserLegalTypeValue:
+            organization_ids = [organization.id for organization in userDTO.organizations]
+            filters.append(and_(self.model.organization_id.in_(organization_ids)))
+        if userDTO.user_type.value == TableConstantsNames.UserIndividualTypeValue:
+            filters.append(and_(or_(self.model.owner_id == userDTO.id, self.model.driver_id == userDTO.id)))
+        start_date = datetime.combine(filter.start_at, time(0, 0, 0))
+        end_date = datetime.combine(filter.end_at, time(23, 59, 59))
+        filters.append(and_(self.model.start_at >= start_date, self.model.end_at <= end_date))
+        schedules = await self.get_all_with_filter(filters=filters)
+        schedule_calendars_dto = []
+        for date_filter in date_filters:
+            total = [schedule.id for schedule in schedules
+                                if schedule.start_at >= date_filter[0] and schedule.start_at < date_filter[1]]
+            active_schedule = [schedule.id for schedule in schedules
+                                if schedule.is_active and schedule.start_at >= date_filter[0] and schedule.start_at < date_filter[1]
+                               ]
+            canceled_schedule = [schedule.id for schedule in schedules
+                               if schedule.is_canceled and schedule.start_at >= date_filter[0] and schedule.start_at <
+                               date_filter[1]
+                               ]
+
+            executed_schedule = [schedule.id for schedule in schedules
+                                 if schedule.is_executed and schedule.start_at >= date_filter[0] and schedule.start_at <
+                                 date_filter[1]
+                                 ]
+
+            schedule_calendars_dto.append(
+                ScheduleCalendarDTO(
+                    scheduled_at = date_filter[0].date(),
+                    total = len(total),
+                    total_active = len(active_schedule),
+                    total_canceled = len(canceled_schedule),
+                    total_executed = len(executed_schedule),
+                )
+            )
+
+        return schedule_calendars_dto
+
 
     async def get_active_schedules(self, userDTO: UserRDTOWithRelations, operationRepo: OperationRepository):
         operations = await operationRepo.get_all_with_filter(filters=[and_(operationRepo.model.role_value == userDTO.role.value)])

@@ -1,6 +1,9 @@
 from datetime import datetime
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import selectinload
+
+from app.feature.operation.operation_repository import OperationRepository
 
 
 class TestController:
@@ -11,5 +14,5 @@ class TestController:
     def _add_routes(self):
         self.router.get("/test")(self.test)
 
-    async def test(self):
-        return datetime.now()
+    async def test(self,operationRepos:OperationRepository = Depends()):
+        return await operationRepos.get_all_with_filter(options=[selectinload(operationRepos.model.role),])

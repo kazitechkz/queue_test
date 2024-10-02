@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 
 from sqlalchemy import ForeignKey, String, Integer, Computed
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
 from app.shared.database_constants import AppTableNames, ID, CreatedAt, UpdatedAt
@@ -32,3 +32,21 @@ class ActWeightModel(Base):
     measured_at: Mapped[datetime] = mapped_column()
     created_at: Mapped[CreatedAt]
     updated_at: Mapped[UpdatedAt]
+
+    history:Mapped["ScheduleHistoryModel"] = relationship(
+        "ScheduleHistoryModel",
+        back_populates="act_weights",
+        foreign_keys=[history_id]
+    )
+
+    order:Mapped["OrderModel"] = relationship(
+        "OrderModel",
+        back_populates="act_weights",
+        foreign_keys=[order_id]
+    )
+
+    responsible:Mapped["UserModel"] = relationship(
+        "UserModel",
+        back_populates="act_weights",
+        foreign_keys=[responsible_id]
+    )

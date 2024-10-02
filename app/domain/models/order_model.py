@@ -86,9 +86,10 @@ class OrderModel(Base):
         back_populates="orders",
     )
 
-    factory: Mapped["FactoryModel"] = relationship("FactoryModel", back_populates="order")
+    factory: Mapped["FactoryModel"] = relationship("FactoryModel", back_populates="order",foreign_keys=[factory_id])
     workshop: Mapped["WorkshopModel"] = relationship("WorkshopModel", foreign_keys=[workshop_id])
     kaspi: Mapped["KaspiPaymentModel"] = relationship("KaspiPaymentModel", foreign_keys=[kaspi_id])
+    owner:Mapped["UserModel"] = relationship("UserModel",back_populates="orders",foreign_keys=[owner_id])
 
     # Связь с SapRequestModel для "успешного" запроса
     sap_request: Mapped["SapRequestModel"] = relationship(
@@ -106,5 +107,36 @@ class OrderModel(Base):
         foreign_keys=[SapRequestModel.order_id],
         uselist=True,
         overlaps="sap_request",  # Указываем, что эта связь перекрывается с sap_request
+        viewonly=True
+    )
+
+    #Акт взвешивания
+    act_weights:Mapped[List["ActWeightModel"]] = relationship(
+        "ActWeightModel",
+        back_populates="order",
+        foreign_keys="[ActWeightModel.order_id]"
+    )
+
+    #Первоначальное взвешивание
+    initial_weights:Mapped[List["InitialWeightModel"]] = relationship(
+        "InitialWeightModel",
+        back_populates="order",
+        foreign_keys="[InitialWeightModel.order_id]"
+    )
+
+    #Kaspi Payments
+    kaspi_payment: Mapped["KaspiPaymentModel"] = relationship(
+        "KaspiPaymentModel",
+        back_populates="order",
+        foreign_keys="[KaspiPaymentModel.order_id]",
+        uselist=False,
+        overlaps="kaspi_payment_failed"  # Указываем, что эта связь перекрывается с sap_request_failed
+    )
+    kaspi_payment_failed:Mapped[List["KaspiPaymentModel"]] = relationship(
+        "KaspiPaymentModel",
+        back_populates="order_failed",
+        foreign_keys="[KaspiPaymentModel.order_id]",
+        uselist=True,
+        overlaps="kaspi_payment",  # Указываем, что эта связь перекрывается с sap_request
         viewonly=True
     )

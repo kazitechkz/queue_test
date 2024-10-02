@@ -28,7 +28,7 @@ class ScheduleController:
     def _add_routes(self):
         self.router.post("/create-individual", response_model=ScheduleRDTO)(self.create_individual)
         self.router.post("/create-legal", response_model=ScheduleRDTO)(self.create_legal)
-        self.router.get("/get_schedule")(self.get_schedule)
+        self.router.get("/get-schedule")(self.get_schedule)
         self.router.get("/get-active-schedules")(self.get_active_schedules)
         self.router.get("/get-canceled-schedules")(self.get_canceled_schedules)
         self.router.get("/get-all-schedules")(self.get_all_schedules)
@@ -116,7 +116,10 @@ class ScheduleController:
             params: ScheduleClientScheduledFilter = Depends(),
             userDTO: UserRDTOWithRelations = Depends(check_client),
             repo: ScheduleRepository = Depends(ScheduleRepository),
+            orderRepo: OrderRepository = Depends(OrderRepository)
     ):
+        if params.order_id:
+            order = await orderRepo.get(id=params.order_id)
         return await repo.get_all_with_filter(filters=params.apply(userRDTO=userDTO))
 
     async def my_schedules_count(
@@ -124,5 +127,9 @@ class ScheduleController:
             params: ScheduleClientFromToFilter = Depends(),
             userDTO: UserRDTOWithRelations = Depends(check_client),
             repo: ScheduleRepository = Depends(ScheduleRepository),
+            orderRepo:OrderRepository = Depends(OrderRepository)
     ):
-        return params.apply(userRDTO=userDTO)
+        return await repo.my_schedules_count( userDTO = userDTO,
+                                 filter = params,
+                                 date_filters = params.apply(),
+                                 orderRepo = orderRepo)
