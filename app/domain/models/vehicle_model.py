@@ -58,3 +58,14 @@ class VehicleModel(Base):
     organization: Mapped["OrganizationModel"] = relationship(
         back_populates="vehicles"
     )
+
+    initial_weights_vehicle:Mapped[list["InitialWeightModel"]] = relationship(
+        "InitialWeightModel",
+        back_populates="vehicle",
+        foreign_keys="[InitialWeightModel.vehicle_id]"
+    )
+    initial_weights_trailer: Mapped[list["InitialWeightModel"]] = relationship(
+        "InitialWeightModel",
+        back_populates="trailer",
+        foreign_keys="[InitialWeightModel.trailer_id]"
+    )

@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 
 from sqlalchemy import String, Numeric, Boolean, ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
 from app.shared.database_constants import AppTableNames, ID, CreatedAt, UpdatedAt
@@ -28,3 +28,20 @@ class KaspiPaymentModel(Base):
     paid_at: Mapped[Optional[datetime]] = mapped_column(default=None, nullable=True)
     created_at: Mapped[CreatedAt]
     updated_at: Mapped[UpdatedAt]
+
+    # Связь для "успешного" заказа
+    order: Mapped["OrderModel"] = relationship(
+        "OrderModel",
+        back_populates="kaspi_payment",
+        foreign_keys=[order_id],
+        overlaps="order_failed"  # Указываем перекрытие с order_failed
+    )
+
+    # Связь для "неудачного" заказа
+    order_failed: Mapped["OrderModel"] = relationship(
+        "OrderModel",
+        back_populates="kaspi_payment_failed",
+        foreign_keys=[order_id],
+        overlaps="order",  # Указываем перекрытие с order
+        viewonly=True
+    )

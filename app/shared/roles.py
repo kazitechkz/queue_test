@@ -129,9 +129,13 @@ def assign_roles(app):
 
     assign_roles_to_route(app, "/schedule/create-individual", ["admin"])
     assign_roles_to_route(app, "/schedule/create-legal", ["admin"])
-    assign_roles_to_route(app, "/schedule/get_schedule", ["admin"])
+    assign_roles_to_route(app, "/schedule/get-schedule", ["admin"])
     assign_roles_to_route(app, "/schedule/get-active-schedules", ["admin"])
     assign_roles_to_route(app, "/schedule/get-canceled-schedules", ["admin"])
+    assign_roles_to_route(app, "/schedule/get-all-schedules", ["client"])
+    assign_roles_to_route(app, "/schedule/my-active-schedules", ["client"])
+    assign_roles_to_route(app, "/schedule/my-schedules", ["client"])
+    assign_roles_to_route(app, "/schedule/my-schedules-count", ["client"])
 
     assign_roles_to_route(app, "/schedule-history/take-request/{schedule_id}", ["admin"])
     assign_roles_to_route(app, "/schedule-history/make-decision/{schedule_id}", ["admin"])

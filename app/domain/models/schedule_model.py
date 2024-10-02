@@ -49,6 +49,8 @@ class ScheduleModel(Base):
 
     start_at: Mapped[datetime] = mapped_column()
     end_at: Mapped[datetime] = mapped_column()
+    rescheduled_start_at:Mapped[Optional[datetime]] = mapped_column()
+    rescheduled_end_at:Mapped[Optional[datetime]] = mapped_column()
 
     loading_volume_kg: Mapped[int] = mapped_column(Integer())
     vehicle_tara_kg: Mapped[int] = mapped_column(Integer(), nullable=True)
@@ -76,4 +78,10 @@ class ScheduleModel(Base):
     workshop_schedule: Mapped["WorkshopScheduleModel"] = relationship("WorkshopScheduleModel", foreign_keys=[workshop_schedule_id])
     current_operation: Mapped["OperationModel"] = relationship("OperationModel", foreign_keys=[current_operation_id])
     vehicle: Mapped["VehicleModel"] = relationship("VehicleModel", foreign_keys=[vehicle_id])
+    trailer: Mapped["VehicleModel"] = relationship("VehicleModel", foreign_keys=[trailer_id])
     order: Mapped["OrderModel"] = relationship("OrderModel", foreign_keys=[order_id])
+    owner: Mapped["UserModel"] = relationship("UserModel", foreign_keys=[owner_id])
+    driver: Mapped["UserModel"] = relationship("UserModel", foreign_keys=[driver_id])
+    organization: Mapped["OrganizationModel"] = relationship("OrganizationModel", foreign_keys=[organization_id])
+    responsible : Mapped["UserModel"] = relationship("UserModel",foreign_keys=[responsible_id])
+    canceled_user : Mapped["UserModel"] = relationship("UserModel",foreign_keys=[canceled_by])

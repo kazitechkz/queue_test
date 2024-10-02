@@ -16,3 +16,9 @@ class RoleModel(Base):
     users: Mapped[list["UserModel"]] = relationship(
         back_populates="role"
     )
+
+    operations:Mapped[list["OperationModel"]] = relationship(
+        "OperationModel",
+        back_populates="role",
+        foreign_keys="[OperationModel.role_id]"
+    )

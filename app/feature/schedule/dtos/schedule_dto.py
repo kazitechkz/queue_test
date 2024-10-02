@@ -185,6 +185,8 @@ class ScheduleSpaceDTO(BaseModel):
     free_space:int = Field("Кол-во свободных мест")
 
 class ScheduleCalendarDTO(BaseModel):
-    scheduled_at:date = Field(description="Дата бронирования", ge=date.today())
+    scheduled_at:date = Field(description="Дата бронирования")
     total:int = Field(description="Общее количество бронирований")
     total_active:int = Field(description="Общее количество активных бронирований")
+    total_canceled:int = Field(description="Количество отменненых бронирований")
+    total_executed:int = Field(description="Количество выполненых бронирований")
