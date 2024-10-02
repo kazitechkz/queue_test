@@ -103,12 +103,12 @@ def assign_roles(app):
     assign_roles_to_route(app, "/auth/login", ["admin", "client"])
     assign_roles_to_route(app, "/auth/me", ["admin", "client"])
 
-    assign_roles_to_route(app, "/order/get-all-order", ["admin"])
-    assign_roles_to_route(app, "/order/get-detail-order/{order_id}", ["admin"])
-    assign_roles_to_route(app, "/order/get-detail-schedule/{order_id}", ["admin"])
-    assign_roles_to_route(app, "/order/get-detail-schedule-history/{schedule_id}", ["admin"])
-    assign_roles_to_route(app, "/order/create-individual-order", ["admin"])
-    assign_roles_to_route(app, "/order/create-legal-order", ["admin"])
+    assign_roles_to_route(app, "/order/get-all-order", ["admin", "client"])
+    assign_roles_to_route(app, "/order/get-detail-order", ["admin", "client"])
+    assign_roles_to_route(app, "/order/get-detail-schedule/{order_id}", ["admin", "client"])
+    assign_roles_to_route(app, "/order/get-detail-schedule-history/{schedule_id}", ["admin", "client"])
+    assign_roles_to_route(app, "/order/create-individual-order", ["admin", "client"])
+    assign_roles_to_route(app, "/order/create-legal-order", ["admin", "client"])
 
     assign_roles_to_route(app, "/sap-request/recreate/{order_id}", ["admin"])
 
@@ -136,7 +136,7 @@ def assign_roles(app):
     assign_roles_to_route(app, "/schedule-history/take-request/{schedule_id}", ["admin"])
     assign_roles_to_route(app, "/schedule-history/make-decision/{schedule_id}", ["admin"])
 
-    assign_roles_to_route(app, "/get-qr/get-qr-link/{order_id}", ["admin"])
+    assign_roles_to_route(app, "/get-qr/get-qr-link/{order_id}", ["admin", "client"])
 
     assign_roles_to_route(app, "/test/test", ["admin"])
 
