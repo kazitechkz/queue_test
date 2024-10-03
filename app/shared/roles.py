@@ -136,6 +136,8 @@ def assign_roles(app):
     assign_roles_to_route(app, "/schedule/my-active-schedules", ["client"])
     assign_roles_to_route(app, "/schedule/my-schedules", ["client"])
     assign_roles_to_route(app, "/schedule/my-schedules-count", ["client"])
+    assign_roles_to_route(app, "/schedule/reschedules-all", ["admin"])
+    assign_roles_to_route(app, "/schedule/cancel-all-schedules", ["admin"])
 
     assign_roles_to_route(app, "/schedule-history/take-request/{schedule_id}", ["admin"])
     assign_roles_to_route(app, "/schedule-history/make-decision/{schedule_id}", ["admin"])

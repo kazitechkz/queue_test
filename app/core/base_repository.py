@@ -214,6 +214,8 @@ class BaseRepository(Generic[T]):
 
         return 0
 
+
+
     async def delete(self, id: int) -> None:
         result = await self.get(id)
         if result is None:
@@ -234,3 +236,5 @@ class BaseRepository(Generic[T]):
             return f"Duplicate entry for {column} in {table}. Please choose a different value."
         else:
             return "An error occurred while processing your request."
+
+
