@@ -44,6 +44,9 @@ class ScheduleRDTO(ScheduleDTO):
     start_at: datetime = Field(..., description="Время начала")
     end_at: datetime = Field(..., description="Время окончания")
 
+    rescheduled_start_at: Optional[datetime] = Field(default=None, description="Время начала перенос")
+    rescheduled_end_at:  Optional[datetime] = Field(default=None,description="Время окончания перенос")
+
     loading_volume_kg: int = Field(..., description="Объем загрузки в кг")
     vehicle_tara_kg: Optional[int] = Field(None, description="Тара транспортного средства в кг")
     vehicle_brutto_kg: Optional[int] = Field(None, description="Брутто транспортного средства в кг")
@@ -93,6 +96,9 @@ class ScheduleCDTO(BaseModel):
     start_at: datetime = Field(..., description="Время начала")
     end_at: datetime = Field(..., description="Время окончания")
 
+    rescheduled_start_at: Optional[datetime] = Field(default=None, description="Время начала перенос")
+    rescheduled_end_at: Optional[datetime] = Field(default=None, description="Время окончания перенос")
+
     loading_volume_kg: int = Field(..., description="Объем загрузки в кг")
     vehicle_tara_kg: Optional[int] = Field(None, description="Тара транспортного средства в кг")
     vehicle_brutto_kg: Optional[int] = Field(None, description="Брутто транспортного средства в кг")
@@ -124,24 +130,20 @@ class ScheduleCDTO(BaseModel):
 
 class ScheduleIndividualCDTO(BaseModel):
     order_id: int = Field(description="ID заказа")
-    workshop_id:int = Field(description="Шаблон расписания цеха")
+    workshop_schedule_id:int = Field(description="Шаблон расписания цеха")
     scheduled_data:date = Field(description="Дата бронирования",ge=date.today())
     start_at:time = Field(description="Начало бронирования")
     end_at:time = Field(description="Конец бронирования")
     vehicle_id: Optional[int] = Field(None, description="ID транспортного средства")
     trailer_id: Optional[int] = Field(None, description="ID прицепа")
+    booked_quan_t:float = Field(description="Общая масса бронирования в тоннах",ge=1)
 
     @model_validator(mode='after')
     def check_dates_and_times(self):
         start_at = self.start_at
         end_at = self.end_at
-        scheduled_data = self.scheduled_data
-        current_time = datetime.now(timezone.utc)
         if start_at and end_at and end_at <= start_at:
             raise ValueError('Время окончания работы должна быть больше даты начала')
-        # if scheduled_data == date.today():
-        #     if start_at < current_time.time() or end_at < current_time.time():
-        #         raise ValueError('Время начала и конца работы должны быть больше текущего времени')
         return self
 
 class ScheduleLegalCDTO(BaseModel):
@@ -154,18 +156,14 @@ class ScheduleLegalCDTO(BaseModel):
     end_at: time = Field(description="Конец бронирования")
     vehicle_id: Optional[int] = Field(None, description="ID транспортного средства")
     trailer_id: Optional[int] = Field(None, description="ID прицепа")
+    booked_quan_t: float = Field(description="Общая масса бронирования в тоннах")
 
     @model_validator(mode='after')
     def check_dates_and_times(self):
         start_at = self.start_at
         end_at = self.end_at
-        scheduled_data = self.scheduled_data
-        current_time = datetime.now(timezone.utc)
         if start_at and end_at and end_at <= start_at:
             raise ValueError('Время окончания работы должна быть больше даты начала')
-        # if scheduled_data == date.today():
-        #     if start_at < current_time.time() or end_at < current_time.time():
-        #         raise ValueError('Время начала и конца работы должны быть больше текущего времени')
         return self
 
 
@@ -179,6 +177,7 @@ class ScheduleLegalCDTO(BaseModel):
         from_attributes = True
 
 class ScheduleSpaceDTO(BaseModel):
+    workshop_schedule_id:int = Field(description="Уникальный идентификатор бронирования")
     scheduled_data: date = Field(description="Дата бронирования", ge=date.today())
     start_at: time = Field(description="Начало бронирования")
     end_at: time = Field(description="Конец бронирования")
@@ -190,3 +189,26 @@ class ScheduleCalendarDTO(BaseModel):
     total_active:int = Field(description="Общее количество активных бронирований")
     total_canceled:int = Field(description="Количество отменненых бронирований")
     total_executed:int = Field(description="Количество выполненых бронирований")
+
+class RescheduleAllDTO(BaseModel):
+    scheduled_data: date = Field(description="Дата бронирования", ge=date.today())
+    minute:int = Field(description="Перенос в минутах",gt=0,le=120)
+
+class ScheduleCancelDTO(BaseModel):
+    scheduled_data: date = Field(description="Дата бронирования", ge=date.today())
+    cancel_reason: Optional[str] = Field(None, max_length=1000, description="Причина отмены")
+
+class RescheduleOneDTO(BaseModel):
+    scheduled_data: date = Field(description="Дата бронирования", ge=date.today())
+    start_at: time = Field(description="Начало бронирования")
+    end_at: time = Field(description="Конец бронирования")
+    @model_validator(mode='after')
+    def check_dates_and_times(self):
+        start_at = self.start_at
+        end_at = self.end_at
+        if start_at and end_at and end_at <= start_at:
+            raise ValueError('Время окончания работы должна быть больше даты начала')
+        return self
+
+class ScheduleCancelOneDTO(BaseModel):
+    cancel_reason: Optional[str] = Field(None, max_length=1000, description="Причина отмены")

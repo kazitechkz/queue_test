@@ -1,15 +1,16 @@
 from datetime import date, time
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Path
 from sqlalchemy import and_
 
-from app.core.auth_core import check_individual_client, check_legal_client, check_employee, check_client
+from app.core.auth_core import check_individual_client, check_legal_client, check_employee, check_client, check_admin
 from app.feature.operation.operation_repository import OperationRepository
 from app.feature.order.order_repository import OrderRepository
 from app.feature.organization.organization_repository import OrganizationRepository
 from app.feature.organization_employee.organization_employee_repository import OrganizationEmployeeRepository
-from app.feature.schedule.dtos.schedule_dto import ScheduleRDTO, ScheduleIndividualCDTO, ScheduleLegalCDTO
+from app.feature.schedule.dtos.schedule_dto import ScheduleRDTO, ScheduleIndividualCDTO, ScheduleLegalCDTO, \
+    RescheduleAllDTO, ScheduleCancelDTO, RescheduleOneDTO
 from app.feature.schedule.filter.schedule_filter import ScheduleFilter, ScheduleClientScheduledFilter, \
     ScheduleClientFromToFilter
 from app.feature.schedule.schedule_repository import ScheduleRepository
@@ -35,6 +36,10 @@ class ScheduleController:
         self.router.get("/my-active-schedules")(self.my_active_schedules)
         self.router.get("/my-schedules")(self.my_schedules)
         self.router.get("/my-schedules-count")(self.my_schedules_count)
+        self.router.post("/reschedules-all")(self.reschedules_all)
+        self.router.post("/cancel-all-schedules")(self.cancel_all_schedules)
+        self.router.put("/reschedule-to-date/{schedule_id}")(self.reschedule_to_date)
+        self.router.put("/cancel-one/{schedule_id}")(self.cancel_one)
 
     async def create_individual(self,
                                 dto: ScheduleIndividualCDTO,
@@ -133,3 +138,25 @@ class ScheduleController:
                                  filter = params,
                                  date_filters = params.apply(),
                                  orderRepo = orderRepo)
+
+    async def reschedules_all(self,
+                              dto: RescheduleAllDTO,
+                              repo: ScheduleRepository = Depends(ScheduleRepository)
+                              ):
+        return await repo.reshedule_data(dto=dto)
+
+    async def cancel_all_schedules(self,
+                                   dto:ScheduleCancelDTO,
+                                   userDTO: UserRDTOWithRelations = Depends(check_admin),
+                                   repo: ScheduleRepository = Depends(ScheduleRepository),
+                                   orderRepo: OrderRepository = Depends(OrderRepository)
+                                   ):
+        return await repo.cancel_all_schedules(dto=dto,orderRepo=orderRepo,userDTO=userDTO)
+
+    async def reschedule_to_date(self,
+                              dto: RescheduleOneDTO,
+                              userDTO: UserRDTOWithRelations = Depends(check_admin),
+                              schedule_id:int = Path(description="Идентификатор заказа"),
+                              repo: ScheduleRepository = Depends(ScheduleRepository)
+                              ):
+        return await repo.reschedule_to_date(schedule_id=schedule_id,dto=dto)

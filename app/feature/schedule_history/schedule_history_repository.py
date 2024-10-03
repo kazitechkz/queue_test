@@ -68,8 +68,12 @@ class ScheduleHistoryRepository(BaseRepository[ScheduleHistoryModel]):
                 return schedule_history
 
         if operation.value == TableConstantsNames.EntryOperationName:
-            if schedule.start_at > datetime.now() or schedule.end_at < datetime.now():
-                raise AppExceptionResponse.bad_request("Нельзя заявиться на текущее расписание")
+            if schedule.rescheduled_start_at == None or schedule.rescheduled_end_at == None:
+                if (schedule.start_at > datetime.now() or schedule.end_at < datetime.now()):
+                    raise AppExceptionResponse.bad_request("Нельзя заявиться на текущее расписание")
+            else:
+                if (schedule.rescheduled_start_at > datetime.now() or schedule.rescheduled_end_at < datetime.now()):
+                    raise AppExceptionResponse.bad_request("Нельзя заявиться на текущее расписание")
 
         return await self._take_responisbibility(
                 schedule=schedule,
@@ -86,7 +90,6 @@ class ScheduleHistoryRepository(BaseRepository[ScheduleHistoryModel]):
             scheduleRepo: ScheduleRepository,
             initialWeightRepo: InitialWeightRepository,
             actWeightRepo: ActWeightRepository,
-            vehicleRepo: VehicleRepository,
             orderRepo: OrderRepository,
             operationRepo: OperationRepository,
     ):
@@ -155,7 +158,6 @@ class ScheduleHistoryRepository(BaseRepository[ScheduleHistoryModel]):
                     schedule_history=schedule_history,
                     initialWeightRepo=initialWeightRepo,
                     userRDTO=userRDTO,
-                    vehicleRepo=vehicleRepo,
                     vehicle_tara_kg=vehicle_tara_kg,
                 )
             if operation.value == TableConstantsNames.FinalWeightOperationName and is_passed:
@@ -168,7 +170,6 @@ class ScheduleHistoryRepository(BaseRepository[ScheduleHistoryModel]):
                     schedule_history=schedule_history,
                     actWeightRepo=actWeightRepo,
                     userRDTO=userRDTO,
-                    vehicleRepo=vehicleRepo,
                     vehicle_brutto_kg=vehicle_brutto_kg)
             if operation.value == TableConstantsNames.ExitCheckOperationName and is_passed:
                 is_last = True
@@ -202,7 +203,6 @@ class ScheduleHistoryRepository(BaseRepository[ScheduleHistoryModel]):
                 operation_id=operation_id,
             )
             schedule_history_model = await self.create(obj=schedule_history_model)
-
         schedule_history_dto = ScheduleHistoryCDTO.from_orm(schedule_history_model)
         schedule_history_dto.responsible_id = userRDTO.id
         schedule_history_dto.responsible_name = userRDTO.name
@@ -318,31 +318,19 @@ class ScheduleHistoryRepository(BaseRepository[ScheduleHistoryModel]):
             schedule_history: ScheduleHistoryModel,
             initialWeightRepo: InitialWeightRepository,
             userRDTO: UserRDTOWithRelations,
-            vehicleRepo: VehicleRepository,
             vehicle_tara_kg:int,
 
     )->InitialWeightModel:
-        vehicle = await vehicleRepo.get(id=schedule.vehicle_id)
-        vehicle_info = get_vehicle_information(vehicle)
-        if vehicle is None:
-            raise AppExceptionResponse.bad_request("Транспорт не найден")
-        trailer_id = None
-        trailer_info = None
-        if schedule.trailer_id is not None:
-            trailer = await vehicleRepo.get(id=schedule.trailer_id)
-            if trailer is None:
-                raise AppExceptionResponse.bad_request("Прицеп не найден")
-            trailer_id = trailer.id
-            trailer_info = get_vehicle_information(trailer)
+
         current_time = datetime.now()
         initial_weight_dto = InitialWeightCDTO(
             history_id=schedule_history.id,
             order_id=schedule.order_id,
             zakaz=schedule.zakaz,
             vehicle_id=schedule.vehicle_id,
-            vehicle_info=vehicle_info,
-            trailer_id=trailer_id,
-            trailer_info=trailer_info,
+            vehicle_info=schedule.vehicle_info,
+            trailer_id=schedule.trailer_id,
+            trailer_info=schedule.trailer_info,
             responsible_id=userRDTO.id,
             responsible_name=userRDTO.name,
             responsible_iin=userRDTO.iin,
@@ -358,30 +346,17 @@ class ScheduleHistoryRepository(BaseRepository[ScheduleHistoryModel]):
             schedule_history: ScheduleHistoryModel,
             actWeightRepo: ActWeightRepository,
             userRDTO: UserRDTOWithRelations,
-            vehicleRepo: VehicleRepository,
             vehicle_brutto_kg:int,
     )->ActWeightModel:
-        vehicle = await vehicleRepo.get(id=schedule.vehicle_id)
-        vehicle_info = get_vehicle_information(vehicle)
-        if vehicle is None:
-            raise AppExceptionResponse.bad_request("Транспорт не найден")
-        trailer_id = None
-        trailer_info = None
-        if schedule.trailer_id is not None:
-            trailer = await vehicleRepo.get(id=schedule.trailer_id)
-            if trailer is None:
-                raise AppExceptionResponse.bad_request("Прицеп не найден")
-            trailer_id = trailer.id
-            trailer_info = get_vehicle_information(trailer)
         current_time = datetime.now()
         act_weight_dto = ActWeightCDTO(
             history_id=schedule_history.id,
             order_id=schedule.order_id,
             zakaz=schedule.zakaz,
             vehicle_id=schedule.vehicle_id,
-            vehicle_info=vehicle_info,
-            trailer_id=trailer_id,
-            trailer_info=trailer_info,
+            vehicle_info=schedule.vehicle_info,
+            trailer_id=schedule.trailer_id,
+            trailer_info=schedule.trailer_info,
             responsible_id=userRDTO.id,
             responsible_name=userRDTO.name,
             responsible_iin=userRDTO.iin,

@@ -49,6 +49,7 @@ class ScheduleModel(Base):
 
     start_at: Mapped[datetime] = mapped_column()
     end_at: Mapped[datetime] = mapped_column()
+
     rescheduled_start_at:Mapped[Optional[datetime]] = mapped_column()
     rescheduled_end_at:Mapped[Optional[datetime]] = mapped_column()
 
