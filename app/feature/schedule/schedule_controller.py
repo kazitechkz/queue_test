@@ -10,7 +10,7 @@ from app.feature.order.order_repository import OrderRepository
 from app.feature.organization.organization_repository import OrganizationRepository
 from app.feature.organization_employee.organization_employee_repository import OrganizationEmployeeRepository
 from app.feature.schedule.dtos.schedule_dto import ScheduleRDTO, ScheduleIndividualCDTO, ScheduleLegalCDTO, \
-    RescheduleAllDTO, ScheduleCancelDTO, RescheduleOneDTO
+    RescheduleAllDTO, ScheduleCancelDTO, RescheduleOneDTO, ScheduleCancelOneDTO
 from app.feature.schedule.filter.schedule_filter import ScheduleFilter, ScheduleClientScheduledFilter, \
     ScheduleClientFromToFilter
 from app.feature.schedule.schedule_repository import ScheduleRepository
@@ -160,3 +160,14 @@ class ScheduleController:
                               repo: ScheduleRepository = Depends(ScheduleRepository)
                               ):
         return await repo.reschedule_to_date(schedule_id=schedule_id,dto=dto)
+
+    async def cancel_one(self,
+                              dto: ScheduleCancelOneDTO,
+                              userDTO: UserRDTOWithRelations = Depends(check_admin),
+                              schedule_id:int = Path(description="Идентификатор заказа"),
+                              repo: ScheduleRepository = Depends(ScheduleRepository),
+                              orderRepo: OrderRepository = Depends(OrderRepository)
+                              ):
+        return await repo.cancel_one_schedule(
+            schedule_id=schedule_id, dto=dto, orderRepo=orderRepo, userDTO=userDTO
+        )

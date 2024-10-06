@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional, List
 
-from sqlalchemy import Integer, Computed, Numeric, Boolean, Date, ForeignKey, String
+from sqlalchemy import Integer, Computed, Numeric, Boolean, Date, ForeignKey, String, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -77,6 +77,10 @@ class OrderModel(Base):
 
     created_at: Mapped[CreatedAt]
     updated_at: Mapped[UpdatedAt]
+    must_paid_at: Mapped[datetime] = mapped_column(
+        DateTime(),
+        Computed("created_at + INTERVAL 1 DAY")
+    )
 
     material: Mapped["MaterialModel"] = relationship(
         "MaterialModel"

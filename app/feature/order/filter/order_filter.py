@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from fastapi import Query
 from sqlalchemy import and_
@@ -15,7 +15,7 @@ class OrderFilter(BaseFilter):
                  page: int = Query(default=1, ge=1, example=1, description="Номер страницы"),
                  search: Optional[str] = Query(default=None, max_length=255, min_length=3,
                                                description="Поисковый запрос по имени, телефону, почте, иину"),
-                 status_id: int = Query(default=1, description="Статус заказа")
+                 status_id: List[int] = Query(default=[], description="Статус заказа")
                  ):
         super().__init__(per_page, page, search)
         self.per_page = per_page
@@ -41,7 +41,7 @@ class OrderFilter(BaseFilter):
                     print("Список owner_ids пуст!")
 
         if self.status_id:
-            filters.append(and_(self.model.status_id == self.status_id))
+            filters.append(and_(self.model.status_id.in_(self.status_id)))
         return filters
 
 
