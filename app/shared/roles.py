@@ -103,6 +103,10 @@ def assign_roles(app):
     assign_roles_to_route(app, "/auth/login", ["admin", "client"])
     assign_roles_to_route(app, "/auth/me", ["admin", "client"])
 
+    assign_roles_to_route(app, "/order-status/all", ["admin", "client"])
+    assign_roles_to_route(app, "/order-status/get/{id}", ["admin", "client"])
+    assign_roles_to_route(app, "/order-status/get-by-value/{value}", ["admin", "client"])
+
     assign_roles_to_route(app, "/order/get-all-order", ["admin", "client"])
     assign_roles_to_route(app, "/order/get-detail-order", ["admin", "client"])
     assign_roles_to_route(app, "/order/get-detail-schedule/{order_id}", ["admin", "client"])
@@ -117,7 +121,8 @@ def assign_roles(app):
 
     assign_roles_to_route(app, "/operation/", ["admin"])
     assign_roles_to_route(app, "/operation/create", ["admin"])
-    assign_roles_to_route(app, "/operation/get_by_id/{id}", ["admin"])
+    assign_roles_to_route(app, "/operation/get/{id}", ["admin"])
+    assign_roles_to_route(app, "/operation/get-by-value/{value}", ["admin"])
     assign_roles_to_route(app, "/operation/update/{id}", ["admin"])
     assign_roles_to_route(app, "/operation/delete/{id}", ["admin"])
 
@@ -138,6 +143,8 @@ def assign_roles(app):
     assign_roles_to_route(app, "/schedule/my-schedules-count", ["client"])
     assign_roles_to_route(app, "/schedule/reschedules-all", ["admin"])
     assign_roles_to_route(app, "/schedule/cancel-all-schedules", ["admin"])
+    assign_roles_to_route(app, "/schedule/reschedule-to-date/{schedule_id}", ["admin"])
+    assign_roles_to_route(app, "/schedule/cancel-one/{schedule_id}", ["admin"])
 
     assign_roles_to_route(app, "/schedule-history/take-request/{schedule_id}", ["admin"])
     assign_roles_to_route(app, "/schedule-history/make-decision/{schedule_id}", ["admin"])

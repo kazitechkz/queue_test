@@ -1,10 +1,11 @@
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Path
+from sqlalchemy.orm import selectinload
 
 from app.core.app_exception_response import AppExceptionResponse
 from app.domain.models.operation_model import OperationModel
-from app.feature.operation.dtos.operation_dto import OperationRDTO, OperationCDTO
+from app.feature.operation.dtos.operation_dto import OperationRDTO, OperationCDTO, OperationWithRelationRDTO
 from app.feature.operation.operation_repository import OperationRepository
 from app.feature.role.role_repository import RoleRepository
 
@@ -16,21 +17,52 @@ class OperationController:
         self._add_routes()
 
     def _add_routes(self):
-        self.router.get("/", response_model=List[OperationRDTO])(self.get_all)
+        self.router.get("/", response_model=List[OperationWithRelationRDTO])(self.get_all)
         self.router.post("/create", response_model=OperationRDTO)(self.create)
-        self.router.get("/get_by_id/{id}", response_model=OperationRDTO)(self.get_by_id)
+        self.router.get("/get/{id}", response_model=OperationWithRelationRDTO)(self.get_by_id)
+        self.router.get("/get-by-value/{value}", response_model=OperationWithRelationRDTO)(self.get_by_value)
         self.router.put("/update/{id}", response_model=OperationRDTO)(self.update)
         self.router.delete("/delete/{id}")(self.delete)
 
     async def get_all(self, repo: OperationRepository = Depends(OperationRepository)):
-        result = await repo.get_all()
-        return result
+        result = await repo.get_all_with_filter(
+            options=[
+                selectinload(repo.model.role),
+                selectinload(repo.model.prev_operation),
+                selectinload(repo.model.next_operation)
+            ])
+        result_dto = [OperationWithRelationRDTO.from_orm(resultItem) for resultItem in result]
+        return result_dto
 
     async def get_by_id(self, id: int = Path(gt=0), repo: OperationRepository = Depends(OperationRepository)):
-        result = await repo.get(id=id)
+        result = await repo.get(id=id,
+                                options=[
+                                    selectinload(repo.model.role),
+                                    selectinload(repo.model.prev_operation),
+                                    selectinload(repo.model.next_operation)
+                                ]
+                                )
         if result is None:
             raise AppExceptionResponse.not_found(message="Операции не найдены")
-        return result
+
+        result_dto = OperationWithRelationRDTO.from_orm(result)
+        return result_dto
+
+    async def get_by_value(self, value: str = Path(), repo: OperationRepository = Depends(OperationRepository)):
+        result = await repo.get_filtered(
+            filters={"value": value},
+            options=[
+                selectinload(repo.model.role),
+                selectinload(repo.model.prev_operation),
+                selectinload(repo.model.next_operation)
+            ]
+        )
+
+        if result is None:
+            raise AppExceptionResponse.not_found(message="Операции не найдены")
+
+        result_dto = OperationWithRelationRDTO.from_orm(result)
+        return result_dto
 
     async def create(self, dto: OperationCDTO, repo: OperationRepository = Depends(OperationRepository),roleRepo: RoleRepository = Depends(RoleRepository)):
         role = await self.check_form(dto=dto,repo=repo,roleRepo=roleRepo)

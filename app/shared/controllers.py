@@ -3,6 +3,7 @@ from app.feature.factory.factory_controller import FactoryController
 from app.feature.kaspi_payment.kaspi_payment_controller import KaspiPaymentController
 from app.feature.material.material_controller import MaterialController
 from app.feature.operation.operation_controller import OperationController
+from app.feature.order_status.order_status_controller import OrderStatusController
 from app.feature.order.order_controller import OrderController
 from app.feature.organization.organization_controller import OrganizationController
 from app.feature.organization_employee.organization_employee_controller import OrganizationEmployeeController
@@ -39,6 +40,7 @@ def include_routers(app):
     app.include_router(WorkshopController().router, prefix="/workshop", tags=["workshop"])
     app.include_router(MaterialController().router, prefix="/material", tags=["material"])
     app.include_router(AuthController().router, prefix="/auth", tags=["auth"])
+    app.include_router(OrderStatusController().router, prefix="/order-status", tags=["order-status"])
     app.include_router(OrderController().router, prefix="/order", tags=["order"])
     app.include_router(SapRequestController().router, prefix="/sap-request", tags=["sap-request"])
     app.include_router(KaspiPaymentController().router, prefix="/kaspi", tags=["kaspi"])

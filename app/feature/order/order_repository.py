@@ -90,3 +90,4 @@ class OrderRepository(BaseRepository[OrderModel]):
 
         order = await self.update(obj=order, dto=OrderCDTO.from_orm(order))
         return await self.get(id=order.id, options=[selectinload(self.model.sap_request)])
+

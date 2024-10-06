@@ -345,6 +345,21 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
         return schedules_update
 
 
+    async def reschedule_to_date(self, schedule_id:int, dto: RescheduleOneDTO):
+        schedule = await self.get_first_with_filter(and_(
+            self.model.id == schedule_id,
+            self.model.is_active == True,
+            self.model.is_used == False
+        ))
+        if schedule is None:
+            raise AppExceptionResponse.bad_request("Расписание не найдено либо неактивно")
+
+        schedule_dto = ScheduleCDTO.from_orm(schedule)
+        schedule_dto.rescheduled_start_at = datetime.combine(dto.scheduled_data,dto.start_at)
+        schedule_dto.rescheduled_end_at = datetime.combine(dto.scheduled_data,dto.end_at)
+        updated_schedule = await self.update(obj=schedule, dto=schedule_dto)
+        return updated_schedule
+
     async def cancel_one_schedule(self, schedule_id:int, dto: ScheduleCancelOneDTO,orderRepo:OrderRepository, userDTO:UserRDTOWithRelations,):
         schedule = await self.get_first_with_filter(and_(
             self.model.id == schedule_id,

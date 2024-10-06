@@ -628,6 +628,17 @@ async def add_users(session: Session):
                 password_hash=get_password_hash("admin123"),
                 status=True
             ),
+            UserModel(
+                id=9,
+                role_id=1,
+                type_id=1,
+                name="Система Цифровой Очереди",
+                iin="100200300400",
+                email="admin@gmail.com",
+                phone="+77068495961",
+                password_hash=get_password_hash("admin123"),
+                status=True
+            ),
         ]
         session.add_all(data)
         await session.commit()

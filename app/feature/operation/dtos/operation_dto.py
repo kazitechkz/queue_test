@@ -3,6 +3,8 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 
+from app.feature.role.dtos.role_dto import RoleRDTO
+
 
 class OperationDTO(BaseModel):
     id: int
@@ -24,6 +26,8 @@ class OperationRDTO(OperationDTO):
     prev_id: Optional[int] = Field(None, description="ID предыдущей операции")
     next_id: Optional[int] = Field(None, description="ID следующей операции")
     can_cancel: bool = Field(..., description="Можно ли отменить операцию")
+    class Config:
+        from_attributes = True
 
 class OperationCDTO(BaseModel):
     title: str = Field(..., max_length=255, description="Название операции")
@@ -35,3 +39,12 @@ class OperationCDTO(BaseModel):
     prev_id: Optional[int] = Field(None, description="ID предыдущей операции")
     next_id: Optional[int] = Field(None, description="ID следующей операции")
     can_cancel: bool = Field(..., description="Можно ли отменить операцию")
+    class Config:
+        from_attributes = True
+
+class OperationWithRelationRDTO(OperationRDTO):
+    role: Optional[RoleRDTO] = None
+    prev_operation:Optional[OperationRDTO] = None
+    next_operation:Optional[OperationRDTO] = None
+    class Config:
+        from_attributes = True

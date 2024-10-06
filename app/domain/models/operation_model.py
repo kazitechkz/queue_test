@@ -27,5 +27,20 @@ class OperationModel(Base):
     role:Mapped["RoleModel"] = relationship(
         "RoleModel",
         back_populates="operations",
-        foreign_keys=[role_id]
+        foreign_keys=[role_id],
+    )
+
+    prev_operation: Mapped[Optional["OperationModel"]] = relationship(
+        "OperationModel",
+        foreign_keys=[prev_id],
+        remote_side="OperationModel.id",
+        lazy="select",
+    )
+
+    # Отношение к следующему статусу
+    next_operation: Mapped[Optional["OperationModel"]] = relationship(
+        "OperationModel",
+        foreign_keys=[next_id],
+        remote_side="OperationModel.id",
+        lazy="select",
     )
