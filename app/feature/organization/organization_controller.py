@@ -1,9 +1,11 @@
 import logging
-from typing import Optional
+from typing import Optional, List
 
 from fastapi import APIRouter, Depends, Path
+from sqlalchemy import and_
 from sqlalchemy.orm import selectinload
 from app.core.app_exception_response import AppExceptionResponse
+from app.core.auth_core import check_legal_client
 from app.core.validation_rules import TWELVE_DIGITS_REGEX
 from app.domain.models.organization_model import OrganizationModel
 from app.domain.models.user_model import UserModel
@@ -13,7 +15,7 @@ from app.feature.organization.organization_repository import OrganizationReposit
 from app.feature.organization_type.organization_type_repository import OrganizationTypeRepository
 from app.feature.user.user_repository import UserRepository
 from app.shared.database_constants import TableConstantsNames
-from app.shared.relation_dtos.user_organization import OrganizationRDTOWithRelations
+from app.shared.relation_dtos.user_organization import OrganizationRDTOWithRelations, UserRDTOWithRelations
 
 
 class OrganizationController:
@@ -25,6 +27,7 @@ class OrganizationController:
         self.router.get("/all")(self.all)
         self.router.get("/get/{id}", response_model=OrganizationRDTOWithRelations)(self.get)
         self.router.get("/get_by_bin/{bin}", response_model=OrganizationRDTOWithRelations)(self.get_by_bin)
+        self.router.get("/my-organizations",response_model=List[OrganizationRDTOWithRelations])(self.my_organizations)
         self.router.post("/create", response_model=OrganizationRDTO)(self.create)
         self.router.put("/update/{id}", response_model=OrganizationRDTO)(self.update)
         self.router.put("/delete/{id}")(self.delete)
@@ -37,6 +40,14 @@ class OrganizationController:
             per_page=params.per_page, filters=params.apply(),
             options=[selectinload(OrganizationModel.owner),selectinload(OrganizationModel.type)])
         return result
+
+
+    async def my_organizations(self,
+                               repo: OrganizationRepository = Depends(OrganizationRepository),
+                               userRDTO:UserRDTOWithRelations = Depends(check_legal_client)
+                               ):
+        return await repo.get_all_with_filter(filters=[and_(repo.model.owner_id == userRDTO.id)],
+                                        options=[selectinload(repo.model.owner),selectinload(repo.model.type)])
 
     async def get(self, id: int = Path(gt=0), repo: OrganizationRepository = Depends(OrganizationRepository)):
         result = await repo.get(id=id, options=[selectinload(OrganizationModel.owner),selectinload(OrganizationModel.type)])

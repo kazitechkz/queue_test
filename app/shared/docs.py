@@ -71,6 +71,7 @@ def setup_documentation(app):
                     <ul>
                         <li><a target="_blank" href="/docs/admin">Администратор</a></li>
                         <li><a target="_blank" href="/docs/client">Клиент</a></li>
+                        <li><a target="_blank" href="/docs/employee">Сотрудники</a></li>
                     </ul>
                 </div>
             </body>
@@ -86,6 +87,10 @@ def setup_documentation(app):
     @app.get("/docs/client", include_in_schema=False)
     async def get_user_docs():
         return get_swagger_ui_html(openapi_url="/openapi/client", title="Client Docs")
+    
+    @app.get("/docs/employee", include_in_schema=False)
+    async def get_employee_docs():
+        return get_swagger_ui_html(openapi_url="/openapi/employee", title="Employee Docs")
 
     # OpenAPI схемы для каждой роли
     @app.get("/openapi/admin", include_in_schema=False)
@@ -95,3 +100,7 @@ def setup_documentation(app):
     @app.get("/openapi/client", include_in_schema=False)
     async def get_user_openapi():
         return custom_openapi(app, "client")
+    
+    @app.get("/openapi/employee", include_in_schema=False)
+    async def get_employee_openapi():
+        return custom_openapi(app, "employee")

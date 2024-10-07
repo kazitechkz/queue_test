@@ -41,12 +41,14 @@ def assign_roles(app):
     assign_roles_to_route(app, "/organization/all", ["admin"])
     assign_roles_to_route(app, "/organization/get/{id}", ["admin"])
     assign_roles_to_route(app, "/organization/get_by_bin/{bin}", ["admin"])
+    assign_roles_to_route(app, "/organization/my-organizations", ["client"])
     assign_roles_to_route(app, "/organization/create", ["admin"])
     assign_roles_to_route(app, "/organization/update/{id}", ["admin"])
     assign_roles_to_route(app, "/organization/delete/{id}", ["admin"])
 
     assign_roles_to_route(app, "/organization-employee/", ["admin"])
     assign_roles_to_route(app, "/organization-employee/get/{id}", ["admin"])
+    assign_roles_to_route(app, "/organization-employee/my-drivers/{organization_id}", ["client"])
     assign_roles_to_route(app, "/organization-employee/create", ["admin"])
     assign_roles_to_route(app, "/organization-employee/update/{id}", ["admin"])
     assign_roles_to_route(app, "/organization-employee/delete/{id}", ["admin"])
@@ -109,8 +111,7 @@ def assign_roles(app):
 
     assign_roles_to_route(app, "/order/get-all-order", ["admin", "client"])
     assign_roles_to_route(app, "/order/get-detail-order", ["admin", "client"])
-    assign_roles_to_route(app, "/order/get-detail-schedule/{order_id}", ["admin", "client"])
-    assign_roles_to_route(app, "/order/get-detail-schedule-history/{schedule_id}", ["admin", "client"])
+    assign_roles_to_route(app, "/order/my-paid-orders", ["client"])
     assign_roles_to_route(app, "/order/create-individual-order", ["admin", "client"])
     assign_roles_to_route(app, "/order/create-legal-order", ["admin", "client"])
 
@@ -145,6 +146,8 @@ def assign_roles(app):
     assign_roles_to_route(app, "/schedule/cancel-all-schedules", ["admin"])
     assign_roles_to_route(app, "/schedule/reschedule-to-date/{schedule_id}", ["admin"])
     assign_roles_to_route(app, "/schedule/cancel-one/{schedule_id}", ["admin"])
+    assign_roles_to_route(app, "/schedule/get/{id}", ["client"])
+    assign_roles_to_route(app, "/schedule/my-responsible-schedules", ["employee"])
 
     assign_roles_to_route(app, "/schedule-history/take-request/{schedule_id}", ["admin"])
     assign_roles_to_route(app, "/schedule-history/make-decision/{schedule_id}", ["admin"])
