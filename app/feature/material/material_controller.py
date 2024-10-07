@@ -1,9 +1,12 @@
+from typing import List
+
 from fastapi import APIRouter, Depends, Path
+from sqlalchemy.orm import selectinload
 
 from app.core.app_exception_response import AppExceptionResponse
 from app.domain.models.material_model import MaterialModel
 from app.feature.factory.factory_repository import FactoryRepository
-from app.feature.material.dtos.material_dto import MaterialRDTO, MaterialCDTO
+from app.feature.material.dtos.material_dto import MaterialRDTO, MaterialCDTO, MaterialWithRelationsDTO
 from app.feature.material.material_repository import MaterialRepository
 from app.feature.workshop.workshop_repository import WorkshopRepository
 
@@ -14,28 +17,33 @@ class MaterialController:
         self._add_routes()
 
     def _add_routes(self):
-        self.router.get("/", )(self.all)
+        self.router.get("/", response_model=List[MaterialWithRelationsDTO] )(self.all)
         self.router.post("/create", response_model=MaterialRDTO)(self.create)
-        self.router.get("/get/{id}", response_model=MaterialRDTO)(self.get)
-        self.router.get("/get_by_sap/{sap_id}", response_model=MaterialRDTO)(self.get_by_sap)
+        self.router.get("/get/{id}", response_model=MaterialWithRelationsDTO)(self.get)
+        self.router.get("/get_by_sap/{sap_id}", response_model=MaterialWithRelationsDTO)(self.get_by_sap)
         self.router.put("/update/{id}", response_model=MaterialRDTO)(self.update)
         self.router.delete("/delete/{id}")(self.delete)
 
     async def all(self, repo: MaterialRepository = Depends(MaterialRepository)):
-        result = await repo.get_all()
-        return result
+        result = await repo.get_all_with_filter(options=[
+            selectinload(repo.model.workshop)
+        ])
+        result_dto = [MaterialWithRelationsDTO.from_orm(resultItem) for resultItem in result]
+        return result_dto
 
     async def get(self, id: int = Path(gt=0), repo: MaterialRepository = Depends(MaterialRepository)):
-        result = await repo.get(id=id)
+        result = await repo.get(id=id,options=[selectinload(repo.model.workshop)])
         if result is None:
             raise AppExceptionResponse.not_found(message="Материал не найден")
-        return result
+        result_dto = MaterialWithRelationsDTO.from_orm(result)
+        return result_dto
 
     async def get_by_sap(self, sap_id: int = Path(gt=0), repo: MaterialRepository = Depends(MaterialRepository)):
-        result = await repo.get_filtered(filters={"sap_id": sap_id})
+        result = await repo.get_filtered(filters={"sap_id": sap_id},options=[selectinload(repo.model.workshop)])
         if result is None:
             raise AppExceptionResponse.not_found(message="Материал не найден")
-        return result
+        result_dto = MaterialWithRelationsDTO.from_orm(result)
+        return result_dto
 
     async def create(self, dto: MaterialCDTO, repo: MaterialRepository = Depends(MaterialRepository),workshopRepo:WorkshopRepository = Depends(WorkshopRepository)):
         existed = await repo.get_filtered(filters={"sap_id": dto.sap_id})

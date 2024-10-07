@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
 from sqlalchemy import ForeignKey, Integer, Boolean, Text, String, Computed
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -86,3 +86,7 @@ class ScheduleModel(Base):
     organization: Mapped["OrganizationModel"] = relationship("OrganizationModel", foreign_keys=[organization_id])
     responsible : Mapped["UserModel"] = relationship("UserModel",foreign_keys=[responsible_id])
     canceled_user : Mapped["UserModel"] = relationship("UserModel",foreign_keys=[canceled_by])
+    schedule_histories:Mapped[List["ScheduleHistoryModel"]] = relationship(
+        "ScheduleHistoryModel",
+        foreign_keys="[ScheduleHistoryModel.schedule_id]"
+    )

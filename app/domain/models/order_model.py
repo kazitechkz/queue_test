@@ -1,8 +1,8 @@
 from datetime import datetime
 from typing import Optional, List
 
-from sqlalchemy import Integer, Computed, Numeric, Boolean, Date, ForeignKey, String, DateTime
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import Integer, Computed, Numeric, Boolean, Date, ForeignKey, String, DateTime, and_
+from sqlalchemy.orm import Mapped, mapped_column, relationship, remote, foreign
 
 from app.core.database import Base
 from app.domain.models.factory_model import FactoryModel
@@ -77,9 +77,10 @@ class OrderModel(Base):
 
     created_at: Mapped[CreatedAt]
     updated_at: Mapped[UpdatedAt]
-    must_paid_at: Mapped[datetime] = mapped_column(
+    must_paid_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(),
-        Computed("created_at + INTERVAL 1 DAY")
+        Computed("created_at + INTERVAL 1 DAY"),
+        nullable=True
     )
 
     material: Mapped["MaterialModel"] = relationship(
@@ -100,6 +101,8 @@ class OrderModel(Base):
         "SapRequestModel",
         back_populates="order",
         foreign_keys=[SapRequestModel.order_id],
+        primaryjoin="and_(SapRequestModel.order_id == OrderModel.id, SapRequestModel.is_failed == False)",
+        viewonly=True,
         uselist=False,
         overlaps="sap_request_failed"  # Указываем, что эта связь перекрывается с sap_request_failed
     )
@@ -111,7 +114,8 @@ class OrderModel(Base):
         foreign_keys=[SapRequestModel.order_id],
         uselist=True,
         overlaps="sap_request",  # Указываем, что эта связь перекрывается с sap_request
-        viewonly=True
+        viewonly=True,
+        primaryjoin="and_(SapRequestModel.order_id == OrderModel.id, SapRequestModel.is_failed == True)",
     )
 
     #Акт взвешивания
@@ -134,6 +138,7 @@ class OrderModel(Base):
         back_populates="order",
         foreign_keys="[KaspiPaymentModel.order_id]",
         uselist=False,
+        primaryjoin="and_(KaspiPaymentModel.order_id == OrderModel.id, KaspiPaymentModel.is_paid == True)",
         overlaps="kaspi_payment_failed"  # Указываем, что эта связь перекрывается с sap_request_failed
     )
     kaspi_payment_failed:Mapped[List["KaspiPaymentModel"]] = relationship(
@@ -141,6 +146,7 @@ class OrderModel(Base):
         back_populates="order_failed",
         foreign_keys="[KaspiPaymentModel.order_id]",
         uselist=True,
+        primaryjoin="and_(KaspiPaymentModel.order_id == OrderModel.id, KaspiPaymentModel.is_paid == False)",
         overlaps="kaspi_payment",  # Указываем, что эта связь перекрывается с sap_request
         viewonly=True
     )

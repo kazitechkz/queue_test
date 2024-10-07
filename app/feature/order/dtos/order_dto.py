@@ -7,6 +7,7 @@ from app.feature.factory.dtos.factory_dto import FactoryRDTO
 from app.feature.kaspi_payment.dtos.kaspi_payment_dto import KaspiPaymentRDTO
 from app.feature.material.dtos.material_dto import MaterialRDTO
 from app.feature.organization.dtos.organization_dto import OrganizationRDTO
+from app.feature.sap_request.dto.sap_request_dto import SapRequestRDTO
 from app.feature.workshop.dtos.workshop_dto import WorkshopRDTO
 
 
@@ -71,10 +72,11 @@ class OrderRDTO(BaseModel):
 
 class OrderRDTOWithRelations(OrderRDTO):
     material: MaterialRDTO
-    organization: Optional[OrganizationRDTO]
-    factory: Optional[FactoryRDTO]
-    workshop: Optional[WorkshopRDTO]
-    kaspi: Optional[KaspiPaymentRDTO]
+    organization: Optional[OrganizationRDTO] = None
+    factory: Optional[FactoryRDTO] = None
+    workshop: Optional[WorkshopRDTO] = None
+    kaspi: Optional[KaspiPaymentRDTO] = None
+    sap_request: Optional[SapRequestRDTO] = None
 
     class Config:
         from_attributes = True

@@ -1,8 +1,11 @@
+from typing import List
+
 from fastapi import APIRouter, Depends, Path
+from sqlalchemy import and_
 from sqlalchemy.orm import selectinload
 
 from app.core.app_exception_response import AppExceptionResponse
-from app.core.auth_core import check_individual_client, check_legal_client, get_current_user
+from app.core.auth_core import check_individual_client, check_legal_client, get_current_user, check_client
 from app.domain.models.order_model import OrderModel
 from app.domain.models.schedule_history_model import ScheduleHistoryModel
 from app.domain.models.schedule_model import ScheduleModel
@@ -19,6 +22,7 @@ from app.feature.sap_request.sap_request_service import SapRequestService
 from app.feature.schedule.schedule_repository import ScheduleRepository
 from app.feature.schedule_history.schedule_history_repository import ScheduleHistoryRepository
 from app.feature.workshop.workshop_repository import WorkshopRepository
+from app.shared.database_constants import TableConstantsNames
 from app.shared.relation_dtos.user_organization import UserRDTOWithRelations
 
 
@@ -30,8 +34,7 @@ class OrderController:
     def _add_routes(self):
         self.router.get("/get-all-order")(self.get_all)
         self.router.get("/get-detail-order")(self.get_detail_order)
-        self.router.get("/get-detail-schedule/{order_id}")(self.get_detail_schedule)
-        self.router.get("/get-detail-schedule-history/{schedule_id}")(self.get_detail_schedule_history)
+        self.router.get("/my-paid-orders",response_model=List[OrderRDTOWithRelations])(self.my_paid_orders)
         self.router.post("/create-individual-order")(self.create_individual)
         self.router.post("/create-legal-order")(self.create_legal)
 
@@ -48,9 +51,34 @@ class OrderController:
                 selectinload(OrderModel.factory),
                 selectinload(OrderModel.workshop),
                 selectinload(OrderModel.kaspi),
+                selectinload(OrderModel.sap_request),
             ])
 
         return result
+
+    async def my_paid_orders(
+            self,
+            userDTO:UserRDTOWithRelations = Depends(check_client),
+            repo: OrderRepository = Depends(OrderRepository),
+
+    ):
+        filters = [and_(repo.model.is_active == True, repo.model.is_paid == True)]
+        if userDTO.user_type.value == TableConstantsNames.UserIndividualTypeValue:
+            filters.append(and_(repo.model.owner_id == userDTO.id))
+        elif userDTO.user_type.value == TableConstantsNames.UserLegalTypeValue:
+            owner_ids = [org.id for org in userDTO.organizations]
+            filters.append(and_(repo.model.organization_id.in_(owner_ids)))
+        result = await repo.get_all_with_filter(
+            filters=filters, options=[
+                selectinload(repo.model.material),
+                selectinload(repo.model.organization),
+                selectinload(repo.model.factory),
+                selectinload(repo.model.workshop),
+                selectinload(repo.model.kaspi),
+                selectinload(repo.model.sap_request),
+            ])
+        result_dto = [OrderRDTOWithRelations.from_orm(resultItem) for resultItem in result]
+        return result_dto
 
     async def get_detail_order(
             self,
@@ -63,34 +91,12 @@ class OrderController:
             selectinload(OrderModel.workshop),
             selectinload(OrderModel.kaspi),
             selectinload(OrderModel.organization),
+            selectinload(OrderModel.sap_request),
         ])
         if result is None:
             raise AppExceptionResponse.not_found(message="Заказ не найден")
         return result
 
-    async def get_detail_schedule(self, order_id: int = Path(gt=0),
-                                  repo: ScheduleRepository = Depends(ScheduleRepository)):
-        result = await repo.get(id=order_id, options=[
-            selectinload(ScheduleModel.workshop_schedule)
-                                .selectinload(WorkshopScheduleModel.workshop)
-                                .selectinload(WorkshopModel.factory),
-            selectinload(ScheduleModel.current_operation),
-            selectinload(ScheduleModel.vehicle),
-        ])
-        if result is None:
-            raise AppExceptionResponse.not_found(message="Заказ не найден")
-        return result
-
-    async def get_detail_schedule_history(self, schedule_id: int = Path(gt=0),
-                                          repo: ScheduleHistoryRepository = Depends(ScheduleHistoryRepository)):
-        result = await repo.get(id=schedule_id, options=[
-            selectinload(ScheduleHistoryModel.operation),
-            selectinload(ScheduleHistoryModel.schedule).selectinload(ScheduleModel.vehicle),
-            selectinload(ScheduleHistoryModel.schedule).selectinload(ScheduleModel.order).selectinload(OrderModel.material)
-        ])
-        if result is None:
-            raise AppExceptionResponse.not_found(message="Заказ не найден")
-        return result
 
     async def create_individual(self,
                                 dto: CreateIndividualOrderDTO,

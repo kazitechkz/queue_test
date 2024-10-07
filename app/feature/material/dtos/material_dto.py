@@ -1,4 +1,8 @@
+from typing import Optional
+
 from pydantic import BaseModel, Field
+
+from app.feature.workshop.dtos.workshop_dto import WorkshopRDTO
 
 
 class MaterialDTO(BaseModel):
@@ -32,4 +36,7 @@ class MaterialRDTO(BaseModel):
 
 
 class MaterialWithRelationsDTO(MaterialRDTO):
-    pass
+    workshop:Optional[WorkshopRDTO] = None
+
+    class Config:
+        from_attributes = True

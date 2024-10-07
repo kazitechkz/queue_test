@@ -3,7 +3,7 @@ from typing import Optional, Union
 
 from fastapi import Depends
 from sqlalchemy import and_, or_
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.core.app_exception_response import AppExceptionResponse
 from app.core.base_repository import BaseRepository
@@ -82,16 +82,16 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
                                  if schedule.is_executed and schedule.start_at >= date_filter[0] and schedule.start_at <
                                  date_filter[1]
                                  ]
-
-            schedule_calendars_dto.append(
-                ScheduleCalendarDTO(
-                    scheduled_at = date_filter[0].date(),
-                    total = len(total),
-                    total_active = len(active_schedule),
-                    total_canceled = len(canceled_schedule),
-                    total_executed = len(executed_schedule),
+            if len(total) > 0:
+                schedule_calendars_dto.append(
+                    ScheduleCalendarDTO(
+                        scheduled_at = date_filter[0].date(),
+                        total = len(total),
+                        total_active = len(active_schedule),
+                        total_canceled = len(canceled_schedule),
+                        total_executed = len(executed_schedule),
+                    )
                 )
-            )
 
         return schedule_calendars_dto
 
@@ -141,7 +141,7 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
                                         self.model.responsible_name == None,
                                         self.model.is_active == True ))
 
-        return await self.get_all_with_filter(filters=filters)
+        return await self.get_all_with_filter(filters=filters,options=[selectinload(self.model.current_operation)])
     async def get_canceled_schedules(self, userDTO: UserRDTOWithRelations, operationRepo: OperationRepository):
         operations = await operationRepo.get_all_with_filter(filters=[and_(operationRepo.model.role_value == userDTO.role.value)])
         operation_ids = [operation.id for operation in operations]
@@ -152,7 +152,7 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
             self.model.is_canceled == True,
             self.model.start_at > start_of_day,
             self.model.end_at < end_of_day
-        )])
+        )],options=[selectinload(self.model.current_operation)])
         return schedules
 
     async def calculate_order(self, order: OrderModel, orderRepo: OrderRepository, ):
