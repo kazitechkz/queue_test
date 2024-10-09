@@ -1,3 +1,4 @@
+import datetime
 from typing import List
 
 from fastapi import APIRouter, Depends, Path
@@ -32,6 +33,7 @@ class OrderController:
         self._add_routes()
 
     def _add_routes(self):
+        self.router.get("/check-order-payment")(self.check_order_payment)
         self.router.get("/get-all-order")(self.get_all)
         self.router.get("/get-detail-order")(self.get_detail_order)
         self.router.get("/my-paid-orders",response_model=List[OrderRDTOWithRelations])(self.my_paid_orders)
@@ -143,3 +145,10 @@ class OrderController:
             is_individual=False
         )
         return result
+
+
+    async def check_order_payment(self,repo: OrderRepository = Depends(OrderRepository)):
+        filters = [and_(repo.model.is_active == True, repo.model.txn_id == None, repo.model.must_paid_at < datetime.datetime.now())]
+        updated_values = {"status_id":7,"is_active":False,"is_finished":False,"is_paid":False, "is_failed":True}
+        return await repo.update_with_filters(update_values=updated_values,filters=filters)
+

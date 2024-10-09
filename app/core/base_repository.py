@@ -177,13 +177,7 @@ class BaseRepository(Generic[T]):
             update_values: Dict[str, Any],
             filters: List[Dict[str, Any]] = []
     ):
-        """
-        Filter rows based on the provided filters and update the filtered rows with the given update values.
 
-        :param update_values: A dictionary of column names and values to update.
-        :param filters: A list of dictionaries with column names and values to filter by.
-        :return: The number of rows affected.
-        """
         # Step 1: Filter rows
         query = select(self.model)
         if filters:
@@ -203,7 +197,7 @@ class BaseRepository(Generic[T]):
 
         # Step 2: Update filtered rows
         if filtered_items:
-            # Prepare update statement with the gathered filters
+            # Prepare update statement with the gathered filter
             stmt = update(self.model).values(**update_values).where(and_(*conditions))
 
             # Execute the update statement
@@ -215,6 +209,12 @@ class BaseRepository(Generic[T]):
         return 0
 
 
+    async def update_with_filters(self,update_values: Dict[str, Any],
+            filters: List = []):
+        stmt = update(self.model).values(**update_values).where(*filters)
+        result = await self.db.execute(stmt)
+        await self.db.commit()  # Commit the transaction
+        return result.rowcount  # Return the number of rows affected
 
     async def delete(self, id: int) -> None:
         result = await self.get(id)

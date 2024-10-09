@@ -3,6 +3,11 @@ from typing import Optional
 
 from pydantic import BaseModel, Field, model_validator
 
+from app.feature.order.dtos.order_dto import OrderRDTO
+from app.feature.schedule_history.dtos.schedule_history_dto import ScheduleHistoryRDTO
+from app.feature.user.dtos.user_dto import UserRDTO
+from app.feature.vehicle.dtos.vehicle_dto import VehicleRDTO
+
 
 class ActWeightDTO(BaseModel):
     id: int = Field(..., description="ID акта взвешивания")
@@ -69,3 +74,14 @@ class ActWeightCDTO(BaseModel):
         if vehicle_brutto_kg < vehicle_tara_kg:
             raise ValueError('Вес брутто не может быть меньше веса тары')
         return self
+
+
+class ActWeightRelationsDTO(ActWeightRDTO):
+    history:Optional[ScheduleHistoryRDTO] = None
+    order:Optional[OrderRDTO] = None
+    responsible:Optional[UserRDTO] = None
+    vehicle:Optional[VehicleRDTO] = None
+    trailer:Optional[VehicleRDTO] = None
+
+    class Config:
+        from_attributes = True

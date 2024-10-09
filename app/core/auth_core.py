@@ -184,3 +184,13 @@ def check_employee(current_user: UserRDTOWithRelations = Depends(get_current_use
         )
 
     return current_user
+
+def check_admin_and_client(current_user: UserRDTOWithRelations = Depends(get_current_user)):
+    if current_user.role.value not in [TableConstantsNames.RoleAdminValue,
+                                       TableConstantsNames.RoleClientValue]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Отказано в доступе",
+        )
+
+    return current_user
