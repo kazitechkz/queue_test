@@ -58,3 +58,15 @@ class ActWeightModel(Base):
         back_populates="act_weights",
         foreign_keys=[responsible_id]
     )
+
+    vehicle: Mapped["VehicleModel"] = relationship(
+        "VehicleModel",
+        back_populates="act_weights_vehicle",
+        foreign_keys=[vehicle_id]
+    )
+
+    trailer: Mapped["VehicleModel"] = relationship(
+        "VehicleModel",
+        back_populates="act_weights_trailer",
+        foreign_keys=[trailer_id]
+    )

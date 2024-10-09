@@ -42,11 +42,10 @@ class ScheduleHistoryController:
             scheduleRepo: ScheduleRepository = Depends(ScheduleRepository),
             initialWeightRepo: InitialWeightRepository = Depends(InitialWeightRepository),
             actWeightRepo: ActWeightRepository = Depends(ActWeightRepository),
-            vehicleRepo: VehicleRepository = Depends(VehicleRepository),
             orderRepo: OrderRepository = Depends(OrderRepository),
             operationRepo: OperationRepository = Depends(OperationRepository),
     ):
         return await repo.accept_or_cancel(schedule_id=schedule_id, dto=dto, userRDTO=userRDTO,
                                            scheduleRepo=scheduleRepo, initialWeightRepo=initialWeightRepo,
-                                           actWeightRepo=actWeightRepo, vehicleRepo=vehicleRepo, orderRepo=orderRepo,
+                                           actWeightRepo=actWeightRepo, orderRepo=orderRepo,
                                            operationRepo=operationRepo)

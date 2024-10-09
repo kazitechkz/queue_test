@@ -5,7 +5,8 @@ from fastapi import APIRouter, Depends, Query, Path
 from sqlalchemy import and_
 from sqlalchemy.orm import selectinload
 
-from app.core.auth_core import check_individual_client, check_legal_client, check_employee, check_client, check_admin
+from app.core.auth_core import check_individual_client, check_legal_client, check_employee, check_client, check_admin, \
+    check_admin_and_client
 from app.domain.models.schedule_history_model import ScheduleHistoryModel
 from app.feature.operation.operation_repository import OperationRepository
 from app.feature.order.order_repository import OrderRepository
@@ -44,6 +45,7 @@ class ScheduleController:
         self.router.post("/cancel-all-schedules")(self.cancel_all_schedules)
         self.router.put("/reschedule-to-date/{schedule_id}")(self.reschedule_to_date)
         self.router.put("/cancel-one/{schedule_id}")(self.cancel_one)
+        self.router.get("/check-late-schedules")(self.check_late_schedules)
 
     async def create_individual(self,
                                 dto: ScheduleIndividualCDTO,
@@ -91,20 +93,27 @@ class ScheduleController:
                                          workshopScheduleRepo=workshopScheduleRepo)
         return result
 
+    async def check_late_schedules(self,repo: ScheduleRepository = Depends(ScheduleRepository),orderRepo:OrderRepository = Depends(OrderRepository)):
+        return await repo.check_late_schedules(orderRepo=orderRepo)
+
     async def get(self,
                   id: int = Path(gt=0, description="Уникальный идентфикатор"),
                   repo: ScheduleRepository = Depends(ScheduleRepository),
                   userDTO: UserRDTOWithRelations = Depends(check_client)
                   ):
-        schedule = await repo.get(id=id,options=[
+        schedule = await repo.get(id=id, options=[
             selectinload(repo.model.order),
             selectinload(repo.model.driver),
             selectinload(repo.model.vehicle),
             selectinload(repo.model.trailer),
-            selectinload(repo.model.schedule_histories)
-                                  .selectinload(ScheduleHistoryModel.operation)
-                                  .selectinload(ScheduleHistoryModel.act_weights)
-                                  .selectinload(ScheduleHistoryModel.initial_weights),
+            # Подгружаем schedule_histories и вложенные связи через полный путь
+            selectinload(repo.model.schedule_histories)  # Загружаем schedule_histories
+                                  .selectinload(ScheduleHistoryModel.operation),
+            # Загружаем operation для schedule_histories
+            selectinload(repo.model.schedule_histories)  # Подгружаем снова schedule_histories для act_weights
+                                  .selectinload(ScheduleHistoryModel.act_weights),
+            selectinload(repo.model.schedule_histories)  # Подгружаем снова schedule_histories для initial_weights
+                                  .selectinload(ScheduleHistoryModel.initial_weights)
         ])
         return schedule
 
@@ -200,7 +209,7 @@ class ScheduleController:
 
     async def cancel_one(self,
                          dto: ScheduleCancelOneDTO,
-                         userDTO: UserRDTOWithRelations = Depends(check_admin),
+                         userDTO: UserRDTOWithRelations = Depends(check_admin_and_client),
                          schedule_id: int = Path(description="Идентификатор заказа"),
                          repo: ScheduleRepository = Depends(ScheduleRepository),
                          orderRepo: OrderRepository = Depends(OrderRepository)
@@ -208,3 +217,6 @@ class ScheduleController:
         return await repo.cancel_one_schedule(
             schedule_id=schedule_id, dto=dto, orderRepo=orderRepo, userDTO=userDTO
         )
+
+
+

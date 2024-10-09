@@ -37,6 +37,26 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
         super().__init__(ScheduleModel, db)
 
 
+    async def check_late_schedules (self,orderRepo:OrderRepository):
+        current_time = datetime.now()
+        filters = [
+            (or_(
+                and_(self.model.end_at < current_time, self.model.rescheduled_end_at == None, self.model.is_active == True,self.model.is_used == False),
+                and_(self.model.rescheduled_end_at < current_time, self.model.rescheduled_end_at != None, self.model.is_active == True,self.model.is_used == False),
+            ))
+        ]
+        updated = 0
+        schedules = await self.get_all_with_filter(filters=filters)
+        schedule_ids = [schedule.id for schedule in schedules]
+        order_ids = [schedule.order_id for schedule in schedules]
+        if len(schedule_ids) > 0:
+            updated_value = {"canceled_at":current_time, "cancel_reason":"Опоздали","is_active":False, "is_used":False,"is_executed":False,"is_canceled":True}
+            updated = await self.update_with_filters(update_values=updated_value,filters=[and_(self.model.id.in_(schedule_ids))])
+            orders = await orderRepo.get_all_with_filter(filters=[and_(orderRepo.model.id.in_(order_ids))])
+            for order in orders:
+                await self.calculate_order(order=order, orderRepo=orderRepo)
+        return updated
+
     async def my_schedules_count(self,
                                  userDTO: UserRDTOWithRelations,
                                  filter:ScheduleClientFromToFilter,
@@ -189,8 +209,14 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
             active_schedules = await self.get_schedule(workshop_sap_id=order.workshop_sap_id,schedule_date=dto.scheduled_data,workshopScheduleRepo=workshopScheduleRepo)
         if dto.trailer_id is not None:
             trailer = await vehicleRepo.get(id=dto.trailer_id)
+        #Статическая проверка
         self.check_individual_form(dto=dto, order=order, vehicle=vehicle, trailer=trailer, userDTO=userDTO,
                                    workshopSchedule=workshopSchedule,openWorkshopSchedules=active_schedules)
+        # Проверка доступных машин
+        await self.check_available_vehicle_or_driver(scheduled_data=dto.scheduled_data, start_at=dto.start_at,
+                                                     end_at=dto.end_at, vehicle_id=dto.vehicle_id,
+                                                     trailer_id=dto.trailer_id)
+
         scheduleDTO = self.prepare_dto_individual(dto=dto, order=order, userDTO=userDTO,
                                                   vehicle=vehicle, trailer=trailer)
         schedule = await self.create(obj=ScheduleModel(**scheduleDTO.dict()))
@@ -229,6 +255,7 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
                 driver = await userRepo.get(id=dto.driver_id)
         if dto.trailer_id is not None:
             trailer = await vehicleRepo.get(id=dto.trailer_id)
+            #Статическая проверка
         self.check_legal_form(dto=dto,
                               order=order,
                               vehicle=vehicle,
@@ -239,6 +266,8 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
                               workshopSchedule=workshopSchedule,
                               openWorkshopSchedules=active_schedules
                               )
+        #Проверка доступных машин
+        await self.check_available_vehicle_or_driver(scheduled_data=dto.scheduled_data,start_at=dto.start_at, end_at=dto.end_at,vehicle_id=dto.vehicle_id,trailer_id=dto.trailer_id)
         scheduleDTO = self.prepare_dto_legal(dto=dto, order=order, userDTO=userDTO, vehicle=vehicle, trailer=trailer,
                                              organization=organization, driver=driver)
         schedule = await self.create(obj=ScheduleModel(**scheduleDTO.dict()))
@@ -361,11 +390,21 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
         return updated_schedule
 
     async def cancel_one_schedule(self, schedule_id:int, dto: ScheduleCancelOneDTO,orderRepo:OrderRepository, userDTO:UserRDTOWithRelations,):
-        schedule = await self.get_first_with_filter(and_(
+        filters = []
+        if(userDTO.role.value == TableConstantsNames.RoleAdminValue):
+            filters.append(and_(
             self.model.id == schedule_id,
             self.model.is_active == True,
             self.model.is_used == False
         ))
+        else:
+            filters.append(and_(
+                self.model.id == schedule_id,
+                self.model.is_active == True,
+                self.model.is_used == False,
+                self.model.owner_id == userDTO.id
+            ))
+        schedule = await self.get_first_with_filter(filters=filters)
         if schedule is None:
             raise AppExceptionResponse.bad_request("Расписание не найдено либо неактивно")
         current_datetime = datetime.now()
@@ -595,3 +634,17 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
         if quan_kg > vehicle_load:
             raise AppExceptionResponse.bad_request(
                 "Вы не можете забронировать материал объем которого превышают максимальную грузоподъемность транспорта")
+
+    async def check_available_vehicle_or_driver(self,scheduled_data: date,start_at: time,end_at:time,vehicle_id:int,trailer_id:Optional[int]):
+        start_at = datetime.combine(scheduled_data,start_at)
+        end_at = datetime.combine(scheduled_data,end_at)
+        filters = [and_(self.model.vehicle_id == vehicle_id,self.model.start_at == start_at, self.model.end_at == end_at)]
+        if trailer_id is not None:
+            filters.append(and_(or_(self.model.vehicle_id == vehicle_id, self.model.trailer_id == trailer_id)))
+        else:
+            filters.append(and_(self.model.vehicle_id == vehicle_id))
+        result = await self.get_with_filter(filters=filters)
+        if result is not None:
+            raise AppExceptionResponse.bad_request("Данный транспорт или трейлер уже занят на текущее время")
+
+

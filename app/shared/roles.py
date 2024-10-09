@@ -109,6 +109,7 @@ def assign_roles(app):
     assign_roles_to_route(app, "/order-status/get/{id}", ["admin", "client", "employee"])
     assign_roles_to_route(app, "/order-status/get-by-value/{value}", ["admin", "client", "employee"])
 
+    assign_roles_to_route(app, "/order/check-order-payment", ["admin"])
     assign_roles_to_route(app, "/order/get-all-order", ["admin", "client"])
     assign_roles_to_route(app, "/order/get-detail-order", ["admin", "client"])
     assign_roles_to_route(app, "/order/my-paid-orders", ["client"])
@@ -148,9 +149,16 @@ def assign_roles(app):
     assign_roles_to_route(app, "/schedule/cancel-one/{schedule_id}", ["admin"])
     assign_roles_to_route(app, "/schedule/get/{id}", ["admin", "client", "employee"])
     assign_roles_to_route(app, "/schedule/my-responsible-schedules", ["employee"])
+    assign_roles_to_route(app, "/schedule/check-late-schedules", ["admin"])
 
     assign_roles_to_route(app, "/schedule-history/take-request/{schedule_id}", ["employee"])
     assign_roles_to_route(app, "/schedule-history/make-decision/{schedule_id}", ["employee"])
+
+    assign_roles_to_route(app, "/act-weight/all", ["admin","employee"])
+    assign_roles_to_route(app, "/act-weight/get/{id}", ["admin","employee","client"])
+
+    assign_roles_to_route(app, "/initial-weight/all", ["admin", "employee"])
+    assign_roles_to_route(app, "/initial-weight/get/{id}", ["admin", "employee", "client"])
 
     assign_roles_to_route(app, "/get-qr/get-qr-link/{order_id}", ["admin", "client"])
 
