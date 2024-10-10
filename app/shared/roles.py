@@ -12,14 +12,12 @@ def assign_roles(app):
     assign_roles_to_route(app, "/role/", ["admin"])
     assign_roles_to_route(app, "/role/create", ["admin"])
     assign_roles_to_route(app, "/role/get_by_id/{id}", ["admin"])
-    assign_roles_to_route(app, "/role/get_first", ["admin"])
     assign_roles_to_route(app, "/role/update/{id}", ["admin"])
     assign_roles_to_route(app, "/role/delete/{id}", ["admin"])
 
     assign_roles_to_route(app, "/user-type/", ["admin", "client"])
     assign_roles_to_route(app, "/user-type/create", ["admin"])
     assign_roles_to_route(app, "/user-type/get_by_id/{id}", ["admin"])
-    assign_roles_to_route(app, "/user-type/get_first", ["admin"])
     assign_roles_to_route(app, "/user-type/update/{id}", ["admin"])
     assign_roles_to_route(app, "/user-type/delete/{id}", ["admin"])
 
@@ -52,6 +50,11 @@ def assign_roles(app):
     assign_roles_to_route(app, "/organization-employee/create", ["admin"])
     assign_roles_to_route(app, "/organization-employee/update/{id}", ["admin"])
     assign_roles_to_route(app, "/organization-employee/delete/{id}", ["admin"])
+
+    assign_roles_to_route(app,"/employee-request/search-employee",["client"])
+    assign_roles_to_route(app,"/employee-request/create-request",["client"])
+    assign_roles_to_route(app,"/employee-request/my-requests",["client"])
+    assign_roles_to_route(app,"/employee-request/make-decision/{id}",["client"])
 
     assign_roles_to_route(app, "/vehicle-color/", ["admin", "client"])
     assign_roles_to_route(app, "/vehicle-color/create", ["admin"])

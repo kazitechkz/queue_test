@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Path
 from sqlalchemy.orm import selectinload
 
 from app.core.app_exception_response import AppExceptionResponse
-from app.core.auth_core import get_password_hash
+from app.core.auth_core import get_password_hash, check_admin
 from app.core.validation_rules import TWELVE_DIGITS_REGEX, EMAIL_REGEX, PHONE_REGEX
 from app.domain.models.user_model import UserModel
 from app.feature.role.role_repository import RoleRepository
@@ -55,16 +55,18 @@ class UserController:
             raise AppExceptionResponse.not_found(message="Пользователь не найден")
         return result
 
-    async def all(self, params: UserFilter = Depends(), repo: UserRepository = Depends(UserRepository)):
+    async def all(self, params: UserFilter = Depends(), repo: UserRepository = Depends(UserRepository),current_user=Depends(check_admin)):
         result = await repo.paginate_with_filter(dto=UserRDTOWithRelations, page=params.page, per_page=params.per_page,
                                                  filters=params.apply(), options=[selectinload(UserModel.role),
-                                                                                  selectinload(UserModel.user_type)])
+                                                                                  selectinload(UserModel.user_type),
+                                                                                  selectinload(UserModel.organizations),
+                                                                                  ])
         return result
 
     async def get_by_iin(self, iin: str = Path(regex=TWELVE_DIGITS_REGEX, title='ИИН'),
                          repo: UserRepository = Depends(UserRepository)):
         user_iin = await repo.get_filtered({"iin": iin},
-                                           options=[selectinload(UserModel.role), selectinload(UserModel.user_type)])
+                                           options=[selectinload(UserModel.role), selectinload(UserModel.user_type),selectinload(UserModel.organizations),])
         if user_iin is None:
             raise AppExceptionResponse.not_found(message="Пользователь не найден")
         return user_iin
@@ -72,7 +74,7 @@ class UserController:
     async def get_by_email(self, email: str = Path(regex=EMAIL_REGEX, title='Почта'),
                            repo: UserRepository = Depends(UserRepository)):
         user_email = await repo.get_filtered({"email": email},
-                                             options=[selectinload(UserModel.role), selectinload(UserModel.user_type)])
+                                             options=[selectinload(UserModel.role), selectinload(UserModel.user_type),selectinload(UserModel.organizations),])
         if user_email is None:
             raise AppExceptionResponse.not_found(message="Пользователь не найден")
         return user_email
@@ -80,7 +82,7 @@ class UserController:
     async def get_by_phone(self, phone: str = Path(regex=PHONE_REGEX, title='Телефон', example="+7(XXX) XXX-XX-XX"),
                            repo: UserRepository = Depends(UserRepository)):
         user_phone = await repo.get_filtered({"phone": phone},
-                                             options=[selectinload(UserModel.role), selectinload(UserModel.user_type)])
+                                             options=[selectinload(UserModel.role), selectinload(UserModel.user_type),selectinload(UserModel.organizations),])
         if user_phone is None:
             raise AppExceptionResponse.not_found(message="Пользователь не найден")
         return user_phone

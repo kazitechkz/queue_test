@@ -33,6 +33,7 @@ class AppTableNames:
     ScheduleHistoryTableName = "schedule_histories"
     InitialWeightTableName = "initial_weights"
     ActWeightTableName = "act_weights"
+    EmployeeRequestTableName = "employee_requests"
 
 
 class TableConstantsNames:
@@ -52,7 +53,9 @@ class TableConstantsNames:
 
     # User Types
     UserLegalTypeValue = "legal_entity"
+    UserLegalTypeId = 2
     UserIndividualTypeValue = "individual"
+    UserIndividualTypeId = 1
 
     # Organization Type
     OrganizationLLCTypeValue = "llc"

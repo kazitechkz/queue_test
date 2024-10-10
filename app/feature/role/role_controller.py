@@ -18,7 +18,6 @@ class RoleController:
         self.router.get("/", response_model=List[RoleRDTO])(self.get_all)
         self.router.post("/create", response_model=RoleRDTO)(self.create)
         self.router.get("/get_by_id/{id}", response_model=RoleRDTO)(self.get_by_id)
-        self.router.get("/get_first", response_model=RoleRDTO)(self.get_by_filter)
         self.router.put("/update/{id}", response_model=RoleRDTO)(self.update)
         self.router.delete("/delete/{id}")(self.delete)
 
@@ -26,17 +25,15 @@ class RoleController:
         result = await repo.get_all()
         return result
 
-    async def get_by_id(self, id: int = Path(gt=0), repo: RoleRepository = Depends(RoleRepository)):
+    async def get_by_id(self, id: int = Path(gt=0), repo: RoleRepository = Depends(RoleRepository),current_user=Depends(check_admin)):
         result = await repo.get(id=id)
         if result is None:
             raise AppExceptionResponse.not_found(message="Роль не найдена")
         return result
 
-    async def get_by_filter(self, search: Optional[str] = Query(title="Поиск по имени или значению"),
-                            repo: RoleRepository = Depends(RoleRepository)):
-        return await repo.get_by_filter(search=search)
 
-    async def create(self, role_dto: RoleCDTO, repo: RoleRepository = Depends(RoleRepository)):
+
+    async def create(self, role_dto: RoleCDTO, repo: RoleRepository = Depends(RoleRepository),current_user=Depends(check_admin)):
         existed_role = await repo.get_by_unique_value(value=role_dto.value)
         if (existed_role is not None):
             raise AppExceptionResponse.bad_request(message="Такое значение для роли уже существует")
@@ -44,7 +41,7 @@ class RoleController:
         result = await repo.create(obj=role)
         return result
 
-    async def update(self, role_dto: RoleCDTO, id: int = Path(gt=0), repo: RoleRepository = Depends(RoleRepository)):
+    async def update(self, role_dto: RoleCDTO, id: int = Path(gt=0), repo: RoleRepository = Depends(RoleRepository),current_user=Depends(check_admin)):
         role = await repo.get(id=id)
         if role is None:
             raise AppExceptionResponse.not_found(message="Роль не найдена")
