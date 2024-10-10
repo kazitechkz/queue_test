@@ -24,6 +24,7 @@ from app.feature.workshop.workshop_controller import WorkshopController
 from app.feature.workshop_schedule.workshop_schedule_controller import WorkshopScheduleController
 from app.feature.act_weight.act_weight_controller import ActWeightController
 from app.feature.initial_weight.initial_weight_controller import InitialWeightController
+from app.feature.employee_request.employee_request_controller import EmployeeRequestController
 
 
 def include_routers(app):
@@ -52,5 +53,6 @@ def include_routers(app):
     app.include_router(ScheduleHistoryController().router, prefix="/schedule-history", tags=["schedule-history"])
     app.include_router(ActWeightController().router, prefix="/act-weight", tags=["act-weight"])
     app.include_router(InitialWeightController().router, prefix="/initial-weight", tags=["initial-weight"])
+    app.include_router(EmployeeRequestController().router, prefix="/employee-request", tags=["employee-request"])
     app.include_router(QrController().router, prefix="/get-qr", tags=["get QR"])
     app.include_router(TestController().router, prefix="/test", tags=["test"])
