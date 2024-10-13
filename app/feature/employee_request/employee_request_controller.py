@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import APIRouter, Query, Depends, Path
 from pydantic import EmailStr
 from sqlalchemy import and_
@@ -13,6 +15,7 @@ from app.feature.employee_request.employee_request_repository import EmployeeReq
 from app.feature.employee_request.filter.employee_request_filter import EmployeeRequestFilter
 from app.feature.organization.organization_repository import OrganizationRepository
 from app.feature.organization_employee.organization_employee_repository import OrganizationEmployeeRepository
+from app.feature.user.dtos.user_dto import UserRDTO
 from app.feature.user.user_repository import UserRepository
 from app.shared.database_constants import TableConstantsNames
 from app.shared.relation_dtos.user_organization import UserRDTOWithRelations
@@ -25,7 +28,7 @@ class EmployeeRequestController:
 
     def _add_routes(self):
         #Organization
-        self.router.get("/search-employee")(self.search_employee)
+        self.router.get("/search-employee",response_model=Optional[UserRDTO])(self.search_employee)
         self.router.post("/create-request")(self.create_request)
         #Both
         self.router.get("/my-requests")(self.my_requests)
@@ -45,7 +48,7 @@ class EmployeeRequestController:
         finded_user = await userRepo.get_with_filter(filters=[and_(
             userRepo.model.email == email,
             userRepo.model.type_id == TableConstantsNames.UserIndividualTypeId,
-            userRepo.model.id.in_(employee_ids)
+            userRepo.model.id.notin_(employee_ids)
         )])
         return finded_user
 
@@ -55,11 +58,12 @@ class EmployeeRequestController:
                                        params:EmployeeRequestFilter = Depends(),
                                        repo:EmployeeRequestRepository = Depends(EmployeeRequestRepository)
                                        ):
+        filters = params.apply(userDTO=userDTO)
         return await repo.paginate_with_filter(
             dto=EmployeeRequestWithRelationDTO,
             page = params.page,
             per_page=params.per_page,
-            filters = params.apply(userDTO),
+            filters = filters,
             options=[
                 selectinload(repo.model.employee),
                 selectinload(repo.model.owner),

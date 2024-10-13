@@ -86,7 +86,7 @@ class SapRequestRepository(BaseRepository[SapRequestModel]):
     ):
         if order is None:
             return AppExceptionResponse.bad_request(message="Заказ не найден")
-        if order.sap_id is not None:
+        if order.sap_id is not None or order.zakaz:
             return AppExceptionResponse.bad_request(message="Счет на предоплату уже создан")
         if userRDTO.user_type.value == TableConstantsNames.UserLegalTypeValue:
             if order.organization is not None:
