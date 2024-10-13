@@ -3,6 +3,7 @@ from typing import Optional
 from fastapi import Query
 from sqlalchemy import or_, and_
 
+from app.core.app_exception_response import AppExceptionResponse
 from app.core.base_filter import BaseFilter
 from app.domain.models.employee_request import EmployeeRequestModel
 from app.shared.database_constants import TableConstantsNames
@@ -27,7 +28,7 @@ class EmployeeRequestFilter(BaseFilter):
 
     def apply(self, userDTO: UserRDTOWithRelations) -> list:
         filters = []
-        if self.search:
+        if self.search is not None:
             filters.append(and_(
                     or_(
                         self.model.organization_full_name.like(f"%{self.search}%"),
@@ -44,7 +45,7 @@ class EmployeeRequestFilter(BaseFilter):
                     self.model.status == self.status
                 )
             )
-        if userDTO.user_type == TableConstantsNames.UserLegalTypeValue:
+        if userDTO.user_type.value == TableConstantsNames.UserLegalTypeValue:
             organization_ids = [organization.id for organization in userDTO.organizations]
             filters.append(and_(self.model.organization_id.in_(organization_ids)))
         else:
