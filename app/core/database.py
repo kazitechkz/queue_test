@@ -10,7 +10,8 @@ engine_async = create_async_engine(
     pool_size=100,  # Количество соединений в пуле
     max_overflow=50,  # Максимальное количество дополнительных соединений
     pool_timeout=300,  # Таймаут ожидания свободного соединения
-    pool_recycle=25000
+    pool_recycle=25000,
+    connect_args={"init_command": "SET time_zone = '+05:00'"}
 )
 
 AsyncSessionLocal = sessionmaker(
