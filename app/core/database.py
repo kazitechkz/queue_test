@@ -7,6 +7,10 @@ from app.core.seed_database import seed_database
 engine_async = create_async_engine(
     app_settings.DB_URL_ASYNC,
     echo=False,
+    pool_size=100,  # Количество соединений в пуле
+    max_overflow=50,  # Максимальное количество дополнительных соединений
+    pool_timeout=300,  # Таймаут ожидания свободного соединения
+    pool_recycle=25000
 )
 
 AsyncSessionLocal = sessionmaker(
