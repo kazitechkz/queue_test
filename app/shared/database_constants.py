@@ -66,6 +66,7 @@ class TableConstantsNames:
     OrderStatusRejectSap = "reject_from_sup"
     OrderStatusWaitPayment = "waiting_for_payment"
     OrderStatusRejectPayment = "reject_from_payment"
+    OrderStatusWaitingForExecution = "waiting_for_execution"
     OrderStatusExecuted = "executed"
     OrderStatusFinished = "finished"
     OrderStatusCanceled = "canceled"
