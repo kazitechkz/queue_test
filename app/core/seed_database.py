@@ -28,13 +28,12 @@ async def add_roles(session: Session):
     if total_items == 0:
         data = [
             RoleModel(title="Администратор", value=TableConstantsNames.RoleAdminValue),
-            RoleModel(title="Служба Безопасности КПП", value=TableConstantsNames.RoleSecurityValue),
-            RoleModel(title="Служба Безопасности Погрузки", value=TableConstantsNames.RoleSecurityLoaderValue),
+            RoleModel(title="Служба Безопасности", value=TableConstantsNames.RoleSecurityValue),
+            RoleModel(title="Контроллер погрузки", value=TableConstantsNames.RoleSecurityLoaderValue),
             RoleModel(title="Погрузчик", value=TableConstantsNames.RoleLoaderValue),
             RoleModel(title="Весовщик", value=TableConstantsNames.RoleWeigherValue),
             RoleModel(title="Клиент", value=TableConstantsNames.RoleClientValue),
         ]
-
         session.add_all(data)
         await session.commit()
 
@@ -75,48 +74,55 @@ async def add_order_status(session: Session):
         data = [
             OrderStatusModel(
                 id=1,
-                title="Ожидание создания счета предоплаты в SAP",
+                title="Ожидание создания счета оплаты в SAP",
                 value=TableConstantsNames.OrderStatusWaitSap,
                 is_first=True,
                 is_last=False,
             ),
             OrderStatusModel(
                 id=2,
-                title="Отказ в системе в SAP",
+                title="Ошибка при создании счета на оплату в системе в SAP",
                 value=TableConstantsNames.OrderStatusRejectSap,
                 is_first=False,
                 is_last=False,
             ),
             OrderStatusModel(
                 id=3,
-                title="Ожидание оплаты в Kaspi",
+                title="Ожидание оплаты",
                 value=TableConstantsNames.OrderStatusWaitPayment,
                 is_first=False,
                 is_last=False,
             ),
             OrderStatusModel(
                 id=4,
-                title="Отказ в системе в Kaspi",
+                title="Отказ в системе эквайринга",
                 value=TableConstantsNames.OrderStatusRejectPayment,
                 is_first=False,
                 is_last=False,
             ),
             OrderStatusModel(
                 id=5,
+                title="Ожидает бронирования",
+                value=TableConstantsNames.OrderStatusWaitingForExecution,
+                is_first=False,
+                is_last=False,
+            ),
+            OrderStatusModel(
+                id=6,
                 title="Выполняется",
                 value=TableConstantsNames.OrderStatusExecuted,
                 is_first=False,
                 is_last=False,
             ),
             OrderStatusModel(
-                id=6,
+                id=7,
                 title="Завершен",
                 value=TableConstantsNames.OrderStatusFinished,
                 is_first=False,
                 is_last=True,
             ),
             OrderStatusModel(
-                id=7,
+                id=8,
                 title="Отклонен",
                 value=TableConstantsNames.OrderStatusCanceled,
                 is_first=False,
@@ -142,11 +148,14 @@ async def add_order_status(session: Session):
                 if item.value == TableConstantsNames.OrderStatusRejectPayment:
                     order_status.prev_id = 3
                     order_status.next_id = None
-                if item.value == TableConstantsNames.OrderStatusExecuted:
+                if item.value == TableConstantsNames.OrderStatusWaitingForExecution:
                     order_status.prev_id = 3
                     order_status.next_id = 6
-                if item.value == TableConstantsNames.OrderStatusFinished:
+                if item.value == TableConstantsNames.OrderStatusExecuted:
                     order_status.prev_id = 5
+                    order_status.next_id = 7
+                if item.value == TableConstantsNames.OrderStatusFinished:
+                    order_status.prev_id = 6
                     order_status.next_id = None
                 await session.commit()
 
@@ -588,7 +597,7 @@ async def add_users(session: Session):
                 id=5,
                 role_id=2,
                 type_id=1,
-                name="Охраник Охранников",
+                name="Служба безопасности завода",
                 iin="222222222222",
                 email="security@gmail.com",
                 phone="+77062222222",

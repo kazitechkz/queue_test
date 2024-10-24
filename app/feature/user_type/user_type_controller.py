@@ -26,10 +26,13 @@ class UserTypeController:
         return result
 
     async def get_by_id(self, id: int = Path(gt=0), repo: UserTypeRepository = Depends(UserTypeRepository)):
-        result = await repo.get(id=id)
-        if result is None:
-            raise AppExceptionResponse.not_found(message="Тип пользователя не найден")
-        return result
+        try:
+            result = await repo.get(id=id)
+            if result is None:
+                raise AppExceptionResponse.not_found(message="Тип пользователя не найден")
+            return result
+        except Exception as e:
+            raise AppExceptionResponse.internal_error(message=str(e))
 
 
     async def create(self, UserType_dto: UserTypeCDTO, repo: UserTypeRepository = Depends(UserTypeRepository),current_user=Depends(check_admin)):

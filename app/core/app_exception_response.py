@@ -1,5 +1,7 @@
 from fastapi import HTTPException, status
 
+from app.core.app_settings import AppSettings
+
 
 class AppExceptionResponse:
 
@@ -40,6 +42,10 @@ class AppExceptionResponse:
 
     @staticmethod
     def internal_error(message: str = "Internal server error"):
+        if AppSettings.APP_STATUS == "DEVELOPMENT":
+            message = message
+        else:
+            message = "Internal server error"
         return HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=message

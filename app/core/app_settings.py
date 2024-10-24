@@ -14,6 +14,7 @@ class AppSettings(BaseSettings):
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
     REFRESH_TOKEN_EXPIRE_DAYS: int
+    APP_STATUS: str
 
     @property
     def DB_URL_ASYNC(self):
