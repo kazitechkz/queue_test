@@ -24,6 +24,7 @@ class RoleUDTO(RoleDTO):
 class RoleRDTO(RoleDTO):
     title: str
     value: str
+    can_auth: bool
 
     class Config:
         from_attributes = True

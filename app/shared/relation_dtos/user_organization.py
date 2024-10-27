@@ -16,9 +16,9 @@ class OrganizationRDTOWithRelations(OrganizationRDTO):
 
 
 class UserRDTOWithRelations(UserRDTO):
-    role: Optional[RoleRDTO]
-    user_type: Optional[UserTypeRDTO]
-    organizations: Optional[list[OrganizationRDTO]]
+    role: Optional[RoleRDTO] = None
+    user_type: Optional[UserTypeRDTO] = None
+    organizations: Optional[list[OrganizationRDTO]] = []
 
     class Config:
         from_attributes = True

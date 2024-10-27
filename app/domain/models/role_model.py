@@ -10,6 +10,7 @@ class RoleModel(Base):
     id: Mapped[ID]
     title: Mapped[str] = mapped_column(String(length=200))
     value: Mapped[str] = mapped_column(String(length=255), unique=True)
+    can_auth: Mapped[bool] = mapped_column(default=True)
     created_at: Mapped[CreatedAt]
     updated_at: Mapped[UpdatedAt]
 

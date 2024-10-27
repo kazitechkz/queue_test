@@ -13,7 +13,7 @@ class FactoryCDTO(BaseModel):
         from_attributes = True
 
 
-class FactoryRDTO(BaseModel):
+class FactoryRDTO(FactoryDTO):
     title: str
     sap_id: str
     status: bool

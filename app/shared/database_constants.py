@@ -34,6 +34,7 @@ class AppTableNames:
     InitialWeightTableName = "initial_weights"
     ActWeightTableName = "act_weights"
     EmployeeRequestTableName = "employee_requests"
+    AccessTokenTableName = "access_token"
 
 
 class TableConstantsNames:

@@ -54,6 +54,7 @@ async def init_db():
     from app.domain.models.schedule_history_model import ScheduleHistoryModel
     from app.domain.models.initial_weight_model import InitialWeightModel
     from app.domain.models.act_weight_model import ActWeightModel
+    from app.domain.models.access_token_model import AccessTokenModel
 
     async with engine_async.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
