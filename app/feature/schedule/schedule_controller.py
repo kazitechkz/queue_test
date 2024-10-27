@@ -1,19 +1,19 @@
 from datetime import date, time
-from typing import Optional
+from typing import Optional, List
 
 from fastapi import APIRouter, Depends, Query, Path
 from sqlalchemy import and_
 from sqlalchemy.orm import selectinload
 
 from app.core.auth_core import check_individual_client, check_legal_client, check_employee, check_client, check_admin, \
-    check_admin_and_client
+    check_admin_and_client, get_current_user
 from app.domain.models.schedule_history_model import ScheduleHistoryModel
 from app.feature.operation.operation_repository import OperationRepository
 from app.feature.order.order_repository import OrderRepository
 from app.feature.organization.organization_repository import OrganizationRepository
 from app.feature.organization_employee.organization_employee_repository import OrganizationEmployeeRepository
 from app.feature.schedule.dtos.schedule_dto import ScheduleRDTO, ScheduleIndividualCDTO, ScheduleLegalCDTO, \
-    RescheduleAllDTO, ScheduleCancelDTO, RescheduleOneDTO, ScheduleCancelOneDTO
+    RescheduleAllDTO, ScheduleCancelDTO, RescheduleOneDTO, ScheduleCancelOneDTO, ScheduleSpaceDTO
 from app.feature.schedule.filter.schedule_filter import ScheduleFilter, ScheduleClientScheduledFilter, \
     ScheduleClientFromToFilter
 from app.feature.schedule.schedule_repository import ScheduleRepository
@@ -30,9 +30,24 @@ class ScheduleController:
         self._add_routes()
 
     def _add_routes(self):
-        self.router.post("/create-individual", response_model=ScheduleRDTO)(self.create_individual)
-        self.router.post("/create-legal", response_model=ScheduleRDTO)(self.create_legal)
-        self.router.get("/get-schedule")(self.get_schedule)
+        self.router.post(
+            "/create-individual",
+            response_model=ScheduleRDTO,
+            summary="Создание брони для физического лица",
+            description="Создание брони для физического лица"
+        )(self.create_individual)
+        self.router.post(
+            "/create-legal",
+            response_model=ScheduleRDTO,
+            summary="Создание брони для юридического лица",
+            description="Создание брони для юридического лица"
+        )(self.create_legal)
+        self.router.get(
+            "/get-schedule",
+            response_model=List[ScheduleSpaceDTO],
+            summary="Получение свободного времени для бронирования",
+            description="Получение свободного времени для бронирования"
+        )(self.get_schedule)
         self.router.get("/get/{id}")(self.get)
         self.router.get("/get-active-schedules")(self.get_active_schedules)
         self.router.get("/get-canceled-schedules")(self.get_canceled_schedules)
@@ -88,6 +103,7 @@ class ScheduleController:
                                                                  ge=date.today()),
                            repo: ScheduleRepository = Depends(ScheduleRepository),
                            workshopScheduleRepo: WorkshopScheduleRepository = Depends(WorkshopScheduleRepository),
+                           userDTO: UserRDTOWithRelations = Depends(get_current_user),
                            ):
         result = await repo.get_schedule(workshop_sap_id=workshop_sap_id, schedule_date=schedule_date,
                                          workshopScheduleRepo=workshopScheduleRepo)

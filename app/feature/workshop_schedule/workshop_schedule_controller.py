@@ -2,6 +2,7 @@ import datetime
 from typing import List, Optional
 from fastapi import APIRouter, Depends, Path, Query
 from app.core.app_exception_response import AppExceptionResponse
+from app.core.auth_core import get_current_user, check_admin
 from app.domain.models.workshop_schedule_model import WorkshopScheduleModel
 from app.feature.workshop.workshop_repository import WorkshopRepository
 from app.feature.workshop_schedule.dtos.workshop_schedule_dto import WorkshopScheduleRDTO, WorkshopScheduleCDTO
@@ -15,17 +16,48 @@ class WorkshopScheduleController:
         self._add_routes()
 
     def _add_routes(self):
-        self.router.get("/", response_model=List[WorkshopScheduleRDTO])(self.get_all)
-        self.router.post("/create", response_model=WorkshopScheduleRDTO)(self.create)
-        self.router.get("/get_by_id/{id}", response_model=WorkshopScheduleRDTO)(self.get_by_id)
-        self.router.put("/update/{id}", response_model=WorkshopScheduleRDTO)(self.update)
-        self.router.delete("/delete/{id}")(self.delete)
+        self.router.get(
+            "/", response_model=List[WorkshopScheduleRDTO],
+            summary="Получение расписания цеха",
+            description="Получение всех расписаний цеха"
+        )(self.get_all)
+        self.router.post(
+            "/create",
+            response_model=WorkshopScheduleRDTO,
+            summary="Создание расписания цеха",
+            description="Создание нового расписания цеха")(self.create)
+        self.router.get(
+            "/get-by-id/{id}",
+            response_model=WorkshopScheduleRDTO,
+            summary="Получение расписания цеха по идентификатору",
+            description="Получение расписания цеха по уникальному идентификатору"
+        )(self.get_by_id)
+        self.router.put(
+            "/update/{id}",
+            response_model=WorkshopScheduleRDTO,
+            summary="Обновление расписания цеха по уникальному идентификатору",
+            description="Обновление расписания цеха по уникальному идентификатору"
+        )(self.update)
+        self.router.delete(
+            "/delete/{id}",
+            summary="Удаление расписания цеха по уникальному идентификатору",
+            description="Удаление расписания цеха по уникальному идентификатору"
+        )(self.delete)
 
-    async def get_all(self, repo: WorkshopScheduleRepository = Depends(WorkshopScheduleRepository)):
+    async def get_all(
+            self,
+            repo: WorkshopScheduleRepository = Depends(WorkshopScheduleRepository),
+            current_user = Depends(get_current_user)
+    ):
         result = await repo.get_all()
         return result
 
-    async def get_by_id(self, id: int = Path(gt=0), repo: WorkshopScheduleRepository = Depends(WorkshopScheduleRepository)):
+    async def get_by_id(
+            self,
+            id: int = Path(gt=0),
+            repo: WorkshopScheduleRepository = Depends(WorkshopScheduleRepository),
+            current_user=Depends(get_current_user)
+    ):
         result = await repo.get(id=id)
         if result is None:
             raise AppExceptionResponse.not_found(message="Расписание цеха не найдена")
@@ -34,7 +66,9 @@ class WorkshopScheduleController:
     async def create(self,
                      dto:WorkshopScheduleCDTO,
                      repo: WorkshopScheduleRepository = Depends(WorkshopScheduleRepository),
-                     workshopRepo:WorkshopRepository = Depends(WorkshopRepository)):
+                     workshopRepo:WorkshopRepository = Depends(WorkshopRepository),
+                     current_user=Depends(check_admin)
+                     ):
         await self.check_form(dto=dto,repo=repo,workshopRepo=workshopRepo)
         result = await repo.create(obj=WorkshopScheduleModel(**dto.dict()))
         return result
@@ -43,12 +77,14 @@ class WorkshopScheduleController:
                      dto: WorkshopScheduleCDTO,
                      id:int = Path(gt=0),
                      repo: WorkshopScheduleRepository = Depends(WorkshopScheduleRepository),
-                     workshopRepo:WorkshopRepository = Depends(WorkshopRepository)):
+                     workshopRepo:WorkshopRepository = Depends(WorkshopRepository),
+                     current_user=Depends(check_admin)
+                     ):
         existed = await self.check_form(dto=dto,repo=repo,workshopRepo=workshopRepo,id=id)
         result = await repo.update(obj=existed,dto=dto)
         return result
 
-    async def delete(self, id: int = Path(gt=0), repo: WorkshopScheduleRepository = Depends(WorkshopScheduleRepository)):
+    async def delete(self, id: int = Path(gt=0), repo: WorkshopScheduleRepository = Depends(WorkshopScheduleRepository),current_user=Depends(check_admin)):
         await repo.delete(id=id)
 
 

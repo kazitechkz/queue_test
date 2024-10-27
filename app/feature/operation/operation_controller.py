@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Path
 from sqlalchemy.orm import selectinload
 
 from app.core.app_exception_response import AppExceptionResponse
+from app.core.auth_core import get_current_user, check_admin
 from app.domain.models.operation_model import OperationModel
 from app.feature.operation.dtos.operation_dto import OperationRDTO, OperationCDTO, OperationWithRelationRDTO
 from app.feature.operation.operation_repository import OperationRepository
@@ -17,14 +18,47 @@ class OperationController:
         self._add_routes()
 
     def _add_routes(self):
-        self.router.get("/", response_model=List[OperationWithRelationRDTO])(self.get_all)
-        self.router.post("/create", response_model=OperationRDTO)(self.create)
-        self.router.get("/get/{id}", response_model=OperationWithRelationRDTO)(self.get_by_id)
-        self.router.get("/get-by-value/{value}", response_model=OperationWithRelationRDTO)(self.get_by_value)
-        self.router.put("/update/{id}", response_model=OperationRDTO)(self.update)
-        self.router.delete("/delete/{id}")(self.delete)
+        self.router.get(
+            "/",
+            response_model=List[OperationWithRelationRDTO],
+            summary="Список операций",
+            description="Получение списка операций с бизнес-логикой"
+        )(self.get_all)
+        self.router.post(
+            "/create",
+            response_model=OperationRDTO,
+            summary="Создание операции",
+            description="Создание операции с бизнес-логикой"
+        )(self.create)
+        self.router.get(
+            "/get/{id}",
+            response_model=OperationWithRelationRDTO,
+            summary="Получение операции по уникальному идентификатору",
+            description="Получение операции по уникальному идентификатору с бизнес-логикой"
+        )(self.get_by_id)
+        self.router.get(
+            "/get-by-value/{value}",
+            response_model=OperationWithRelationRDTO,
+            summary="Получение операции по значению",
+            description="Получение операции по значению с бизнес-логикой"
+        )(self.get_by_value)
+        self.router.put(
+            "/update/{id}",
+            response_model=OperationRDTO,
+            summary="Обновление операции по уникальному идентификатору",
+            description="Обновление операции по уникальному идентификатору с бизнес-логикой"
+        )(self.update)
+        self.router.delete(
+            "/delete/{id}",
+            summary="Удаление операции по уникальному идентификатору",
+            description="Удаление операции по уникальному идентификатору с бизнес-логикой"
+        )(self.delete)
 
-    async def get_all(self, repo: OperationRepository = Depends(OperationRepository)):
+    async def get_all(
+            self,
+            repo: OperationRepository = Depends(OperationRepository),
+            current_user = Depends(get_current_user)
+    ):
         result = await repo.get_all_with_filter(
             options=[
                 selectinload(repo.model.role),
@@ -34,7 +68,12 @@ class OperationController:
         result_dto = [OperationWithRelationRDTO.from_orm(resultItem) for resultItem in result]
         return result_dto
 
-    async def get_by_id(self, id: int = Path(gt=0), repo: OperationRepository = Depends(OperationRepository)):
+    async def get_by_id(
+            self,
+            id: int = Path(gt=0),
+            repo: OperationRepository = Depends(OperationRepository),
+            current_user = Depends(get_current_user)
+    ):
         result = await repo.get(id=id,
                                 options=[
                                     selectinload(repo.model.role),
@@ -48,7 +87,12 @@ class OperationController:
         result_dto = OperationWithRelationRDTO.from_orm(result)
         return result_dto
 
-    async def get_by_value(self, value: str = Path(), repo: OperationRepository = Depends(OperationRepository)):
+    async def get_by_value(
+            self,
+            value: str = Path(),
+            repo: OperationRepository = Depends(OperationRepository),
+            current_user = Depends(get_current_user)
+    ):
         result = await repo.get_filtered(
             filters={"value": value},
             options=[
@@ -64,13 +108,26 @@ class OperationController:
         result_dto = OperationWithRelationRDTO.from_orm(result)
         return result_dto
 
-    async def create(self, dto: OperationCDTO, repo: OperationRepository = Depends(OperationRepository),roleRepo: RoleRepository = Depends(RoleRepository)):
+    async def create(
+            self,
+            dto: OperationCDTO,
+            repo: OperationRepository = Depends(OperationRepository),
+            roleRepo: RoleRepository = Depends(RoleRepository),
+            current_user=Depends(check_admin)
+    ):
         role = await self.check_form(dto=dto,repo=repo,roleRepo=roleRepo)
         dto.role_value = role.value
         result = await repo.create(obj=OperationModel(**dto.dict()))
         return result
 
-    async def update(self, dto: OperationCDTO,id: int = Path(gt=0), repo: OperationRepository = Depends(OperationRepository),roleRepo: RoleRepository = Depends(RoleRepository)):
+    async def update(
+            self,
+            dto: OperationCDTO,
+            id: int = Path(gt=0),
+            repo: OperationRepository = Depends(OperationRepository),
+            roleRepo: RoleRepository = Depends(RoleRepository),
+            current_user=Depends(check_admin)
+    ):
         role = await self.check_form(dto=dto,repo=repo,roleRepo=roleRepo,id=id)
         existed = await repo.get(id=id)
         if existed is None:
@@ -79,7 +136,7 @@ class OperationController:
         result = await repo.update(obj=existed,dto=dto)
         return result
 
-    async def delete(self, id: int = Path(gt=0), repo: OperationRepository = Depends(OperationRepository)):
+    async def delete(self, id: int = Path(gt=0), repo: OperationRepository = Depends(OperationRepository),current_user=Depends(check_admin)):
         await repo.delete(id=id)
 
     @staticmethod

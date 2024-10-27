@@ -17,7 +17,7 @@ def assign_roles(app):
 
     assign_roles_to_route(app, "/user-type/", ["admin", "client"])
     assign_roles_to_route(app, "/user-type/create", ["admin"])
-    assign_roles_to_route(app, "/user-type/get_by_id/{id}", ["admin"])
+    assign_roles_to_route(app, "/user-type/get-by-id/{id}", ["admin"])
     assign_roles_to_route(app, "/user-type/update/{id}", ["admin"])
     assign_roles_to_route(app, "/user-type/delete/{id}", ["admin"])
 
@@ -32,13 +32,13 @@ def assign_roles(app):
 
     assign_roles_to_route(app, "/organization-type/", ["admin", "client"])
     assign_roles_to_route(app, "/organization-type/create", ["admin"])
-    assign_roles_to_route(app, "/organization-type/get_by_id/{id}", ["admin"])
+    assign_roles_to_route(app, "/organization-type/get-by-id/{id}", ["admin"])
     assign_roles_to_route(app, "/organization-type/update/{id}", ["admin"])
     assign_roles_to_route(app, "/organization-type/delete/{id}", ["admin"])
 
     assign_roles_to_route(app, "/organization/all", ["admin"])
     assign_roles_to_route(app, "/organization/get/{id}", ["admin"])
-    assign_roles_to_route(app, "/organization/get_by_bin/{bin}", ["admin"])
+    assign_roles_to_route(app, "/organization/get-by-bin/{bin}", ["admin"])
     assign_roles_to_route(app, "/organization/my-organizations", ["client"])
     assign_roles_to_route(app, "/organization/create", ["admin"])
     assign_roles_to_route(app, "/organization/update/{id}", ["admin"])
@@ -58,19 +58,19 @@ def assign_roles(app):
 
     assign_roles_to_route(app, "/vehicle-color/", ["admin", "client"])
     assign_roles_to_route(app, "/vehicle-color/create", ["admin"])
-    assign_roles_to_route(app, "/vehicle-color/get_by_id/{id}", ["admin"])
+    assign_roles_to_route(app, "/vehicle-color/get-by-id/{id}", ["admin"])
     assign_roles_to_route(app, "/vehicle-color/update/{id}", ["admin"])
     assign_roles_to_route(app, "/vehicle-color/delete/{id}", ["admin"])
 
     assign_roles_to_route(app, "/vehicle-category/", ["admin", "client"])
     assign_roles_to_route(app, "/vehicle-category/create", ["admin"])
-    assign_roles_to_route(app, "/vehicle-category/get_by_id/{id}", ["admin"])
+    assign_roles_to_route(app, "/vehicle-category/get-by-id/{id}", ["admin"])
     assign_roles_to_route(app, "/vehicle-category/update/{id}", ["admin"])
     assign_roles_to_route(app, "/vehicle-category/delete/{id}", ["admin"])
 
     assign_roles_to_route(app, "/region/", ["admin", "client"])
     assign_roles_to_route(app, "/region/create", ["admin"])
-    assign_roles_to_route(app, "/region/get_by_id/{id}", ["admin"])
+    assign_roles_to_route(app, "/region/get-by-id/{id}", ["admin"])
     assign_roles_to_route(app, "/region/update/{id}", ["admin"])
     assign_roles_to_route(app, "/region/delete/{id}", ["admin"])
 
@@ -86,21 +86,21 @@ def assign_roles(app):
     assign_roles_to_route(app, "/factory/", ["admin", "client"])
     assign_roles_to_route(app, "/factory/create", ["admin"])
     assign_roles_to_route(app, "/factory/get/{id}", ["admin"])
-    assign_roles_to_route(app, "/factory/get_by_sap/{sap_id}", ["admin"])
+    assign_roles_to_route(app, "/factory/get-by-sap/{sap_id}", ["admin","employee","client"])
     assign_roles_to_route(app, "/factory/update/{id}", ["admin"])
     assign_roles_to_route(app, "/factory/delete/{id}", ["admin"])
 
     assign_roles_to_route(app, "/workshop/", ["admin", "client"])
     assign_roles_to_route(app, "/workshop/create", ["admin"])
     assign_roles_to_route(app, "/workshop/get/{id}", ["admin"])
-    assign_roles_to_route(app, "/workshop/get_by_sap/{sap_id}", ["admin"])
+    assign_roles_to_route(app, "/workshop/get-by-sap/{sap_id}", ["admin"])
     assign_roles_to_route(app, "/workshop/update/{id}", ["admin"])
     assign_roles_to_route(app, "/workshop/delete/{id}", ["admin"])
 
     assign_roles_to_route(app, "/material/", ["admin", "client"])
     assign_roles_to_route(app, "/material/create", ["admin"])
     assign_roles_to_route(app, "/material/get/{id}", ["admin"])
-    assign_roles_to_route(app, "/material/get_by_sap/{sap_id}", ["admin"])
+    assign_roles_to_route(app, "/material/get-by-sap/{sap_id}", ["admin"])
     assign_roles_to_route(app, "/material/update/{id}", ["admin"])
     assign_roles_to_route(app, "/material/delete/{id}", ["admin"])
 
@@ -133,7 +133,7 @@ def assign_roles(app):
 
     assign_roles_to_route(app, "/workshop-schedule/", ["admin", "client", "employee"])
     assign_roles_to_route(app, "/workshop-schedule/create", ["admin"])
-    assign_roles_to_route(app, "/workshop-schedule/get_by_id/{id}", ["admin", "client", "employee"])
+    assign_roles_to_route(app, "/workshop-schedule/get-by-id/{id}", ["admin", "client", "employee"])
     assign_roles_to_route(app, "/workshop-schedule/update/{id}", ["admin"])
     assign_roles_to_route(app, "/workshop-schedule/delete/{id}", ["admin"])
 

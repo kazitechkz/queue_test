@@ -7,6 +7,7 @@ from sqlalchemy.orm import selectinload
 
 from app.core.app_exception_response import AppExceptionResponse
 from app.core.auth_core import check_individual_client, check_legal_client, get_current_user, check_client
+from app.core.pagination_dto import PaginationOrderRDTOWithRelations
 from app.domain.models.order_model import OrderModel
 from app.domain.models.schedule_history_model import ScheduleHistoryModel
 from app.domain.models.schedule_model import ScheduleModel
@@ -33,12 +34,43 @@ class OrderController:
         self._add_routes()
 
     def _add_routes(self):
-        self.router.get("/check-order-payment")(self.check_order_payment)
-        self.router.get("/get-all-order")(self.get_all)
-        self.router.get("/get-detail-order")(self.get_detail_order)
-        self.router.get("/my-paid-orders",response_model=List[OrderRDTOWithRelations])(self.my_paid_orders)
-        self.router.post("/create-individual-order")(self.create_individual)
-        self.router.post("/create-legal-order")(self.create_legal)
+        self.router.get(
+            "/check-order-payment",
+            response_model=int,
+            summary="Автоматическая проверка оплаты заказа",
+            description="Автоматическая проверка оплаты заказа"
+        )(self.check_order_payment)
+        self.router.get(
+            "/get-all-order",
+            response_model=PaginationOrderRDTOWithRelations,
+            summary="Получение всех моих заказов",
+            description="Получение всех моих заказов"
+
+        )(self.get_all)
+        self.router.get(
+            "/get-detail-order",
+            response_model=OrderRDTOWithRelations,
+            summary="Получение детальной информации о заказе",
+            description="Получение детальной информации о заказе"
+        )(self.get_detail_order)
+        self.router.get(
+            "/my-paid-orders",
+            response_model=List[OrderRDTOWithRelations],
+            summary="Получение своих оплаченных заказов",
+            description="Получение своих оплаченных заказов"
+        )(self.my_paid_orders)
+        self.router.post(
+            "/create-individual-order",
+            response_model=OrderRDTOWithRelations,
+            summary="Создание индивидуального заказа",
+            description="Создание индивидуального заказа"
+        )(self.create_individual)
+        self.router.post(
+            "/create-legal-order",
+            response_model=OrderRDTOWithRelations,
+            summary="Создание юридического заказа",
+            description="Создание юридического заказа"
+        )(self.create_legal)
 
     async def get_all(
             self,
@@ -62,7 +94,6 @@ class OrderController:
             self,
             userDTO:UserRDTOWithRelations = Depends(check_client),
             repo: OrderRepository = Depends(OrderRepository),
-
     ):
         filters = [and_(repo.model.is_active == True, repo.model.is_paid == True)]
         if userDTO.user_type.value == TableConstantsNames.UserIndividualTypeValue:
@@ -89,10 +120,11 @@ class OrderController:
             userRDTO: UserRDTOWithRelations = Depends(get_current_user)
     ):
         result = await repo.get_with_filter(filters=filters.apply(userDTO=userRDTO), options=[
+            selectinload(OrderModel.material),
+            selectinload(OrderModel.organization),
             selectinload(OrderModel.factory),
             selectinload(OrderModel.workshop),
             selectinload(OrderModel.kaspi),
-            selectinload(OrderModel.organization),
             selectinload(OrderModel.sap_request),
         ])
         if result is None:
@@ -147,7 +179,11 @@ class OrderController:
         return result
 
 
-    async def check_order_payment(self,repo: OrderRepository = Depends(OrderRepository)):
+    async def check_order_payment(
+            self,
+            repo: OrderRepository = Depends(OrderRepository),
+
+    ):
         filters = [and_(repo.model.is_active == True, repo.model.txn_id == None, repo.model.must_paid_at < datetime.datetime.now())]
         updated_values = {"status_id":7,"is_active":False,"is_finished":False,"is_paid":False, "is_failed":True}
         return await repo.update_with_filters(update_values=updated_values,filters=filters)

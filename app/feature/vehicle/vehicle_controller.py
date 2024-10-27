@@ -5,7 +5,8 @@ from sqlalchemy import and_
 from sqlalchemy.orm import selectinload
 
 from app.core.app_exception_response import AppExceptionResponse
-from app.core.auth_core import check_client, check_legal_client
+from app.core.auth_core import check_client, check_legal_client, check_admin, get_current_user
+from app.core.pagination_dto import PaginationVehicleWithRelationsDTO
 from app.domain.models.vehicle_model import VehicleModel
 from app.feature.organization.organization_repository import OrganizationRepository
 from app.feature.region.region_repository import RegionRepository
@@ -26,17 +27,55 @@ class VehicleController:
         self._add_routes()
 
     def _add_routes(self):
-        self.router.get("/", )(self.all)
-        self.router.post("/create", response_model=VehicleRDTO)(self.create)
-        self.router.post("/add-vehicle", response_model=VehicleRDTO)(self.add_vehicle)
-        self.router.get("/get/{id}", response_model=VehicleWithRelationsDTO)(self.get)
-        self.router.get("/get-own-cars")(self.get_own_cars)
-        self.router.get("/get-organization-cars/{organization_id}",)(self.get_organization_cars)
-        self.router.put("/update/{id}", response_model=VehicleRDTO)(self.update)
-        self.router.delete("/delete/{id}")(self.delete)
+        self.router.get(
+            "/",
+            response_model=PaginationVehicleWithRelationsDTO,
+            summary="Список транспортных средств",
+            description="Получение списка транспортных средств"
+        )(self.all)
+        self.router.post(
+            "/create",
+            response_model=VehicleRDTO,
+            summary="Создать транспортное средство",
+            description="Создание транспортного средства"
+        )(self.create)
+        self.router.post(
+            "/add-vehicle",
+            response_model=VehicleRDTO,
+            summary="Добавить транспортное средство",
+            description="Добавление транспортных средств"
+        )(self.add_vehicle)
+        self.router.get(
+            "/get/{id}",
+            response_model=VehicleWithRelationsDTO,
+            summary="Получение транспортного средства по ID",
+            description="Получение транспортного средства по ID"
+        )(self.get)
+        self.router.get(
+            "/get-own-cars",
+            summary="Получение списка транспортных средств пользователя",
+            description="Получение списка транспортных средств пользователя"
+        )(self.get_own_cars)
+        self.router.get(
+            "/get-organization-cars/{organization_id}",
+            summary="Получение списка транспортных средств организации",
+            description="Получение списка транспортных средств организации"
+        )(self.get_organization_cars)
+        self.router.put(
+            "/update/{id}",
+            response_model=VehicleRDTO,
+            summary="Обновление транспортного средства по ID",
+            description="Обновление транспортного средства по ID"
+        )(self.update)
+        self.router.delete(
+            "/delete/{id}",
+            summary="Удаление транспортного средства по ID",
+            description="Удаление транспортного средства по ID"
+        )(self.delete)
 
     async def all(self, params: VehicleFilter = Depends(),
-                  repo: VehicleRepository = Depends(VehicleRepository)
+                  repo: VehicleRepository = Depends(VehicleRepository),
+                  current_user = Depends(check_admin)
                   ):
         result = await repo.paginate_with_filter(dto=VehicleWithRelationsDTO, page=params.page,
                                                  per_page=params.per_page, filters=params.apply(), options=[
@@ -48,7 +87,12 @@ class VehicleController:
             ])
         return result
 
-    async def get(self, id: int = Path(gt=0), repo: VehicleRepository = Depends(VehicleRepository)):
+    async def get(
+            self,
+            id: int = Path(gt=0),
+            repo: VehicleRepository = Depends(VehicleRepository),
+            current_user=Depends(get_current_user)
+    ):
         result = await repo.get(id=id, options=[
             selectinload(VehicleModel.category),
             selectinload(VehicleModel.color),
@@ -92,6 +136,7 @@ class VehicleController:
                      regionRepo: RegionRepository = Depends(RegionRepository),
                      userRepo: UserRepository = Depends(UserRepository),
                      organizationRepo: OrganizationRepository = Depends(OrganizationRepository),
+                     current_user=Depends(check_admin)
                      ):
         await self.check_form(dto, repo, vehicleColorRepos, vehicleCategoryRepos,
                               regionRepo, userRepo, organizationRepo, )
@@ -122,6 +167,7 @@ class VehicleController:
                      regionRepo: RegionRepository = Depends(RegionRepository),
                      userRepo: UserRepository = Depends(UserRepository),
                      organizationRepo: OrganizationRepository = Depends(OrganizationRepository),
+                     current_user=Depends(check_admin)
                      ):
         vehicle = await repo.get(id)
         if vehicle is None:
@@ -131,7 +177,12 @@ class VehicleController:
         result = await repo.update(obj=vehicle, dto=dto)
         return result
 
-    async def delete(self, id: int = Path(gt=0), repo: VehicleRepository = Depends(VehicleRepository)):
+    async def delete(
+            self,
+            id: int = Path(gt=0),
+            repo: VehicleRepository = Depends(VehicleRepository),
+            current_user=Depends(check_admin)
+    ):
         await repo.delete(id=id)
 
     @staticmethod

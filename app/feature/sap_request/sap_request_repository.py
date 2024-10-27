@@ -85,21 +85,21 @@ class SapRequestRepository(BaseRepository[SapRequestModel]):
             sapRequestService: SapRequestService
     ):
         if order is None:
-            return AppExceptionResponse.bad_request(message="Заказ не найден")
+            raise AppExceptionResponse.bad_request(message="Заказ не найден")
         if order.sap_id is not None or order.zakaz:
-            return AppExceptionResponse.bad_request(message="Счет на предоплату уже создан")
+            raise AppExceptionResponse.bad_request(message="Счет на предоплату уже создан")
         if userRDTO.user_type.value == TableConstantsNames.UserLegalTypeValue:
             if order.organization is not None:
                 if order.organization.owner_id != userRDTO.id:
-                    return AppExceptionResponse.forbidden(message="Нет доступа к заказу")
+                    raise AppExceptionResponse.forbidden(message="Нет доступа к заказу")
             else:
-                return AppExceptionResponse.forbidden(message="Нет доступа к заказу")
+                raise AppExceptionResponse.forbidden(message="Нет доступа к заказу")
         else:
             if order.owner_id != userRDTO.id:
-                return AppExceptionResponse.forbidden(message="Нет доступа к заказу")
+                raise AppExceptionResponse.forbidden(message="Нет доступа к заказу")
         sap_request_existed = await self.request_to_sap(order=order, sapService=sapRequestService)
         if sap_request_existed is None:
-            return AppExceptionResponse.internal_error("При создании sap request произошла ошибка")
+            raise AppExceptionResponse.internal_error("При создании sap request произошла ошибка")
         else:
             sap_request = await self.request_to_sap(order=order, sapService=sapRequestService)
             if sap_request is not None and not sap_request.is_failed:
@@ -110,4 +110,11 @@ class SapRequestRepository(BaseRepository[SapRequestModel]):
                 order.status_id = 2
 
             order = await orderRepo.update(obj=order, dto=OrderCDTO.from_orm(order))
-            return await orderRepo.get(id=order.id, options=[selectinload(OrderModel.sap_request)])
+            return await orderRepo.get(id=order.id, options=[
+                selectinload(OrderModel.material),
+                selectinload(OrderModel.organization),
+                selectinload(OrderModel.factory),
+                selectinload(OrderModel.workshop),
+                selectinload(OrderModel.kaspi),
+                selectinload(OrderModel.sap_request)
+            ])

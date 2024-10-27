@@ -22,7 +22,7 @@ class MaterialCDTO(BaseModel):
         from_attributes = True
 
 
-class MaterialRDTO(BaseModel):
+class MaterialRDTO(MaterialDTO):
     title: str
     sap_id: str
     status: bool

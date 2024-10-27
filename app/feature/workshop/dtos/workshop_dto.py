@@ -16,7 +16,7 @@ class WorkshopCDTO(BaseModel):
         from_attributes = True
 
 
-class WorkshopRDTO(BaseModel):
+class WorkshopRDTO(WorkshopDTO):
     title: str
     sap_id: str
     status: bool

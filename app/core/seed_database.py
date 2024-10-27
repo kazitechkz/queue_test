@@ -27,12 +27,12 @@ async def add_roles(session: Session):
     total_items = await session.scalar(count_query)
     if total_items == 0:
         data = [
-            RoleModel(title="Администратор", value=TableConstantsNames.RoleAdminValue),
-            RoleModel(title="Служба Безопасности", value=TableConstantsNames.RoleSecurityValue),
-            RoleModel(title="Контроллер погрузки", value=TableConstantsNames.RoleSecurityLoaderValue),
-            RoleModel(title="Погрузчик", value=TableConstantsNames.RoleLoaderValue),
-            RoleModel(title="Весовщик", value=TableConstantsNames.RoleWeigherValue),
-            RoleModel(title="Клиент", value=TableConstantsNames.RoleClientValue),
+            RoleModel(title="Администратор", value=TableConstantsNames.RoleAdminValue,can_auth=True),
+            RoleModel(title="Служба Безопасности", value=TableConstantsNames.RoleSecurityValue,can_auth=False),
+            RoleModel(title="Контроллер погрузки", value=TableConstantsNames.RoleSecurityLoaderValue,can_auth=True),
+            RoleModel(title="Погрузчик", value=TableConstantsNames.RoleLoaderValue,can_auth=True),
+            RoleModel(title="Весовщик", value=TableConstantsNames.RoleWeigherValue,can_auth=True),
+            RoleModel(title="Клиент", value=TableConstantsNames.RoleClientValue,can_auth=True),
         ]
         session.add_all(data)
         await session.commit()
