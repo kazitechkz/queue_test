@@ -1,5 +1,5 @@
 from datetime import datetime, date, time, timezone
-from typing import Optional
+from typing import Optional, List
 
 from pydantic import Field, BaseModel, model_validator, field_validator
 
@@ -181,7 +181,7 @@ class ScheduleSpaceDTO(BaseModel):
     scheduled_data: date = Field(description="Дата бронирования", ge=date.today())
     start_at: time = Field(description="Начало бронирования")
     end_at: time = Field(description="Конец бронирования")
-    free_space:int = Field("Кол-во свободных мест")
+    free_space:int = Field(title="Кол-во свободных мест",description="Кол-во свободных мест")
 
 class ScheduleCalendarDTO(BaseModel):
     scheduled_at:date = Field(description="Дата бронирования")

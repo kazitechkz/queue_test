@@ -3,6 +3,7 @@ from typing import List, Generic, TypeVar
 
 from pydantic import BaseModel
 
+from app.feature.employee_request.dtos.employee_request_dto import EmployeeRequestWithRelationDTO
 from app.feature.order.dtos.order_dto import OrderRDTOWithRelations
 from app.feature.organization_employee.dtos.organization_employee_dto import OrganizationEmployeeRDTOWithRelations
 from app.feature.vehicle.dtos.vehicle_dto import VehicleWithRelationsDTO
@@ -60,3 +61,12 @@ class PaginationOrderRDTOWithRelations(BaseModel):
     total_pages: int
     total_items: int
     items: List[OrderRDTOWithRelations]
+
+class PaginationEmployeeRequestWithRelationDTO(BaseModel):
+    current_page: int
+    last_page: int
+    total_pages: int
+    total_items: int
+    items: List[EmployeeRequestWithRelationDTO]
+
+

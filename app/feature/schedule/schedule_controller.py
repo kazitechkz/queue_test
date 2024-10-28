@@ -13,7 +13,7 @@ from app.feature.order.order_repository import OrderRepository
 from app.feature.organization.organization_repository import OrganizationRepository
 from app.feature.organization_employee.organization_employee_repository import OrganizationEmployeeRepository
 from app.feature.schedule.dtos.schedule_dto import ScheduleRDTO, ScheduleIndividualCDTO, ScheduleLegalCDTO, \
-    RescheduleAllDTO, ScheduleCancelDTO, RescheduleOneDTO, ScheduleCancelOneDTO, ScheduleSpaceDTO
+    RescheduleAllDTO, ScheduleCancelDTO, RescheduleOneDTO, ScheduleCancelOneDTO, ScheduleSpaceDTO,ScheduleCalendarDTO
 from app.feature.schedule.filter.schedule_filter import ScheduleFilter, ScheduleClientScheduledFilter, \
     ScheduleClientFromToFilter
 from app.feature.schedule.schedule_repository import ScheduleRepository
@@ -32,35 +32,85 @@ class ScheduleController:
     def _add_routes(self):
         self.router.post(
             "/create-individual",
-            response_model=ScheduleRDTO,
             summary="Создание брони для физического лица",
             description="Создание брони для физического лица"
         )(self.create_individual)
         self.router.post(
             "/create-legal",
-            response_model=ScheduleRDTO,
             summary="Создание брони для юридического лица",
             description="Создание брони для юридического лица"
         )(self.create_legal)
         self.router.get(
             "/get-schedule",
-            response_model=List[ScheduleSpaceDTO],
             summary="Получение свободного времени для бронирования",
             description="Получение свободного времени для бронирования"
         )(self.get_schedule)
-        self.router.get("/get/{id}")(self.get)
-        self.router.get("/get-active-schedules")(self.get_active_schedules)
-        self.router.get("/get-canceled-schedules")(self.get_canceled_schedules)
-        self.router.get("/get-all-schedules")(self.get_all_schedules)
-        self.router.get("/my-active-schedules")(self.my_active_schedules)
-        self.router.get("/my-responsible-schedules")(self.my_responsible_schedules)
-        self.router.get("/my-schedules")(self.my_schedules)
-        self.router.get("/my-schedules-count")(self.my_schedules_count)
-        self.router.post("/reschedules-all")(self.reschedules_all)
-        self.router.post("/cancel-all-schedules")(self.cancel_all_schedules)
-        self.router.put("/reschedule-to-date/{schedule_id}")(self.reschedule_to_date)
-        self.router.put("/cancel-one/{schedule_id}")(self.cancel_one)
-        self.router.get("/check-late-schedules")(self.check_late_schedules)
+        self.router.get(
+            "/get/{id}",
+            summary="Получение детальной информации о брони",
+            description="Получение детальной информации о брони с уникальным идентификатором"
+        )(self.get)
+        self.router.get(
+            "/get-active-schedules",
+            summary="Получение всех активных броней",
+            description="Получение всех активных броней"
+        )(self.get_active_schedules)
+        self.router.get(
+            "/get-canceled-schedules",
+            summary="Получение всех отмененных броней",
+            description="Получение всех отмененных броней"
+        )(self.get_canceled_schedules)
+        self.router.get(
+            "/get-all-schedules",
+            summary="Получение всех броней с пагинацией",
+            description="Получение всех броней с пагинацией"
+        )(self.get_all_schedules)
+        self.router.get(
+            "/my-active-schedules",
+            summary="Получение всех активных броней текущего сотрудника",
+            description="Получение всех активных броней текущего сотрудника"
+        )(self.my_active_schedules)
+        self.router.get(
+            "/my-responsible-schedules",
+            summary="Получение всех броней текущего сотрудника, которые являются ответственными и должны дать ответ",
+            description="Получение всех броней текущего сотрудника, которые являются ответственными и должны дать ответ"
+        )(self.my_responsible_schedules)
+        self.router.get(
+            "/my-schedules",
+            summary="Получение всех броней текущего клиента по дню",
+            description="Получение всех броней текущего клиента по дню"
+        )(self.my_schedules)
+        self.router.get(
+            "/my-schedules-count",
+            response_model=List[ScheduleCalendarDTO],
+            summary="Получение количества броней текущего клиента по дням",
+            description="Получение количества броней текущего клиента по дням"
+        )(self.my_schedules_count)
+        self.router.post(
+            "/reschedules-all",
+            summary="Перенос всех бронирований на другую дату",
+            description="Перенос всех бронирований на другую дату"
+        )(self.reschedules_all)
+        self.router.post(
+            "/cancel-all-schedules",
+            summary="Отмена всех бронирований",
+            description="Отмена всех бронирований"
+        )(self.cancel_all_schedules)
+        self.router.put(
+            "/reschedule-to-date/{schedule_id}",
+            summary="Перенос одного бронирования на другую дату",
+            description="Перенос одного бронирования на другую дату"
+        )(self.reschedule_to_date)
+        self.router.put(
+            "/cancel-one/{schedule_id}",
+            summary="Отмена одного бронирования",
+            description="Отмена одного бронирования"
+        )(self.cancel_one)
+        self.router.get(
+            "/check-late-schedules",
+            summary="Проверка наличия просроченных бронирований",
+            description="Проверка наличия просроченных бронирований"
+        )(self.check_late_schedules)
 
     async def create_individual(self,
                                 dto: ScheduleIndividualCDTO,

@@ -7,6 +7,7 @@ from sqlalchemy.orm import selectinload
 from datetime import date,datetime
 from app.core.app_exception_response import AppExceptionResponse
 from app.core.auth_core import check_legal_client, check_client, check_individual_client
+from app.core.pagination_dto import PaginationEmployeeRequestWithRelationDTO
 from app.domain.models.employee_request import EmployeeRequestModel
 from app.domain.models.organization_employee_model import OrganizationEmployeeModel
 from app.feature.employee_request.dtos.employee_request_dto import EmployeeRequestWithRelationDTO, \
@@ -28,12 +29,33 @@ class EmployeeRequestController:
 
     def _add_routes(self):
         #Organization
-        self.router.get("/search-employee",response_model=Optional[UserRDTO])(self.search_employee)
-        self.router.post("/create-request")(self.create_request)
+        self.router.get(
+            "/search-employee",
+            response_model=Optional[UserRDTO],
+            summary="Поиск сотрудника по почте",
+            description="Поиск сотрудника по почте в рамках конкретной организации по почте"
+        )(self.search_employee)
+        self.router.post(
+            "/create-request",
+            response_model=EmployeeRequestRDTO,
+            summary="Создание заявки на включение водителя в компанию",
+            description="Создание заявки на включение водителя в компанию в организации"
+
+        )(self.create_request)
         #Both
-        self.router.get("/my-requests")(self.my_requests)
+        self.router.get(
+            "/my-requests",
+            response_model=PaginationEmployeeRequestWithRelationDTO,
+            summary="Мои заявки на включение водителя в компанию",
+            description="Мои заявки на включение водителя в компанию в организации"
+        )(self.my_requests)
         #Employee
-        self.router.put("/make-decision/{id}")(self.make_decision)
+        self.router.put(
+            "/make-decision/{id}",
+            response_model=EmployeeRequestRDTO,
+            summary="Принять или отклонить заявку на включение водителя в компанию",
+            description="Принять или отклонить заявку на включение водителя в компанию в организации"
+        )(self.make_decision)
 
 
     async def search_employee(self,

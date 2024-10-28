@@ -73,9 +73,6 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
                 organization_ids = [organization.id for organization in userDTO.organizations]
                 if order.organization_id not in organization_ids:
                     raise AppExceptionResponse.bad_request("Заказ не найден или не принадлежит компании")
-            if userDTO.user_type.value == TableConstantsNames.UserIndividualTypeValue:
-                if order.owner_id != userDTO.id:
-                    raise AppExceptionResponse.bad_request("Заказ не найден или не принадлежит физическому лицу")
             filters.append(and_(self.model.order_id == filter.order_id))
         if userDTO.user_type.value == TableConstantsNames.UserLegalTypeValue:
             organization_ids = [organization.id for organization in userDTO.organizations]
@@ -188,6 +185,8 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
         booked_max = sum(schedule.loading_volume_kg for schedule in schedule_booked)
 
         # Присваиваем рассчитанные значения в DTO
+        if(order.status_id == TableConstantsNames.OrderStatusWaitingForExecutionId):
+            order_dto.status_id = 6
         order_dto.quan_booked = booked_max
         order_dto.quan_released = release_max
         await orderRepo.update(obj=order, dto=order_dto)
