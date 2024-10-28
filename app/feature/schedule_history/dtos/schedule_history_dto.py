@@ -50,19 +50,23 @@ class ScheduleHistoryAnswerDTO(BaseModel):
     next_operation_value:Optional[str] = Field(None, description="Значение операции")
     is_passed:bool =  Field(..., description="Пройдено ли")
     cancel_reason: Optional[str] = Field(None, max_length=1000, description="Причина отмены")
-    vehicle_tara_kg: Optional[int] = Field(..., description="Вес тары транспорта в кг", gt=1000)
-    vehicle_brutto_kg: Optional[int] = Field(..., description="Вес брутто транспорта в кг", gt=1000)
+    vehicle_id:Optional[int] = Field(..., description="Идентификатор транспорта в кг")
+    vehicle_tara_kg: Optional[int] = Field(..., description="Вес тары транспорта в кг", gt=500)
+    trailer_id: Optional[int] = Field(..., description="Идентификатор прицепа в кг")
+    trailer_tara_kg: Optional[int] = Field(..., description="Вес прицепа в кг", gt=100)
+    vehicle_brutto_kg: Optional[int] = Field(..., description="Вес брутто транспорта в кг", gt=500)
 
     @model_validator(mode='after')
     def check_is_passed_and_vehicle_tara_kg(self):
         operation_value = self.operation_value
         is_passed = self.is_passed
         vehicle_tara_kg = self.vehicle_tara_kg
+        vehicle_id = self.vehicle_id
         vehicle_brutto_kg = self.vehicle_brutto_kg
         next_operation_value = self.next_operation_value
         if operation_value == TableConstantsNames.InitialWeightOperationName:
             if is_passed:
-                if vehicle_tara_kg is None:
+                if vehicle_tara_kg is None or vehicle_id is None:
                     raise ValueError('Вес тары обязателен если транспорт проходит первичное взвешивание')
         if operation_value == TableConstantsNames.FinalWeightOperationName:
             if is_passed:

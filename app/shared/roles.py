@@ -162,6 +162,8 @@ def assign_roles(app):
 
     assign_roles_to_route(app, "/initial-weight/all", ["admin", "employee"])
     assign_roles_to_route(app, "/initial-weight/get/{id}", ["admin", "employee", "client"])
+    assign_roles_to_route(app, "/baseline-weight/get-vehicle-trailer-weights", ["admin", "employee", "client"])
+    assign_roles_to_route(app, "/baseline-weight/get/{vehicle-id}", ["admin", "employee", "client"])
 
     assign_roles_to_route(app, "/get-qr/get-qr-link/{order_id}", ["admin", "client"])
 
