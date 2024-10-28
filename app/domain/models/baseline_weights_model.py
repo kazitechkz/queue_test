@@ -1,7 +1,8 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 
 from sqlalchemy import ForeignKey, Text, Integer
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -16,6 +17,9 @@ class BaselineWeightModel(Base):
     vehicle_info: Mapped[str] = mapped_column(Text(length=1000))
     vehicle_tara_kg: Mapped[int] = mapped_column(Integer())
     measured_at: Mapped[datetime] = mapped_column()
-    end_at: Mapped[datetime] = mapped_column()
     created_at: Mapped[CreatedAt]
     updated_at: Mapped[UpdatedAt]
+
+    @hybrid_property
+    def end_at(self):
+        return self.measured_at + timedelta(days=30)

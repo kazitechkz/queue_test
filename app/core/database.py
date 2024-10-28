@@ -55,6 +55,7 @@ async def init_db():
     from app.domain.models.initial_weight_model import InitialWeightModel
     from app.domain.models.act_weight_model import ActWeightModel
     from app.domain.models.access_token_model import AccessTokenModel
+    from app.domain.models.baseline_weights_model import BaselineWeightModel
 
     async with engine_async.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
