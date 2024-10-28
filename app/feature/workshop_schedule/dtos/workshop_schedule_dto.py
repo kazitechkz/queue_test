@@ -1,7 +1,10 @@
 from datetime import datetime, date, time
-from typing import Optional
+from typing import Optional, List
 
 from pydantic import BaseModel, Field, root_validator, model_validator
+
+from app.feature.factory.dtos.factory_dto import FactoryRDTO
+from app.feature.material.dtos.material_dto import MaterialRDTO
 
 
 class WorkshopScheduleDTO(BaseModel):
@@ -59,3 +62,9 @@ class WorkshopScheduleCDTO(BaseModel):
     class Config:
         from_attributes = True
 
+
+class WorkshopScheduleWithRelationsRDTO(WorkshopScheduleRDTO):
+    factory: Optional[FactoryRDTO]
+    materials: Optional[List[MaterialRDTO]]
+    class Config:
+        from_attributes = True

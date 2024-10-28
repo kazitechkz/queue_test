@@ -37,8 +37,7 @@ class UserTypeController:
         self.router.delete("/delete/{id}", summary="Удаление типа пользователя по уникальному идентификатору",
                            description="Удаление типа пользователя по идентификатору")(self.delete)
 
-    async def get_all(self, repo: UserTypeRepository = Depends(UserTypeRepository),
-                      current_user=Depends(get_current_user)):
+    async def get_all(self, repo: UserTypeRepository = Depends(UserTypeRepository)):
         result = await repo.get_all()
         return result
 

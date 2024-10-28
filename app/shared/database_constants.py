@@ -35,6 +35,7 @@ class AppTableNames:
     ActWeightTableName = "act_weights"
     EmployeeRequestTableName = "employee_requests"
     AccessTokenTableName = "access_token"
+    BaselineWeightTableName = "baseline_weights"
 
 
 class TableConstantsNames:
@@ -68,6 +69,7 @@ class TableConstantsNames:
     OrderStatusWaitPayment = "waiting_for_payment"
     OrderStatusRejectPayment = "reject_from_payment"
     OrderStatusWaitingForExecution = "waiting_for_execution"
+    OrderStatusWaitingForExecutionId = 5
     OrderStatusExecuted = "executed"
     OrderStatusFinished = "finished"
     OrderStatusCanceled = "canceled"

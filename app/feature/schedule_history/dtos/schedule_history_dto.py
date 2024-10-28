@@ -3,6 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel, Field, model_validator
 
+
 from app.shared.database_constants import TableConstantsNames
 
 
@@ -71,7 +72,4 @@ class ScheduleHistoryAnswerDTO(BaseModel):
                 if next_operation_value not in TableConstantsNames.RELOAD_OPERATIONS:
                     raise ValueError('Обязательно укажите следующую операцию если транспорт не проходит контрольное взвешивание')
         return self
-
-
-
 
