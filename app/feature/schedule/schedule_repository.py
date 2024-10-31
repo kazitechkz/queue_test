@@ -36,13 +36,14 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
     def __init__(self, db: Session = Depends(get_db)):
         super().__init__(ScheduleModel, db)
 
-
-    async def check_late_schedules (self,orderRepo:OrderRepository):
+    async def check_late_schedules(self, orderRepo: OrderRepository):
         current_time = datetime.now()
         filters = [
             (or_(
-                and_(self.model.end_at < current_time, self.model.rescheduled_end_at == None, self.model.is_active == True,self.model.is_used == False),
-                and_(self.model.rescheduled_end_at < current_time, self.model.rescheduled_end_at != None, self.model.is_active == True,self.model.is_used == False),
+                and_(self.model.end_at < current_time, self.model.rescheduled_end_at == None,
+                     self.model.is_active == True, self.model.is_used == False),
+                and_(self.model.rescheduled_end_at < current_time, self.model.rescheduled_end_at != None,
+                     self.model.is_active == True, self.model.is_used == False),
             ))
         ]
         updated = 0
@@ -50,8 +51,10 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
         schedule_ids = [schedule.id for schedule in schedules]
         order_ids = [schedule.order_id for schedule in schedules]
         if len(schedule_ids) > 0:
-            updated_value = {"canceled_at":current_time, "cancel_reason":"Опоздали","is_active":False, "is_used":False,"is_executed":False,"is_canceled":True}
-            updated = await self.update_with_filters(update_values=updated_value,filters=[and_(self.model.id.in_(schedule_ids))])
+            updated_value = {"canceled_at": current_time, "cancel_reason": "Опоздали", "is_active": False,
+                             "is_used": False, "is_executed": False, "is_canceled": True}
+            updated = await self.update_with_filters(update_values=updated_value,
+                                                     filters=[and_(self.model.id.in_(schedule_ids))])
             orders = await orderRepo.get_all_with_filter(filters=[and_(orderRepo.model.id.in_(order_ids))])
             for order in orders:
                 await self.calculate_order(order=order, orderRepo=orderRepo)
@@ -59,9 +62,9 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
 
     async def my_schedules_count(self,
                                  userDTO: UserRDTOWithRelations,
-                                 filter:ScheduleClientFromToFilter,
-                                 date_filters:list,
-                                 orderRepo:OrderRepository
+                                 filter: ScheduleClientFromToFilter,
+                                 date_filters: list,
+                                 orderRepo: OrderRepository
                                  ) -> list[ScheduleCalendarDTO]:
         filters = []
 
@@ -86,14 +89,15 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
         schedule_calendars_dto = []
         for date_filter in date_filters:
             total = [schedule.id for schedule in schedules
-                                if schedule.start_at >= date_filter[0] and schedule.start_at < date_filter[1]]
+                     if schedule.start_at >= date_filter[0] and schedule.start_at < date_filter[1]]
             active_schedule = [schedule.id for schedule in schedules
-                                if schedule.is_active and schedule.start_at >= date_filter[0] and schedule.start_at < date_filter[1]
-                               ]
-            canceled_schedule = [schedule.id for schedule in schedules
-                               if schedule.is_canceled and schedule.start_at >= date_filter[0] and schedule.start_at <
+                               if schedule.is_active and schedule.start_at >= date_filter[0] and schedule.start_at <
                                date_filter[1]
                                ]
+            canceled_schedule = [schedule.id for schedule in schedules
+                                 if schedule.is_canceled and schedule.start_at >= date_filter[0] and schedule.start_at <
+                                 date_filter[1]
+                                 ]
 
             executed_schedule = [schedule.id for schedule in schedules
                                  if schedule.is_executed and schedule.start_at >= date_filter[0] and schedule.start_at <
@@ -102,19 +106,19 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
             if len(total) > 0:
                 schedule_calendars_dto.append(
                     ScheduleCalendarDTO(
-                        scheduled_at = date_filter[0].date(),
-                        total = len(total),
-                        total_active = len(active_schedule),
-                        total_canceled = len(canceled_schedule),
-                        total_executed = len(executed_schedule),
+                        scheduled_at=date_filter[0].date(),
+                        total=len(total),
+                        total_active=len(active_schedule),
+                        total_canceled=len(canceled_schedule),
+                        total_executed=len(executed_schedule),
                     )
                 )
 
         return schedule_calendars_dto
 
-
     async def get_active_schedules(self, userDTO: UserRDTOWithRelations, operationRepo: OperationRepository):
-        operations = await operationRepo.get_all_with_filter(filters=[and_(operationRepo.model.role_value == userDTO.role.value)])
+        operations = await operationRepo.get_all_with_filter(
+            filters=[and_(operationRepo.model.role_value == userDTO.role.value)])
         operation_ids = [operation.id for operation in operations]
         filters = []
         exclude_id = None
@@ -144,23 +148,25 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
                     if exclude_id in operation_ids:
                         operation_ids.remove(exclude_id)
                     filters.append(or_(
-                                entry_filter,
-                                and_(
-                                    self.model.current_operation_id == TableConstantsNames.ExitCheckOperationId,
-                                    self.model.responsible_id == None,
-                                    self.model.responsible_name == None,
-                                    self.model.is_active == True
-                                )
+                        entry_filter,
+                        and_(
+                            self.model.current_operation_id == TableConstantsNames.ExitCheckOperationId,
+                            self.model.responsible_id == None,
+                            self.model.responsible_name == None,
+                            self.model.is_active == True
+                        )
                     ))
                 else:
                     filters.append(and_(self.model.current_operation_id.in_(operation_ids),
                                         self.model.responsible_id == None,
                                         self.model.responsible_name == None,
-                                        self.model.is_active == True ))
+                                        self.model.is_active == True))
 
-        return await self.get_all_with_filter(filters=filters,options=[selectinload(self.model.current_operation)])
+        return await self.get_all_with_filter(filters=filters, options=[selectinload(self.model.current_operation)])
+
     async def get_canceled_schedules(self, userDTO: UserRDTOWithRelations, operationRepo: OperationRepository):
-        operations = await operationRepo.get_all_with_filter(filters=[and_(operationRepo.model.role_value == userDTO.role.value)])
+        operations = await operationRepo.get_all_with_filter(
+            filters=[and_(operationRepo.model.role_value == userDTO.role.value)])
         operation_ids = [operation.id for operation in operations]
         start_of_day = datetime.combine(datetime.today(), time(0, 0, 0))
         end_of_day = datetime.combine(datetime.today(), time(23, 59, 59))
@@ -169,7 +175,7 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
             self.model.is_canceled == True,
             self.model.start_at > start_of_day,
             self.model.end_at < end_of_day
-        )],options=[selectinload(self.model.current_operation)])
+        )], options=[selectinload(self.model.current_operation)])
         return schedules
 
     async def calculate_order(self, order: OrderModel, orderRepo: OrderRepository, ):
@@ -185,7 +191,7 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
         booked_max = sum(schedule.loading_volume_kg for schedule in schedule_booked)
 
         # Присваиваем рассчитанные значения в DTO
-        if(order.status_id == TableConstantsNames.OrderStatusWaitingForExecutionId):
+        if (order.status_id == TableConstantsNames.OrderStatusWaitingForExecutionId):
             order_dto.status_id = 6
         order_dto.quan_booked = booked_max
         order_dto.quan_released = release_max
@@ -205,12 +211,14 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
         vehicle = await vehicleRepo.get(id=dto.vehicle_id)
         workshopSchedule = await workshopScheduleRepo.get(id=dto.workshop_schedule_id)
         if order:
-            active_schedules = await self.get_schedule(workshop_sap_id=order.workshop_sap_id,schedule_date=dto.scheduled_data,workshopScheduleRepo=workshopScheduleRepo)
+            active_schedules = await self.get_schedule(workshop_sap_id=order.workshop_sap_id,
+                                                       schedule_date=dto.scheduled_data,
+                                                       workshopScheduleRepo=workshopScheduleRepo)
         if dto.trailer_id is not None:
             trailer = await vehicleRepo.get(id=dto.trailer_id)
-        #Статическая проверка
+        # Статическая проверка
         self.check_individual_form(dto=dto, order=order, vehicle=vehicle, trailer=trailer, userDTO=userDTO,
-                                   workshopSchedule=workshopSchedule,openWorkshopSchedules=active_schedules)
+                                   workshopSchedule=workshopSchedule, openWorkshopSchedules=active_schedules)
         # Проверка доступных машин
         await self.check_available_vehicle_or_driver(scheduled_data=dto.scheduled_data, start_at=dto.start_at,
                                                      end_at=dto.end_at, vehicle_id=dto.vehicle_id,
@@ -245,6 +253,7 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
             active_schedules = await self.get_schedule(workshop_sap_id=order.workshop_sap_id,
                                                        schedule_date=dto.scheduled_data,
                                                        workshopScheduleRepo=workshopScheduleRepo)
+            print(f"active_schedules is: {active_schedules}")
         vehicle = await vehicleRepo.get(id=dto.vehicle_id)
         workshopSchedule = await workshopScheduleRepo.get(id=dto.workshop_schedule_id)
         if organization is not None and dto.driver_id != userDTO.id:
@@ -254,7 +263,7 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
                 driver = await userRepo.get(id=dto.driver_id)
         if dto.trailer_id is not None:
             trailer = await vehicleRepo.get(id=dto.trailer_id)
-            #Статическая проверка
+            # Статическая проверка
         self.check_legal_form(dto=dto,
                               order=order,
                               vehicle=vehicle,
@@ -265,8 +274,10 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
                               workshopSchedule=workshopSchedule,
                               openWorkshopSchedules=active_schedules
                               )
-        #Проверка доступных машин
-        await self.check_available_vehicle_or_driver(scheduled_data=dto.scheduled_data,start_at=dto.start_at, end_at=dto.end_at,vehicle_id=dto.vehicle_id,trailer_id=dto.trailer_id)
+        # Проверка доступных машин
+        await self.check_available_vehicle_or_driver(scheduled_data=dto.scheduled_data, start_at=dto.start_at,
+                                                     end_at=dto.end_at, vehicle_id=dto.vehicle_id,
+                                                     trailer_id=dto.trailer_id)
         scheduleDTO = self.prepare_dto_legal(dto=dto, order=order, userDTO=userDTO, vehicle=vehicle, trailer=trailer,
                                              organization=organization, driver=driver)
         schedule = await self.create(obj=ScheduleModel(**scheduleDTO.dict()))
@@ -277,7 +288,7 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
             self, workshop_sap_id: str,
             schedule_date: datetime.date,
             workshopScheduleRepo: WorkshopScheduleRepository,
-    )->list[ScheduleSpaceDTO]:
+    ) -> list[ScheduleSpaceDTO]:
         active_schedule = await workshopScheduleRepo.get_with_filter(
             filters=[and_(
                 workshopScheduleRepo.model.workshop_sap_id == workshop_sap_id,
@@ -352,28 +363,27 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
 
         return planned_schedules
 
-    async def reshedule_data(self, dto:RescheduleAllDTO):
-        start_at = datetime.combine(date=dto.scheduled_data,time=time(0,0,0))
-        end_at = datetime.combine(date=dto.scheduled_data,time=time(23,59,59))
+    async def reshedule_data(self, dto: RescheduleAllDTO):
+        start_at = datetime.combine(date=dto.scheduled_data, time=time(0, 0, 0))
+        end_at = datetime.combine(date=dto.scheduled_data, time=time(23, 59, 59))
 
         if dto.scheduled_data == date.today():
             start_at = datetime.now()
 
         schedules = await self.get_all_with_filter(filters=[and_(
-                                                            self.model.is_active == True,
-                                                            self.model.is_used == False,
-                                                            self.model.end_at > start_at,
-                                                            self.model.end_at < end_at)])
+            self.model.is_active == True,
+            self.model.is_used == False,
+            self.model.end_at > start_at,
+            self.model.end_at < end_at)])
         schedules_update = []
         for schedule in schedules:
             schedule.rescheduled_start_at = schedule.start_at + timedelta(minutes=dto.minute)
             schedule.rescheduled_end_at = schedule.end_at + timedelta(minutes=dto.minute)
-            updated_schedule = await self.update(obj=schedule,dto=ScheduleCDTO.from_orm(schedule))
+            updated_schedule = await self.update(obj=schedule, dto=ScheduleCDTO.from_orm(schedule))
             schedules_update.append(updated_schedule)
         return schedules_update
 
-
-    async def reschedule_to_date(self, schedule_id:int, dto: RescheduleOneDTO):
+    async def reschedule_to_date(self, schedule_id: int, dto: RescheduleOneDTO):
         schedule = await self.get_first_with_filter(and_(
             self.model.id == schedule_id,
             self.model.is_active == True,
@@ -383,19 +393,20 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
             raise AppExceptionResponse.bad_request("Расписание не найдено либо неактивно")
 
         schedule_dto = ScheduleCDTO.from_orm(schedule)
-        schedule_dto.rescheduled_start_at = datetime.combine(dto.scheduled_data,dto.start_at)
-        schedule_dto.rescheduled_end_at = datetime.combine(dto.scheduled_data,dto.end_at)
+        schedule_dto.rescheduled_start_at = datetime.combine(dto.scheduled_data, dto.start_at)
+        schedule_dto.rescheduled_end_at = datetime.combine(dto.scheduled_data, dto.end_at)
         updated_schedule = await self.update(obj=schedule, dto=schedule_dto)
         return updated_schedule
 
-    async def cancel_one_schedule(self, schedule_id:int, dto: ScheduleCancelOneDTO,orderRepo:OrderRepository, userDTO:UserRDTOWithRelations,):
+    async def cancel_one_schedule(self, schedule_id: int, dto: ScheduleCancelOneDTO, orderRepo: OrderRepository,
+                                  userDTO: UserRDTOWithRelations, ):
         filters = []
-        if(userDTO.role.value == TableConstantsNames.RoleAdminValue):
+        if (userDTO.role.value == TableConstantsNames.RoleAdminValue):
             filters.append(and_(
-            self.model.id == schedule_id,
-            self.model.is_active == True,
-            self.model.is_used == False
-        ))
+                self.model.id == schedule_id,
+                self.model.is_active == True,
+                self.model.is_used == False
+            ))
         else:
             filters.append(and_(
                 self.model.id == schedule_id,
@@ -422,10 +433,10 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
         return updated_schedule
 
     async def cancel_all_schedules(self,
-                                  dto:ScheduleCancelDTO,
-                                  orderRepo:OrderRepository,
-                                  userDTO:UserRDTOWithRelations,
-                                  ):
+                                   dto: ScheduleCancelDTO,
+                                   orderRepo: OrderRepository,
+                                   userDTO: UserRDTOWithRelations,
+                                   ):
         start_at = datetime.combine(date=dto.scheduled_data, time=time(0, 0, 0))
         end_at = datetime.combine(date=dto.scheduled_data, time=time(23, 59, 59))
         if dto.scheduled_data == date.today():
@@ -450,10 +461,9 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
             updated_schedule = await self.update(obj=schedule, dto=schedule_dto)
             if updated_schedule:
                 order = await orderRepo.get(id=updated_schedule.order_id)
-                await self.calculate_order(order=order,orderRepo=orderRepo)
+                await self.calculate_order(order=order, orderRepo=orderRepo)
             schedules_update.append(updated_schedule)
         return schedules_update
-
 
     @staticmethod
     def prepare_dto_individual(dto: ScheduleIndividualCDTO, order: Optional[OrderModel], userDTO: UserRDTOWithRelations,
@@ -559,22 +569,24 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
         if order.workshop_sap_id != workshopSchedule.workshop_sap_id:
             raise AppExceptionResponse.bad_request("Шаблонная модель расписания цеха не совпадает")
         if openWorkshopSchedules is None:
-            raise AppExceptionResponse.bad_request("Время расписания забронировано не найдено или забронировано")
+            raise AppExceptionResponse.bad_request("Время расписания не найдено или забронировано")
         scheduled_at = next(
-                        (openSchedule for openSchedule in openWorkshopSchedules
-                         if openSchedule.start_at == dto.start_at and openSchedule.end_at == dto.end_at),
-                        None
-                    )
+            (openSchedule for openSchedule in openWorkshopSchedules
+             if openSchedule.start_at == dto.start_at and openSchedule.end_at == dto.end_at),
+            None
+        )
         if scheduled_at is None:
-            raise AppExceptionResponse.bad_request("Время расписания забронировано не найдено или забронировано")
+            raise AppExceptionResponse.bad_request("Время расписания не найдено или забронировано")
         quan_kg = int(dto.booked_quan_t * 1000)
         vehicle_load = vehicle.load_max_kg
         if trailer:
             vehicle_load += trailer.weight_clean_kg
         if quan_kg > order.quan_left:
-            raise AppExceptionResponse.bad_request("Вы не можете забронировать материал объем которого превышают доступный остаток")
+            raise AppExceptionResponse.bad_request(
+                "Вы не можете забронировать материал объем которого превышают доступный остаток")
         if quan_kg > vehicle_load:
-            raise AppExceptionResponse.bad_request("Вы не можете забронировать материал объем которого превышают максимальную грузоподъемность транспорта")
+            raise AppExceptionResponse.bad_request(
+                "Вы не можете забронировать материал объем которого превышают максимальную грузоподъемность транспорта")
 
     @staticmethod
     def check_legal_form(
@@ -618,9 +630,9 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
             raise AppExceptionResponse.bad_request("Время расписания забронировано или не найдено")
         scheduled_at = next(
             (openSchedule for openSchedule in openWorkshopSchedules
-                     if openSchedule.start_at == dto.start_at and openSchedule.end_at == dto.end_at),
-                    None
-                )
+             if openSchedule.start_at == dto.start_at and openSchedule.end_at == dto.end_at),
+            None
+        )
         if scheduled_at is None:
             raise AppExceptionResponse.bad_request("Время расписания забронировано или не найдено")
         quan_kg = int(dto.booked_quan_t * 1000)
@@ -634,10 +646,12 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
             raise AppExceptionResponse.bad_request(
                 "Вы не можете забронировать материал объем которого превышают максимальную грузоподъемность транспорта")
 
-    async def check_available_vehicle_or_driver(self,scheduled_data: date,start_at: time,end_at:time,vehicle_id:int,trailer_id:Optional[int]):
-        start_at = datetime.combine(scheduled_data,start_at)
-        end_at = datetime.combine(scheduled_data,end_at)
-        filters = [and_(self.model.vehicle_id == vehicle_id,self.model.start_at == start_at, self.model.end_at == end_at)]
+    async def check_available_vehicle_or_driver(self, scheduled_data: date, start_at: time, end_at: time,
+                                                vehicle_id: int, trailer_id: Optional[int]):
+        start_at = datetime.combine(scheduled_data, start_at)
+        end_at = datetime.combine(scheduled_data, end_at)
+        filters = [
+            and_(self.model.vehicle_id == vehicle_id, self.model.start_at == start_at, self.model.end_at == end_at)]
         if trailer_id is not None:
             filters.append(and_(or_(self.model.vehicle_id == vehicle_id, self.model.trailer_id == trailer_id)))
         else:
@@ -645,5 +659,3 @@ class ScheduleRepository(BaseRepository[ScheduleModel]):
         result = await self.get_with_filter(filters=filters)
         if result is not None:
             raise AppExceptionResponse.bad_request("Данный транспорт или трейлер уже занят на текущее время")
-
-

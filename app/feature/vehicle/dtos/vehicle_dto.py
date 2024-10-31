@@ -21,16 +21,16 @@ class VehicleCDTO(BaseModel):
     start_at: datetime = Field(description="Дата выдачи свидетельства")
     vin: str = Field(description="VIN 17 значный уникальный код")
     produced_at: int = Field(gt=1950, le=datetime.now().year, description="Год выпуска технического средства")
-    engine_volume_sm: int = Field(gt=0, description="Объем двигателя в сантиметрах кубических")
+    engine_volume_sm: int = Field(description="Объем двигателя в сантиметрах кубических")
     weight_clean_kg: int = Field(gt=0, description="Масса без нагрузки в кг")
     weight_load_max_kg: int = Field(gt=0, description="Масса с максимальной нагрузкой в кг")
     note: Optional[str] = Field(max_length=2000, description="Уникальные отметки")
     deregistration_note: Optional[str] = Field(max_length=2000, description="Отметки о снятии с учета")
     is_trailer: bool = Field(default=False, description="ТС является прицепом")
 
-    category_id: int = Field(gt=0, description="Категория Транспортного Средства")
-    color_id: int = Field(gt=0, description="Цвет Транспортного Средства")
-    region_id: int = Field(gt=0, description="Место жительства")
+    category_id: Optional[int] = Field(gt=0, description="Категория Транспортного Средства")
+    color_id: Optional[int] = Field(gt=0, description="Цвет Транспортного Средства")
+    region_id: Optional[int] = Field(gt=0, description="Место жительства")
     owner_id: Optional[int] = Field(description="Физическое лицо - владелец транспортного средства")
     organization_id: Optional[int] = Field(description="Юридическое лицо - владелец транспортного средства")
 
@@ -56,9 +56,11 @@ class VehicleCDTO(BaseModel):
 
     @field_validator("start_at")
     def validate_start_at(cls, value: datetime):
+        # Приведение даты начала к UTC
+        if value.tzinfo is None:
+            value = value.replace(tzinfo=timezone.utc)
         min_date = datetime(1900, 1, 1, tzinfo=timezone.utc)  # Приведение к offset-aware
         current_date = datetime.now(timezone.utc)  # Текущая дата также offset-aware
-
         if not (min_date < value < current_date):
             raise ValueError(f"Дата должна быть больше {min_date} и меньше текущей даты {current_date}.")
         return value

@@ -16,8 +16,8 @@ class BaselineWeightRepository(BaseRepository[BaselineWeightModel]):
 
     async def get_vehicle_trailer_weights(
             self,
-            ids:List[int]
+            ids: List[int]
     ):
         return await self.get_all_with_filter(
-            filters=[and_(self.model.vehicle_id.in_(ids),self.model.end_at > datetime.now())],
+            filters=[and_(self.model.vehicle_id.in_(ids), self.model.end_at > datetime.now())],
         )
