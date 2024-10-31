@@ -3,7 +3,6 @@ from typing import Optional
 
 from pydantic import BaseModel, Field, model_validator
 
-
 from app.shared.database_constants import TableConstantsNames
 
 
@@ -12,6 +11,7 @@ class ScheduleHistoryDTO(BaseModel):
 
     class Config:
         from_attributes = True  # Для работы с объектами SQLAlchemy напрямую
+
 
 class ScheduleHistoryCDTO(BaseModel):
     schedule_id: Optional[int] = Field(None, description="ID расписания")
@@ -29,6 +29,7 @@ class ScheduleHistoryCDTO(BaseModel):
     class Config:
         from_attributes = True
 
+
 class ScheduleHistoryRDTO(ScheduleHistoryDTO):
     schedule_id: Optional[int] = Field(None, description="ID расписания")
     operation_id: Optional[int] = Field(None, description="ID операции")
@@ -45,12 +46,13 @@ class ScheduleHistoryRDTO(ScheduleHistoryDTO):
     class Config:
         from_attributes = True
 
+
 class ScheduleHistoryAnswerDTO(BaseModel):
-    operation_value:str = Field(..., description="Значение операции")
-    next_operation_value:Optional[str] = Field(None, description="Значение операции")
-    is_passed:bool =  Field(..., description="Пройдено ли")
+    operation_value: str = Field(..., description="Значение операции")
+    next_operation_value: Optional[str] = Field(None, description="Значение операции")
+    is_passed: bool = Field(..., description="Пройдено ли")
     cancel_reason: Optional[str] = Field(None, max_length=1000, description="Причина отмены")
-    vehicle_id:Optional[int] = Field(..., description="Идентификатор транспорта в кг")
+    vehicle_id: Optional[int] = Field(..., description="Идентификатор транспорта в кг")
     vehicle_tara_kg: Optional[int] = Field(..., description="Вес тары транспорта в кг", gt=500)
     trailer_id: Optional[int] = Field(..., description="Идентификатор прицепа в кг")
     trailer_tara_kg: Optional[int] = Field(..., description="Вес прицепа в кг", gt=100)
@@ -74,6 +76,6 @@ class ScheduleHistoryAnswerDTO(BaseModel):
                     raise ValueError('Вес брутто обязателен если транспорт проходит контрольное взвешивание')
             if not is_passed:
                 if next_operation_value not in TableConstantsNames.RELOAD_OPERATIONS:
-                    raise ValueError('Обязательно укажите следующую операцию если транспорт не проходит контрольное взвешивание')
+                    raise ValueError(
+                        'Обязательно укажите следующую операцию если транспорт не проходит контрольное взвешивание')
         return self
-

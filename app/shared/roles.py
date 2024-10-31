@@ -51,10 +51,10 @@ def assign_roles(app):
     assign_roles_to_route(app, "/organization-employee/update/{id}", ["admin"])
     assign_roles_to_route(app, "/organization-employee/delete/{id}", ["admin"])
 
-    assign_roles_to_route(app,"/employee-request/search-employee",["client"])
-    assign_roles_to_route(app,"/employee-request/create-request",["client"])
-    assign_roles_to_route(app,"/employee-request/my-requests",["client"])
-    assign_roles_to_route(app,"/employee-request/make-decision/{id}",["client"])
+    assign_roles_to_route(app, "/employee-request/search-employee", ["client"])
+    assign_roles_to_route(app, "/employee-request/create-request", ["client"])
+    assign_roles_to_route(app, "/employee-request/my-requests", ["client"])
+    assign_roles_to_route(app, "/employee-request/make-decision/{id}", ["client"])
 
     assign_roles_to_route(app, "/vehicle-color/", ["admin", "client"])
     assign_roles_to_route(app, "/vehicle-color/create", ["admin"])
@@ -86,7 +86,7 @@ def assign_roles(app):
     assign_roles_to_route(app, "/factory/", ["admin", "client"])
     assign_roles_to_route(app, "/factory/create", ["admin"])
     assign_roles_to_route(app, "/factory/get/{id}", ["admin"])
-    assign_roles_to_route(app, "/factory/get-by-sap/{sap_id}", ["admin","employee","client"])
+    assign_roles_to_route(app, "/factory/get-by-sap/{sap_id}", ["admin", "employee", "client"])
     assign_roles_to_route(app, "/factory/update/{id}", ["admin"])
     assign_roles_to_route(app, "/factory/delete/{id}", ["admin"])
 
@@ -157,8 +157,8 @@ def assign_roles(app):
     assign_roles_to_route(app, "/schedule-history/take-request/{schedule_id}", ["employee"])
     assign_roles_to_route(app, "/schedule-history/make-decision/{schedule_id}", ["employee"])
 
-    assign_roles_to_route(app, "/act-weight/all", ["admin","employee"])
-    assign_roles_to_route(app, "/act-weight/get/{id}", ["admin","employee","client"])
+    assign_roles_to_route(app, "/act-weight/all", ["admin", "employee"])
+    assign_roles_to_route(app, "/act-weight/get/{id}", ["admin", "employee", "client"])
 
     assign_roles_to_route(app, "/initial-weight/all", ["admin", "employee"])
     assign_roles_to_route(app, "/initial-weight/get/{id}", ["admin", "employee", "client"])

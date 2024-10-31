@@ -2,12 +2,14 @@ from fastapi import APIRouter, Path, Depends
 
 from app.core.auth_core import check_employee
 from app.feature.act_weight.act_weight_repository import ActWeightRepository
+from app.feature.baseline_weight.baseline_weight_repository import BaselineWeightRepository
 from app.feature.initial_weight.initial_weight_repository import InitialWeightRepository
 from app.feature.operation.operation_repository import OperationRepository
 from app.feature.order.order_repository import OrderRepository
 from app.feature.schedule.schedule_repository import ScheduleRepository
 from app.feature.schedule_history.dtos.schedule_history_dto import ScheduleHistoryAnswerDTO
 from app.feature.schedule_history.schedule_history_repository import ScheduleHistoryRepository
+from app.feature.user.user_repository import UserRepository
 from app.feature.vehicle.vehicle_repository import VehicleRepository
 from app.shared.relation_dtos.user_organization import UserRDTOWithRelations
 
@@ -52,8 +54,11 @@ class ScheduleHistoryController:
             actWeightRepo: ActWeightRepository = Depends(ActWeightRepository),
             orderRepo: OrderRepository = Depends(OrderRepository),
             operationRepo: OperationRepository = Depends(OperationRepository),
+            baseLineRepo: BaselineWeightRepository = Depends(BaselineWeightRepository),
+            userRepository: UserRepository = Depends(UserRepository)
     ):
         return await repo.accept_or_cancel(schedule_id=schedule_id, dto=dto, userRDTO=userRDTO,
                                            scheduleRepo=scheduleRepo, initialWeightRepo=initialWeightRepo,
                                            actWeightRepo=actWeightRepo, orderRepo=orderRepo,
-                                           operationRepo=operationRepo)
+                                           operationRepo=operationRepo, baseLineWeightRepo=baseLineRepo,
+                                           userRepo=userRepository)

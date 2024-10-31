@@ -20,7 +20,8 @@ class BaselineWeightController:
             "/get-vehicle-trailer-weights",
             response_model=List[BaselineWeightRDTO],
             summary="Получить все данные первичного веса нескольких транспортных средств",
-            description="Получить все данные первичного веса нескольких транспортных средств по уникальным идентификаторам транспортных средств"
+            description="Получить все данные первичного веса нескольких транспортных средств по уникальным "
+                        "идентификаторам транспортных средств "
         )(self.get_vehicle_trailer_weights)
         self.router.get(
             "/get/{vehicle-id}",
@@ -29,25 +30,21 @@ class BaselineWeightController:
             description="Получить данные первичного веса для транспортного средства по его уникальному ID"
         )(self.get)
 
-
-
-
     async def get_vehicle_trailer_weights(
             self,
-            ids:List[int] = Query(description="Идентфикаторы транспортных средств"),
+            ids: List[int] = Query(description="Идентфикаторы транспортных средств"),
             repo: BaselineWeightRepository = Depends(BaselineWeightRepository),
             userRDTO: UserRDTOWithRelations = Depends(get_current_user),
     ):
         return await repo.get_all_with_filter(
-            filters=[and_(repo.model.vehicle_id.in_(ids),repo.model.end_at > datetime.now())],
+            filters=[and_(repo.model.vehicle_id.in_(ids), repo.model.end_at > datetime.now())],
         )
-
 
     async def get(
             self,
             vehicle_id: int,
             repo: BaselineWeightRepository = Depends(BaselineWeightRepository),
             userRDTO: UserRDTOWithRelations = Depends(get_current_user)):
-        return await repo.get_all_with_filter(
+        return await repo.get_first_with_filters(
             filters=[and_(repo.model.vehicle_id == vehicle_id)],
         )

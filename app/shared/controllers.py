@@ -1,4 +1,5 @@
 from app.feature.auth.auth_controller import AuthController
+from app.feature.baseline_weight.baseline_weight_controller import BaselineWeightController
 from app.feature.factory.factory_controller import FactoryController
 from app.feature.kaspi_payment.kaspi_payment_controller import KaspiPaymentController
 from app.feature.material.material_controller import MaterialController
@@ -53,6 +54,7 @@ def include_routers(app):
     app.include_router(ScheduleHistoryController().router, prefix="/schedule-history", tags=["schedule-history"])
     app.include_router(ActWeightController().router, prefix="/act-weight", tags=["act-weight"])
     app.include_router(InitialWeightController().router, prefix="/initial-weight", tags=["initial-weight"])
+    app.include_router(BaselineWeightController().router, prefix="/baseline-weight", tags=["baseline-weight"])
     app.include_router(EmployeeRequestController().router, prefix="/employee-request", tags=["employee-request"])
     app.include_router(QrController().router, prefix="/get-qr", tags=["get QR"])
     app.include_router(TestController().router, prefix="/test", tags=["test"])
