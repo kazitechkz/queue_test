@@ -68,7 +68,10 @@ class ScheduleHistoryRepository(BaseRepository[ScheduleHistoryModel]):
                 detail="Отказано в доступе",
             )
         schedule_history = await self.get_first_with_filters(
-            filters=[{"schedule_id": schedule_id}, {"operation_id": operation.id}])
+            filters=[{"schedule_id": schedule_id}, {"operation_id": operation.id}],
+            order_by=[('id', 'desc')]
+        )
+
         if schedule_history is not None:
             if schedule_history.responsible_id is not None:
                 return schedule_history
@@ -151,7 +154,7 @@ class ScheduleHistoryRepository(BaseRepository[ScheduleHistoryModel]):
             is_passed = dto.is_passed
             next_id = operation.next_id
             total_weight = (dto.vehicle_tara_kg or 0) + (dto.trailer_tara_kg or 0)
-            print(f"total_weight: {total_weight}")
+
             if not dto.is_passed:
                 if operation.value == TableConstantsNames.FinalWeightOperationName:
                     next_operation = await operationRepo.get_filtered(filters={"value": dto.next_operation_value})

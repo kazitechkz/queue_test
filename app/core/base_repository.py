@@ -1,7 +1,7 @@
 from typing import List, Type, Generic, TypeVar, Optional, Any, Dict
 
 from pydantic import BaseModel
-from sqlalchemy import select, func, and_, update
+from sqlalchemy import select, func, and_, update, asc, desc
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -115,7 +115,12 @@ class BaseRepository(Generic[T]):
         result = await self.db.execute(query)
         return result.scalars().first()
 
-    async def get_first_with_filters(self, filters: list = [], options: Optional[list] = None):
+    async def get_first_with_filters(
+            self,
+            filters: list = [],
+            options: Optional[list] = None,
+            order_by: Optional[list] = None
+    ):
         query = select(self.model)
         if options:
             for option in options:
@@ -131,6 +136,22 @@ class BaseRepository(Generic[T]):
             # Apply the filter conditions to the query
             if conditions:
                 query = query.filter(and_(*conditions))
+
+        # Apply ordering if the order_by parameter is provided
+        if order_by:
+            order_clauses = []
+            for field in order_by:
+                if isinstance(field, str):
+                    # Default to ascending if only field name is provided
+                    order_clauses.append(asc(getattr(self.model, field)))
+                elif isinstance(field, tuple) and len(field) == 2:
+                    # Allow specifying order as ("field_name", "asc" or "desc")
+                    field_name, direction = field
+                    if direction == "desc":
+                        order_clauses.append(desc(getattr(self.model, field_name)))
+                    else:
+                        order_clauses.append(asc(getattr(self.model, field_name)))
+            query = query.order_by(*order_clauses)
 
         result = await self.db.execute(query)
         return result.scalars().first()
