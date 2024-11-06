@@ -62,6 +62,10 @@ class OrderRDTO(BaseModel):
     finished_at: Optional[datetime] = Field(description="Время завершения заказа")
     paid_at: Optional[datetime] = Field(description="Время оплаты заказа")
 
+    checked_payment_by_id: Optional[int] = Field(description="Идентификатор бухгалтера")
+    checked_payment_by: Optional[str] = Field(description="Имя бухгалтера")
+    checked_payment_at: Optional[datetime] = Field(description="Дата проверки")
+
     must_paid_at: datetime = Field(description="Дата окончания оплаты")
     created_at: datetime = Field(description="Дата создания заказа")
     updated_at: datetime = Field(description="Дата обновления заказа")

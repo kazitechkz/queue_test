@@ -75,6 +75,11 @@ class OrderModel(Base):
     finished_at: Mapped[Optional[datetime]] = mapped_column(Date, default=None, nullable=True)
     paid_at: Mapped[Optional[datetime]] = mapped_column(Date, default=None, nullable=True)
 
+    checked_payment_by_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey(AppTableNames.UserTableName + ".id", onupdate="cascade", ondelete="set null"), nullable=True)
+    checked_payment_by: Mapped[Optional[str]] = mapped_column(String(length=255), nullable=True)
+    checked_payment_at: Mapped[Optional[datetime]] = mapped_column(Date, nullable=True)
+
     created_at: Mapped[CreatedAt]
     updated_at: Mapped[UpdatedAt]
     must_paid_at: Mapped[Optional[datetime]] = mapped_column(
@@ -91,10 +96,10 @@ class OrderModel(Base):
         back_populates="orders",
     )
 
-    factory: Mapped["FactoryModel"] = relationship("FactoryModel", back_populates="order",foreign_keys=[factory_id])
+    factory: Mapped["FactoryModel"] = relationship("FactoryModel", back_populates="order", foreign_keys=[factory_id])
     workshop: Mapped["WorkshopModel"] = relationship("WorkshopModel", foreign_keys=[workshop_id])
     kaspi: Mapped["KaspiPaymentModel"] = relationship("KaspiPaymentModel", foreign_keys=[kaspi_id])
-    owner:Mapped["UserModel"] = relationship("UserModel",back_populates="orders",foreign_keys=[owner_id])
+    owner: Mapped["UserModel"] = relationship("UserModel", back_populates="orders", foreign_keys=[owner_id])
 
     # Связь с SapRequestModel для "успешного" запроса
     sap_request: Mapped["SapRequestModel"] = relationship(
@@ -118,21 +123,21 @@ class OrderModel(Base):
         primaryjoin="and_(SapRequestModel.order_id == OrderModel.id, SapRequestModel.is_failed == True)",
     )
 
-    #Акт взвешивания
-    act_weights:Mapped[List["ActWeightModel"]] = relationship(
+    # Акт взвешивания
+    act_weights: Mapped[List["ActWeightModel"]] = relationship(
         "ActWeightModel",
         back_populates="order",
         foreign_keys="[ActWeightModel.order_id]"
     )
 
-    #Первоначальное взвешивание
-    initial_weights:Mapped[List["InitialWeightModel"]] = relationship(
+    # Первоначальное взвешивание
+    initial_weights: Mapped[List["InitialWeightModel"]] = relationship(
         "InitialWeightModel",
         back_populates="order",
         foreign_keys="[InitialWeightModel.order_id]"
     )
 
-    #Kaspi Payments
+    # Kaspi Payments
     kaspi_payment: Mapped["KaspiPaymentModel"] = relationship(
         "KaspiPaymentModel",
         back_populates="order",
@@ -141,7 +146,7 @@ class OrderModel(Base):
         primaryjoin="and_(KaspiPaymentModel.order_id == OrderModel.id, KaspiPaymentModel.is_paid == True)",
         overlaps="kaspi_payment_failed"  # Указываем, что эта связь перекрывается с sap_request_failed
     )
-    kaspi_payment_failed:Mapped[List["KaspiPaymentModel"]] = relationship(
+    kaspi_payment_failed: Mapped[List["KaspiPaymentModel"]] = relationship(
         "KaspiPaymentModel",
         back_populates="order_failed",
         foreign_keys="[KaspiPaymentModel.order_id]",

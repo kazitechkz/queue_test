@@ -9,6 +9,7 @@ from app.feature.order.order_controller import OrderController
 from app.feature.organization.organization_controller import OrganizationController
 from app.feature.organization_employee.organization_employee_controller import OrganizationEmployeeController
 from app.feature.organization_type.organization_type_controller import OrganizationTypeController
+from app.feature.payment_document.payment_document_controller import PaymentDocumentController
 from app.feature.qr.qr_controller import QrController
 from app.feature.region.region_controller import RegionController
 from app.feature.role.role_controller import RoleController
@@ -56,5 +57,6 @@ def include_routers(app):
     app.include_router(InitialWeightController().router, prefix="/initial-weight", tags=["initial-weight"])
     app.include_router(BaselineWeightController().router, prefix="/baseline-weight", tags=["baseline-weight"])
     app.include_router(EmployeeRequestController().router, prefix="/employee-request", tags=["employee-request"])
+    app.include_router(PaymentDocumentController().router, prefix="/payment_document", tags=["Upload Payment File"])
     app.include_router(QrController().router, prefix="/get-qr", tags=["get QR"])
     app.include_router(TestController().router, prefix="/test", tags=["test"])

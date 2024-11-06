@@ -165,6 +165,11 @@ def assign_roles(app):
     assign_roles_to_route(app, "/baseline-weight/get-vehicle-trailer-weights", ["admin", "employee", "client"])
     assign_roles_to_route(app, "/baseline-weight/get/{vehicle-id}", ["admin", "employee", "client"])
 
+    assign_roles_to_route(app, "/payment_document/upload-payment-file", ["client"])
+    assign_roles_to_route(app, "/payment_document/get-payment-doc-by-order-id/{order_id}", ["employee"])
+    assign_roles_to_route(app, "/payment_document/add-comment-to-doc", ["employee"])
+    assign_roles_to_route(app, "/payment_document/make-decision", ["employee"])
+
     assign_roles_to_route(app, "/get-qr/get-qr-link/{order_id}", ["admin", "client"])
 
     assign_roles_to_route(app, "/test/test", ["admin"])

@@ -132,3 +132,5 @@ __pypackages__/
 # Other
 *.DS_Store
 Thumbs.db
+
+app/static/
