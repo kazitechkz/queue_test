@@ -11,7 +11,10 @@ from app.core.database import get_db
 from app.core.file_helper import FileUploadHelper
 from app.domain.models.order_model import OrderModel
 from app.domain.models.payment_document_model import PaymentDocumentModel
+from app.feature.order.dtos.order_dto import OrderRDTOWithRelations
+from app.feature.order.filter.order_filter import OrderFiltersForPaymentDocuments
 from app.feature.order.order_repository import OrderRepository
+from app.shared.database_constants import TableConstantsNames
 from app.shared.relation_dtos.user_organization import UserRDTOWithRelations
 
 
@@ -20,10 +23,15 @@ class PaymentDocumentRepository(BaseRepository[PaymentDocumentModel]):
         super().__init__(PaymentDocumentModel, db)
         self.file_helper = FileUploadHelper(db)
 
-    async def upload_file(self, order_id: int, file: UploadFile, orderRepo: OrderRepository):
-        order = await orderRepo.get(id=order_id)
+    async def upload_file(self, order_id: int, file: UploadFile, orderRepo: OrderRepository,
+                          userRepo: UserRDTOWithRelations):
+        if userRepo.user_type.value != TableConstantsNames.UserLegalTypeValue:
+            raise AppExceptionResponse.bad_request("Отказано в доступе")
+        order: OrderModel = await orderRepo.get(id=order_id)
         if order is None:
             raise AppExceptionResponse.bad_request("Заказ не найден")
+        if order.organization_id not in [organization.id for organization in userRepo.organizations]:
+            raise AppExceptionResponse.bad_request("Данный заказ не принадлежит вам")
         if order.status_id != 9 and order.status_id != 3:
             raise AppExceptionResponse.bad_request("Данный этап пройден")
         try:
@@ -57,7 +65,27 @@ class PaymentDocumentRepository(BaseRepository[PaymentDocumentModel]):
         await orderRepo.db.commit()
         await orderRepo.db.refresh(order)
 
-    async def get_payment_doc(self, order_id: int, orderRepo: OrderRepository):
+    async def get_payment_docs(self,
+                               orderRepo: OrderRepository,
+                               params: OrderFiltersForPaymentDocuments,
+                               userRepo: UserRDTOWithRelations):
+        if userRepo.role.value != TableConstantsNames.RoleAccountantValue:
+            raise AppExceptionResponse.bad_request("Отказано в доступе")
+        return await orderRepo.paginate_with_filter(dto=OrderRDTOWithRelations,
+                                                    page=params.page,
+                                                    per_page=params.per_page,
+                                                    filters=params.apply(),
+                                                    options=[
+                                                        selectinload(orderRepo.model.material),
+                                                        selectinload(orderRepo.model.organization),
+                                                        selectinload(orderRepo.model.factory),
+                                                        selectinload(orderRepo.model.workshop),
+                                                        selectinload(orderRepo.model.kaspi),
+                                                        selectinload(orderRepo.model.sap_request),
+                                                    ]
+                                                    )
+
+    async def get_payment_doc_by_order(self, order_id: int, orderRepo: OrderRepository):
         order = await orderRepo.get(id=order_id)
         if order is None:
             raise AppExceptionResponse.bad_request("Заказ не найден")
@@ -90,7 +118,8 @@ class PaymentDocumentRepository(BaseRepository[PaymentDocumentModel]):
 
         return doc
 
-    async def make_decision(self, payment_id: int, orderRepo: OrderRepository, userRepo: UserRDTOWithRelations, status: bool):
+    async def make_decision(self, payment_id: int, orderRepo: OrderRepository, userRepo: UserRDTOWithRelations,
+                            status: bool):
         payment_doc: PaymentDocumentModel = await self.get(id=payment_id)
         if payment_doc is None:
             raise AppExceptionResponse.bad_request("Документ не найден")

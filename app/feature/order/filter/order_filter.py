@@ -1,3 +1,4 @@
+from abc import ABC
 from typing import Optional, List
 
 from fastapi import Query
@@ -71,4 +72,18 @@ class DetailOrderFilter:
             filters.append(and_(self.model.id == self.order_id))
         return filters
 
+
+class OrderFiltersForPaymentDocuments(BaseFilter):
+    def __init__(self,
+                 per_page: int = Query(default=20, gt=0, example=20, description="Количество элементов на страницу"),
+                 page: int = Query(default=1, ge=1, example=1, description="Номер страницы")
+                 ):
+        super().__init__(per_page, page)
+        self.per_page = per_page
+        self.page = page
+        self.model = OrderModel
+
+    def apply(self):
+        filters = [and_(self.model.status_id == 9)]
+        return filters
 
