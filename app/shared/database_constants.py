@@ -24,6 +24,8 @@ class AppTableNames:
     WorkshopTableName = "workshops"
     MaterialTableName = "materials"
     OrderStatusTableName = "order_status"
+    FileTableName = "files"
+    PaymentDocumentTableName = "payment_documents"
     OrderTableName = "orders"
     SAPRequestTableName = "sap_requests"
     KaspiPaymentsTableName = "kaspi_payments"
@@ -52,6 +54,8 @@ class TableConstantsNames:
     RoleWeigherId = 5
     RoleClientValue = "client"
     RoleClientId = 6
+    RoleAccountantValue = "accountant"
+    RoleAccountantId = 6
 
     # User Types
     UserLegalTypeValue = "legal_entity"
@@ -73,6 +77,7 @@ class TableConstantsNames:
     OrderStatusExecuted = "executed"
     OrderStatusFinished = "finished"
     OrderStatusCanceled = "canceled"
+    OrderStatusWaitingForAcceptDocument = "waiting_for_accept_document"
 
     # Operations
     EntryOperationName = "entry_operation"

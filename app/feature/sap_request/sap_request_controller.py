@@ -23,16 +23,14 @@ class SapRequestController:
             description="Персоздание нового запроса SAP для заказа"
         )(self.create_sap_request)
 
-
     async def create_sap_request(
             self,
-            order_id:int = Path(gt=0,description="Идентификатор заказа"),
+            order_id: int = Path(gt=0, description="Идентификатор заказа"),
             userRDTO: UserRDTOWithRelations = Depends(check_client),
-            sapRequestRepo:SapRequestRepository = Depends(SapRequestRepository),
-            orderRepo:OrderRepository = Depends(OrderRepository),
-            sapRequestService:SapRequestService = Depends(SapRequestService),
+            sapRequestRepo: SapRequestRepository = Depends(SapRequestRepository),
+            orderRepo: OrderRepository = Depends(OrderRepository),
+            sapRequestService: SapRequestService = Depends(SapRequestService),
     ):
-
         order = await orderRepo.get(id=order_id, options=[selectinload(OrderModel.organization)])
         return await sapRequestRepo.recreate_sap(
             order=order,

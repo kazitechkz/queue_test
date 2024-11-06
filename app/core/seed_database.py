@@ -27,12 +27,13 @@ async def add_roles(session: Session):
     total_items = await session.scalar(count_query)
     if total_items == 0:
         data = [
-            RoleModel(title="Администратор", value=TableConstantsNames.RoleAdminValue,can_auth=True),
-            RoleModel(title="Служба Безопасности", value=TableConstantsNames.RoleSecurityValue,can_auth=False),
-            RoleModel(title="Контроллер погрузки", value=TableConstantsNames.RoleSecurityLoaderValue,can_auth=True),
-            RoleModel(title="Погрузчик", value=TableConstantsNames.RoleLoaderValue,can_auth=True),
-            RoleModel(title="Весовщик", value=TableConstantsNames.RoleWeigherValue,can_auth=True),
-            RoleModel(title="Клиент", value=TableConstantsNames.RoleClientValue,can_auth=True),
+            RoleModel(title="Администратор", value=TableConstantsNames.RoleAdminValue, can_auth=True),
+            RoleModel(title="Служба Безопасности", value=TableConstantsNames.RoleSecurityValue, can_auth=False),
+            RoleModel(title="Контроллер погрузки", value=TableConstantsNames.RoleSecurityLoaderValue, can_auth=True),
+            RoleModel(title="Погрузчик", value=TableConstantsNames.RoleLoaderValue, can_auth=True),
+            RoleModel(title="Весовщик", value=TableConstantsNames.RoleWeigherValue, can_auth=True),
+            RoleModel(title="Клиент", value=TableConstantsNames.RoleClientValue, can_auth=True),
+            RoleModel(title="Бухгалтер", value=TableConstantsNames.RoleAccountantValue, can_auth=True)
         ]
         session.add_all(data)
         await session.commit()
@@ -128,6 +129,13 @@ async def add_order_status(session: Session):
                 is_first=False,
                 is_last=True,
             ),
+            OrderStatusModel(
+                id=9,
+                title="Ожидание подтверждения документов оплаты",
+                value=TableConstantsNames.OrderStatusWaitingForAcceptDocument,
+                is_first=False,
+                is_last=False,
+            ),
         ]
         session.add_all(data)
         await session.commit()
@@ -157,6 +165,9 @@ async def add_order_status(session: Session):
                 if item.value == TableConstantsNames.OrderStatusFinished:
                     order_status.prev_id = 6
                     order_status.next_id = None
+                if item.value == TableConstantsNames.OrderStatusWaitingForAcceptDocument:
+                    order_status.prev_id = 3
+                    order_status.next_id = 5
                 await session.commit()
 
 
@@ -645,6 +656,17 @@ async def add_users(session: Session):
                 iin="100200300400",
                 email="admin@gmail.com",
                 phone="+77068495961",
+                password_hash=get_password_hash("admin123"),
+                status=True
+            ),
+            UserModel(
+                id=10,
+                role_id=7,
+                type_id=1,
+                name="Бухгалтер",
+                iin="100200300499",
+                email="buh@gmail.com",
+                phone="+77068495907",
                 password_hash=get_password_hash("admin123"),
                 status=True
             ),
