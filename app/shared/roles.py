@@ -106,6 +106,7 @@ def assign_roles(app):
 
     assign_roles_to_route(app, "/auth/register", ["admin", "client", "employee"])
     assign_roles_to_route(app, "/auth/login", ["admin", "client", "employee"])
+    assign_roles_to_route(app, "/auth/refresh", ["admin", "client", "employee"])
     assign_roles_to_route(app, "/auth/me", ["admin", "client", "employee"])
 
     assign_roles_to_route(app, "/order-status/all", ["admin", "client", "employee"])

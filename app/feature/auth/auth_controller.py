@@ -1,13 +1,8 @@
-from datetime import timedelta
-
-from fastapi import APIRouter, Depends, Response
-from fastapi.encoders import jsonable_encoder
-from sqlalchemy import or_
-from sqlalchemy.orm import selectinload
+from fastapi import APIRouter, Depends
 
 from app.core.app_exception_response import AppExceptionResponse
-from app.core.app_settings import app_settings
-from app.core.auth_core import create_access_token, verify_password, get_password_hash, get_current_user
+from app.core.auth_core import create_access_token, verify_password, get_password_hash, get_current_user, \
+    create_refresh_token, verify_refresh_token
 from app.domain.models.user_model import UserModel
 from app.feature.auth.auth_repository import AuthRepository
 from app.feature.auth.dtos.auth_user_dto import AuthRegDTO, AuthLogDTO
@@ -27,6 +22,7 @@ class AuthController:
     def _add_routes(self):
         self.router.post("/register", response_model=UserRDTO)(self.register)
         self.router.post("/login")(self.login)
+        self.router.post("/refresh")(self.refresh_token)
         self.router.get("/me")(self.me)
 
     async def register(self,
@@ -71,10 +67,14 @@ class AuthController:
             result = verify_password(data.password, user.password_hash)
             if not result:
                 raise AppExceptionResponse.bad_request("Неверный email или пароль")
-        access_token = create_access_token(
-            data=user.id
-        )
-        return {"access_token": access_token, "token_type": "bearer"}
+        access_token = create_access_token(data=user.id)
+        refresh_token = create_refresh_token(data=user.id)
+        return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
+
+    async def refresh_token(self, token_data: dict = Depends(verify_refresh_token)):
+        user_id = token_data.get("sub")
+        new_access_token = create_access_token(data=int(user_id))
+        return {"access_token": new_access_token, "token_type": "bearer"}
 
     async def me(self, current_user: UserRDTOWithRelations = Depends(get_current_user)):
         return current_user
