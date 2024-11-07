@@ -78,7 +78,7 @@ class OrderModel(Base):
     checked_payment_by_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey(AppTableNames.UserTableName + ".id", onupdate="cascade", ondelete="set null"), nullable=True)
     checked_payment_by: Mapped[Optional[str]] = mapped_column(String(length=255), nullable=True)
-    checked_payment_at: Mapped[Optional[datetime]] = mapped_column(Date, nullable=True)
+    checked_payment_at: Mapped[Optional[datetime]] = mapped_column(DateTime(), nullable=True)
 
     created_at: Mapped[CreatedAt]
     updated_at: Mapped[UpdatedAt]

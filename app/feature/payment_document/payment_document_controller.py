@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, UploadFile, File, Form, Path
 
@@ -73,7 +73,7 @@ class PaymentDocumentController:
     async def add_to_comment_to_doc(self,
                                     payment_id: int = Form(..., description="Идентификатор документа"),
                                     status: bool = Form(..., description="Статус документа"),
-                                    comment: str = Form(..., description="Комментарии к документу"),
+                                    comment: Optional[str] = Form(None, description="Комментарии к документу"),
                                     repo: PaymentDocumentRepository = Depends(PaymentDocumentRepository),
                                     userRepo: UserRDTOWithRelations = Depends(check_employee)
                                     ):

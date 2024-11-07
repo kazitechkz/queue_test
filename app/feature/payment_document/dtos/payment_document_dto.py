@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel, Field
@@ -15,7 +16,7 @@ class PaymentDocumentRDTO(PaymentDocumentDTO):
     file_id: int = Field(description="Идентификатор файла")
     order_id: int = Field(description="Идентификатор заказа")
     checked_by: int = Field(description="Ответственный за проверку")
-    checked_at: int = Field(description="Дата проверки")
+    checked_at: datetime = Field(description="Дата проверки")
     status: int = Field(description="Статус")
     comment: Optional[str] = Field(description="Комментарии к прикрепленному файлу")
 

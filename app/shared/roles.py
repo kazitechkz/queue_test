@@ -172,6 +172,6 @@ def assign_roles(app):
     assign_roles_to_route(app, "/payment_document/add-comment-to-doc", ["employee"])
     assign_roles_to_route(app, "/payment_document/make-decision", ["employee"])
 
-    assign_roles_to_route(app, "/get-qr/get-qr-link/{order_id}", ["admin", "client"])
-
-    assign_roles_to_route(app, "/test/test", ["admin"])
+    # assign_roles_to_route(app, "/get-qr/get-qr-link/{order_id}", ["admin", "client"])
+    #
+    # assign_roles_to_route(app, "/test/test", ["admin"])
