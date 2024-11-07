@@ -1,6 +1,6 @@
 from typing import Optional
 
-from sqlalchemy import ForeignKey, Boolean, Date, String, Text
+from sqlalchemy import ForeignKey, Boolean, DateTime, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -22,7 +22,7 @@ class PaymentDocumentModel(Base):
         nullable=True)
     status: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
     comment: Mapped[Optional[str]] = mapped_column(Text(length=1000), nullable=True)
-    checked_at: Mapped[Optional[datetime]] = mapped_column(Date, nullable=True)
+    checked_at: Mapped[Optional[datetime]] = mapped_column(DateTime(), nullable=True)
     created_at: Mapped[CreatedAt]
     updated_at: Mapped[UpdatedAt]
 

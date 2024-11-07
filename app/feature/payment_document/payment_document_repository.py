@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from typing import Optional, List
 
 from fastapi import Depends, UploadFile
@@ -104,13 +104,15 @@ class PaymentDocumentRepository(BaseRepository[PaymentDocumentModel]):
             raise AppExceptionResponse.bad_request("Документ не найден")
         if status is True:
             doc.checked_by = userRepo.id
-            doc.checked_at = datetime.datetime.now()
+            doc.checked_at = datetime.now()
             doc.status = True
+            if comment is not None:
+                doc.comment = comment
         else:
             if comment is not None:
                 doc.comment = comment
             doc.checked_by = userRepo.id
-            doc.checked_at = datetime.datetime.now()
+            doc.checked_at = datetime.now()
             doc.status = False
         # Сохраняем изменения
         await self.db.commit()
@@ -126,6 +128,8 @@ class PaymentDocumentRepository(BaseRepository[PaymentDocumentModel]):
         order: OrderModel = await orderRepo.get(id=payment_doc.order_id)
         if order is None:
             raise AppExceptionResponse.bad_request("Заказ не найден")
+        if order.checked_payment_by_id is not None:
+            raise AppExceptionResponse.bad_request("Решение уже принято")
         if order.status_id == 9 and order.is_paid is False:
             if status is True:
                 return await self.accept_doc(order=order, userRepo=userRepo)
@@ -136,10 +140,10 @@ class PaymentDocumentRepository(BaseRepository[PaymentDocumentModel]):
 
     async def accept_doc(self, order: OrderModel, userRepo: UserRDTOWithRelations) -> OrderModel:
         order.is_paid = True
-        order.paid_at = datetime.datetime.now()
+        order.paid_at = datetime.now()
         order.checked_payment_by_id = userRepo.id
         order.checked_payment_by = userRepo.name
-        order.checked_payment_at = datetime.datetime.now()
+        order.checked_payment_at = datetime.now()
         order.status_id = 5
 
         # Сохраняем изменения
@@ -149,9 +153,13 @@ class PaymentDocumentRepository(BaseRepository[PaymentDocumentModel]):
 
     async def cancel_doc(self, order: OrderModel, userRepo: UserRDTOWithRelations) -> OrderModel:
         order.is_paid = False
+        order.is_active = False
+        order.is_finished = True
+        order.is_failed = True
         order.checked_payment_by_id = userRepo.id
         order.checked_payment_by = userRepo.name
-        order.checked_payment_at = datetime.datetime.now()
+        order.checked_payment_at = datetime.now()
+        order.finished_at = datetime.now()
         order.status_id = 8
 
         # Сохраняем изменения
