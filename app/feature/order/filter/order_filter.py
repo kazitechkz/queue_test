@@ -76,14 +76,20 @@ class DetailOrderFilter:
 class OrderFiltersForPaymentDocuments(BaseFilter):
     def __init__(self,
                  per_page: int = Query(default=20, gt=0, example=20, description="Количество элементов на страницу"),
-                 page: int = Query(default=1, ge=1, example=1, description="Номер страницы")
+                 page: int = Query(default=1, ge=1, example=1, description="Номер страницы"),
+                 status: Optional[bool] = Query(default=True, description="Статус заказа")
                  ):
         super().__init__(per_page, page)
         self.per_page = per_page
         self.page = page
+        self.status = status
         self.model = OrderModel
 
-    def apply(self):
-        filters = [and_(self.model.status_id == 9)]
+    def apply(self, userRepo: UserRDTOWithRelations):
+        filters = []
+        if self.status is True:
+            filters.append(and_(self.model.status_id == 9))
+        else:
+            filters.append(and_(self.model.status_id == 8, self.model.checked_payment_by_id == userRepo.id))
         return filters
 
