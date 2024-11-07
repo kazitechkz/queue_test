@@ -74,7 +74,7 @@ class PaymentDocumentRepository(BaseRepository[PaymentDocumentModel]):
         return await orderRepo.paginate_with_filter(dto=OrderRDTOWithRelations,
                                                     page=params.page,
                                                     per_page=params.per_page,
-                                                    filters=params.apply(),
+                                                    filters=params.apply(userRepo),
                                                     options=[
                                                         selectinload(orderRepo.model.material),
                                                         selectinload(orderRepo.model.organization),
