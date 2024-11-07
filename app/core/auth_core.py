@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import Optional
 
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
@@ -30,9 +31,17 @@ def verify_password(plain_password, hashed_password) -> bool:
 
 # Функция для создания токена доступа
 def create_access_token(data: int):
-    to_encode = {}
-    to_encode["sub"] = str(data)
+    to_encode = {"sub": str(data), "type": "access"}
     expire = datetime.now() + timedelta(minutes=app_settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire.timestamp()})
+    encoded_jwt = jwt.encode(to_encode, app_settings.SECRET_KEY, algorithm=app_settings.ALGORITHM)
+    return encoded_jwt
+
+
+# Функция для создания refresh токена
+def create_refresh_token(data: int):
+    to_encode = {"sub": str(data), "type": "refresh"}  # Указываем тип токена как "refresh"
+    expire = datetime.now() + timedelta(days=app_settings.REFRESH_TOKEN_EXPIRE_DAYS)
     to_encode.update({"exp": expire.timestamp()})
     encoded_jwt = jwt.encode(to_encode, app_settings.SECRET_KEY, algorithm=app_settings.ALGORITHM)
     return encoded_jwt
@@ -41,6 +50,30 @@ def create_access_token(data: int):
 def verify_jwt_token(token: str = Depends(oauth2_scheme)) -> dict:
     try:
         decoded_data = jwt.decode(token, app_settings.SECRET_KEY, algorithms=app_settings.ALGORITHM)
+        # Проверяем, что это именно Access Token, а не Refresh Token
+        if decoded_data.get("type") != "access":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Недопустимый токен для доступа к ресурсу"
+            )
+        return decoded_data
+    except jwt.JWTError as jwtError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Не удалось проверить токен {str(jwtError)}",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
+def verify_refresh_token(token: str = Depends(oauth2_scheme)) -> dict:
+    try:
+        decoded_data = jwt.decode(token, app_settings.SECRET_KEY, algorithms=[app_settings.ALGORITHM])
+        # Проверяем, что это именно Refresh Token
+        if decoded_data.get("type") != "refresh":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Недопустимый токен для обновления"
+            )
         return decoded_data
     except jwt.JWTError as jwtError:
         raise HTTPException(
@@ -185,6 +218,7 @@ def check_employee(current_user: UserRDTOWithRelations = Depends(get_current_use
 
     return current_user
 
+
 def check_admin_and_client(current_user: UserRDTOWithRelations = Depends(get_current_user)):
     if current_user.role.value not in [TableConstantsNames.RoleAdminValue,
                                        TableConstantsNames.RoleClientValue]:
@@ -195,11 +229,12 @@ def check_admin_and_client(current_user: UserRDTOWithRelations = Depends(get_cur
 
     return current_user
 
+
 def check_admin_and_employee(current_user: UserRDTOWithRelations = Depends(get_current_user)):
     if current_user.role.value not in [
-                                       TableConstantsNames.RoleAdminValue,TableConstantsNames.RoleSecurityValue,
-                                       TableConstantsNames.RoleSecurityLoaderValue, TableConstantsNames.RoleLoaderValue,
-                                       TableConstantsNames.RoleWeigherValue]:
+        TableConstantsNames.RoleAdminValue, TableConstantsNames.RoleSecurityValue,
+        TableConstantsNames.RoleSecurityLoaderValue, TableConstantsNames.RoleLoaderValue,
+        TableConstantsNames.RoleWeigherValue]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Отказано в доступе",
