@@ -120,12 +120,9 @@ class PaymentDocumentRepository(BaseRepository[PaymentDocumentModel]):
 
         return doc
 
-    async def make_decision(self, payment_id: int, orderRepo: OrderRepository, userRepo: UserRDTOWithRelations,
+    async def make_decision(self, order_id: int, orderRepo: OrderRepository, userRepo: UserRDTOWithRelations,
                             status: bool):
-        payment_doc: PaymentDocumentModel = await self.get(id=payment_id)
-        if payment_doc is None:
-            raise AppExceptionResponse.bad_request("Документ не найден")
-        order: OrderModel = await orderRepo.get(id=payment_doc.order_id)
+        order: OrderModel = await orderRepo.get(id=order_id)
         if order is None:
             raise AppExceptionResponse.bad_request("Заказ не найден")
         if order.checked_payment_by_id is not None:

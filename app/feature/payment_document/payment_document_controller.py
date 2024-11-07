@@ -82,8 +82,8 @@ class PaymentDocumentController:
     async def make_decision(self,
                             repo: PaymentDocumentRepository = Depends(PaymentDocumentRepository),
                             orderRepo: OrderRepository = Depends(OrderRepository),
-                            payment_id: int = Form(..., description="Идентификатор документа"),
+                            order_id: int = Form(..., description="Идентификатор заказа"),
                             status: bool = Form(..., description="Статус документа"),
                             userRepo: UserRDTOWithRelations = Depends(check_employee)
                             ):
-        return await repo.make_decision(payment_id=payment_id, orderRepo=orderRepo, status=status, userRepo=userRepo)
+        return await repo.make_decision(order_id=order_id, orderRepo=orderRepo, status=status, userRepo=userRepo)
