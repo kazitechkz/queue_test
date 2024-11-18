@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from app.feature.employee_request.dtos.employee_request_dto import EmployeeRequestWithRelationDTO
 from app.feature.order.dtos.order_dto import OrderRDTOWithRelations
 from app.feature.organization_employee.dtos.organization_employee_dto import OrganizationEmployeeRDTOWithRelations
+from app.feature.schedule.dtos.schedule_dto import ScheduleRDTOWithRelation
 from app.feature.vehicle.dtos.vehicle_dto import VehicleWithRelationsDTO
 from app.shared.relation_dtos.user_organization import UserRDTOWithRelations, OrganizationRDTOWithRelations
 
@@ -27,46 +28,36 @@ class Pagination(Generic[T]):
         self.last_page = (total_pages + per_page - 1) // per_page
 
 
-class PaginationUserRDTOWithRelations(BaseModel):
+class BasePageModel(BaseModel):
     current_page: int
     last_page: int
     total_pages: int
     total_items: int
+
+
+class PaginationUserRDTOWithRelations(BasePageModel):
     items: List[UserRDTOWithRelations]
 
-class PaginationOrganizationRDTOWithRelations(BaseModel):
-    current_page: int
-    last_page: int
-    total_pages: int
-    total_items: int
+
+class PaginationOrganizationRDTOWithRelations(BasePageModel):
     items: List[OrganizationRDTOWithRelations]
 
-class PaginationOrganizationEmployeeRDTOWithRelations(BaseModel):
-    current_page: int
-    last_page: int
-    total_pages: int
-    total_items: int
+
+class PaginationOrganizationEmployeeRDTOWithRelations(BasePageModel):
     items: List[OrganizationEmployeeRDTOWithRelations]
 
-class PaginationVehicleWithRelationsDTO(BaseModel):
-    current_page: int
-    last_page: int
-    total_pages: int
-    total_items: int
+
+class PaginationVehicleWithRelationsDTO(BasePageModel):
     items: List[VehicleWithRelationsDTO]
 
-class PaginationOrderRDTOWithRelations(BaseModel):
-    current_page: int
-    last_page: int
-    total_pages: int
-    total_items: int
+
+class PaginationOrderRDTOWithRelations(BasePageModel):
     items: List[OrderRDTOWithRelations]
 
-class PaginationEmployeeRequestWithRelationDTO(BaseModel):
-    current_page: int
-    last_page: int
-    total_pages: int
-    total_items: int
+
+class PaginationEmployeeRequestWithRelationDTO(BasePageModel):
     items: List[EmployeeRequestWithRelationDTO]
 
 
+class PaginationScheduleRDTOWithRelations(BasePageModel):
+    items: List[ScheduleRDTOWithRelation]

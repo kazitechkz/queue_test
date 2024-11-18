@@ -125,10 +125,10 @@ def assign_roles(app):
     assign_roles_to_route(app, "/kaspi/check", ["admin", "client"])
     assign_roles_to_route(app, "/kaspi/pay", ["admin", "client"])
 
-    assign_roles_to_route(app, "/operation/", ["admin", "client"])
+    assign_roles_to_route(app, "/operation/", ["admin", "client", "employee"])
     assign_roles_to_route(app, "/operation/create", ["admin"])
-    assign_roles_to_route(app, "/operation/get/{id}", ["admin"])
-    assign_roles_to_route(app, "/operation/get-by-value/{value}", ["admin"])
+    assign_roles_to_route(app, "/operation/get/{id}", ["admin", "employee"])
+    assign_roles_to_route(app, "/operation/get-by-value/{value}", ["admin", "employee"])
     assign_roles_to_route(app, "/operation/update/{id}", ["admin"])
     assign_roles_to_route(app, "/operation/delete/{id}", ["admin"])
 

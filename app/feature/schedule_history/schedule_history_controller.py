@@ -10,7 +10,6 @@ from app.feature.schedule.schedule_repository import ScheduleRepository
 from app.feature.schedule_history.dtos.schedule_history_dto import ScheduleHistoryAnswerDTO
 from app.feature.schedule_history.schedule_history_repository import ScheduleHistoryRepository
 from app.feature.user.user_repository import UserRepository
-from app.feature.vehicle.vehicle_repository import VehicleRepository
 from app.shared.relation_dtos.user_organization import UserRDTOWithRelations
 
 

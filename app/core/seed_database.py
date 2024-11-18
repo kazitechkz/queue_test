@@ -332,7 +332,7 @@ async def add_operations(session: Session):
                 value=TableConstantsNames.LoadingEntryOperationName,
                 role_id=TableConstantsNames.RoleSecurityLoaderId,
                 role_value=TableConstantsNames.RoleSecurityLoaderValue,
-                can_cancel=True,
+                can_cancel=False,
                 is_first=False,
                 is_last=False,
             ),

@@ -21,12 +21,12 @@ class ScheduleFilter(BaseFilter):
                                                            "полным наименованием организации, бин организации,"
                                                            "инофрмации транспорту или прицепу, "
                                                            "причинам отказа и отвественному лицу"),
-                 start_at : Optional[date] = Query(default=None, description="Начать искать с"),
-                 end_at : Optional[date] = Query(default=None, description="Начать искать до"),
-                 is_active:Optional[bool] = Query(default=None, description="Заказ активен?"),
-                 is_used:Optional[bool] = Query(default=None, description="Находится ли он на территории?"),
-                 is_canceled:Optional[bool] = Query(default=None, description="Отменен ли?"),
-                 is_executed:Optional[bool] = Query(default=None, description="Успешно ли завершен?"),
+                 start_at: Optional[date] = Query(default=None, description="Начать искать с"),
+                 end_at: Optional[date] = Query(default=None, description="Начать искать до"),
+                 is_active: Optional[bool] = Query(default=None, description="Заказ активен?"),
+                 is_used: Optional[bool] = Query(default=None, description="Находится ли он на территории?"),
+                 is_canceled: Optional[bool] = Query(default=None, description="Отменен ли?"),
+                 is_executed: Optional[bool] = Query(default=None, description="Успешно ли завершен?"),
                  ):
         super().__init__(per_page, page, search)
         self.per_page = per_page
@@ -39,7 +39,6 @@ class ScheduleFilter(BaseFilter):
         self.is_canceled = is_canceled
         self.is_executed = is_executed
         self.model = ScheduleModel
-
 
     def apply(self) -> list:
         filters = []
@@ -56,13 +55,13 @@ class ScheduleFilter(BaseFilter):
                 self.model.trailer_info.like(f"%{self.search}%"),
                 self.model.responsible_name.like(f"%{self.search}%"),
                 self.model.cancel_reason.like(f"%{self.search}%"),
-                )
+            )
             )
         if self.start_at != None:
-            start_at = datetime.combine(self.start_at,time(0, 0, 0))
+            start_at = datetime.combine(self.start_at, time(0, 0, 0))
             filters.append(and_(self.model.start_at >= start_at))
         if self.end_at != None:
-            end_at = datetime.combine(self.end_at,time(23, 59, 59))
+            end_at = datetime.combine(self.end_at, time(23, 59, 59))
             filters.append(and_(self.model.start_at <= end_at))
 
         if self.is_active != None:
@@ -79,21 +78,21 @@ class ScheduleFilter(BaseFilter):
 
         return filters
 
+
 class ScheduleClientScheduledFilter():
     def __init__(self,
-                 scheduled_at : date = Query(description="Поиск в день"),
-                 order_id : Optional[int] = Query(default=None,description="Идентификатор заказа")
+                 scheduled_at: date = Query(description="Поиск в день"),
+                 order_id: Optional[int] = Query(default=None, description="Идентификатор заказа")
                  ):
         self.scheduled_at = scheduled_at
         self.order_id = order_id
         self.model = ScheduleModel
 
-
-    def apply(self,userRDTO:UserRDTOWithRelations) -> list:
+    def apply(self, userRDTO: UserRDTOWithRelations) -> list:
         filters = []
         start_at = datetime.combine(self.scheduled_at, time(0, 0, 0))
         end_at = datetime.combine(self.scheduled_at, time(23, 59, 59))
-        filters.append(and_(self.model.start_at <= end_at,self.model.start_at >= start_at))
+        filters.append(and_(self.model.start_at <= end_at, self.model.start_at >= start_at))
         if userRDTO.user_type.value == TableConstantsNames.UserLegalTypeValue:
             organization_ids = [organization.id for organization in userRDTO.organizations]
             filters.append(and_(self.model.organization_id.in_(organization_ids)))
@@ -110,7 +109,7 @@ class ScheduleClientFromToFilter:
     def __init__(self,
                  start_at: date = Query(default=date.today(), description="Начать искать с"),
                  end_at: date = Query(default=date.today(), description="Начать искать до"),
-                 order_id:Optional[int] = Query(default=None,description="Идентификатор заказа")
+                 order_id: Optional[int] = Query(default=None, description="Идентификатор заказа")
                  ):
         self.start_at = start_at
         self.end_at = end_at
@@ -120,13 +119,15 @@ class ScheduleClientFromToFilter:
 
     def apply(self) -> list:
         if self.start_at >= self.end_at:
-           raise AppExceptionResponse.bad_request("Дата начала должна быть больше даты конца")
+            raise AppExceptionResponse.bad_request("Дата начала должна быть больше даты конца")
         date_list = []
-        start_date = datetime.combine(self.start_at,time(0,0,0))
-        end_date = datetime.combine(self.end_at,time(0,0,0))
+        start_date = datetime.combine(self.start_at, time(0, 0, 0))
+        end_date = datetime.combine(self.end_at, time(0, 0, 0))
         current_date = start_date
         while current_date <= end_date:
-            date_list.append((current_date,datetime.combine(date(current_date.year,current_date.month,current_date.day),time(23,59,59))))
+            date_list.append((current_date,
+                              datetime.combine(date(current_date.year, current_date.month, current_date.day),
+                                               time(23, 59, 59))))
             current_date += timedelta(days=1)
 
         return date_list

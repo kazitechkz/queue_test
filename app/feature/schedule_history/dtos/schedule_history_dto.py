@@ -26,8 +26,9 @@ class ScheduleHistoryCDTO(BaseModel):
     canceled_at: Optional[datetime] = Field(None, description="Время отмены")
     cancel_reason: Optional[str] = Field(None, max_length=1000, description="Причина отмены")
 
-    class Config:
-        from_attributes = True
+    model_config = {
+        'from_attributes': True
+    }
 
 
 class ScheduleHistoryRDTO(ScheduleHistoryDTO):

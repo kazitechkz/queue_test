@@ -1,20 +1,17 @@
+from datetime import datetime
 from typing import Optional, List
 
 from fastapi import Depends, HTTPException
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
-from datetime import datetime
-
 from starlette import status
 
 from app.core.app_exception_response import AppExceptionResponse
 from app.core.base_repository import BaseRepository
 from app.core.database import get_db
-from app.core.schedule_core import get_vehicle_information
 from app.domain.models.act_weight_model import ActWeightModel
 from app.domain.models.baseline_weights_model import BaselineWeightModel
 from app.domain.models.initial_weight_model import InitialWeightModel
-from app.domain.models.order_model import OrderModel
 from app.domain.models.schedule_history_model import ScheduleHistoryModel
 from app.domain.models.schedule_model import ScheduleModel
 from app.feature.act_weight.act_weight_repository import ActWeightRepository
@@ -25,11 +22,10 @@ from app.feature.initial_weight.dtos.initial_weight_dto import InitialWeightCDTO
 from app.feature.initial_weight.initial_weight_repository import InitialWeightRepository
 from app.feature.operation.operation_repository import OperationRepository
 from app.feature.order.order_repository import OrderRepository
-from app.feature.schedule.dtos.schedule_dto import ScheduleCDTO, ScheduleRDTO
+from app.feature.schedule.dtos.schedule_dto import ScheduleCDTO
 from app.feature.schedule.schedule_repository import ScheduleRepository
 from app.feature.schedule_history.dtos.schedule_history_dto import ScheduleHistoryAnswerDTO, ScheduleHistoryCDTO
 from app.feature.user.user_repository import UserRepository
-from app.feature.vehicle.vehicle_repository import VehicleRepository
 from app.shared.database_constants import TableConstantsNames
 from app.shared.relation_dtos.user_organization import UserRDTOWithRelations
 
@@ -189,6 +185,7 @@ class ScheduleHistoryRepository(BaseRepository[ScheduleHistoryModel]):
                     userRDTO=userRDTO,
                     vehicle_tara_kg=total_weight,
                 )
+
             if operation.value == TableConstantsNames.FinalWeightOperationName and is_passed:
                 vehicle_brutto_kg = dto.vehicle_brutto_kg
                 actual_weight = vehicle_brutto_kg - schedule.vehicle_tara_kg
@@ -214,6 +211,18 @@ class ScheduleHistoryRepository(BaseRepository[ScheduleHistoryModel]):
                 vehicle_tara_kg=total_weight,
                 vehicle_brutto_kg=vehicle_brutto_kg,
             )
+            if operation.next_id == TableConstantsNames.LoadingEntryOperationId:
+                pass_security_loader_schedule_history = results[-1]
+                await self._pass_security_loader(
+                    schedule_id=schedule_id,
+                    scheduleHistory=pass_security_loader_schedule_history,
+                    schedule=schedule,
+                    userRepo=userRepo,
+                    scheduleRepo=scheduleRepo,
+                    orderRepo=orderRepo
+                )
+                print(f"success")
+
             # Автоматически создает первичное взвешивание если есть
             if operation.value == TableConstantsNames.EntryOperationName:
                 veh_ids = [schedule.vehicle_id] + ([schedule.trailer_id] if schedule.trailer_id is not None else [])
@@ -243,7 +252,7 @@ class ScheduleHistoryRepository(BaseRepository[ScheduleHistoryModel]):
                                 ScheduleModel.responsible_id != None
                             )
                         ])
-                        await self._accept_and_create_next_schedule_base(
+                        results_for_pass_loader = await self._accept_and_create_next_schedule_base(
                             schedule=schedule,
                             scheduleHistory=next_schedule_history,
                             scheduleRepo=scheduleRepo,
@@ -255,6 +264,17 @@ class ScheduleHistoryRepository(BaseRepository[ScheduleHistoryModel]):
                             vehicle_tara_kg=baseline_total_weight,
                             vehicle_brutto_kg=vehicle_brutto_kg,
                         )
+                        pass_security_loader_schedule_history = results_for_pass_loader[-1]
+                        await self._pass_security_loader(
+                            schedule_id=schedule_id,
+                            scheduleHistory=pass_security_loader_schedule_history,
+                            schedule=schedule,
+                            userRepo=userRepo,
+                            scheduleRepo=scheduleRepo,
+                            orderRepo=orderRepo
+                        )
+                        print(f"success")
+
 
             return results[0]
 
@@ -273,13 +293,13 @@ class ScheduleHistoryRepository(BaseRepository[ScheduleHistoryModel]):
                 operation_id=operation_id,
             )
             schedule_history_model = await self.create(obj=schedule_history_model)
-        schedule_history_dto = ScheduleHistoryCDTO.from_orm(schedule_history_model)
+        schedule_history_dto = ScheduleHistoryCDTO.model_validate(schedule_history_model)
         schedule_history_dto.responsible_id = userRDTO.id
         schedule_history_dto.responsible_name = userRDTO.name
         schedule_history_dto.responsible_iin = userRDTO.iin
         schedule_history_dto.start_at = current_datetime
         # Меняем расписание
-        schedule_dto = ScheduleCDTO.from_orm(schedule)
+        schedule_dto = ScheduleCDTO.model_validate(schedule)
         schedule_dto.responsible_id = userRDTO.id
         schedule_dto.responsible_name = userRDTO.name
         await scheduleRepo.update(obj=schedule, dto=schedule_dto)
@@ -296,8 +316,8 @@ class ScheduleHistoryRepository(BaseRepository[ScheduleHistoryModel]):
             orderRepo: OrderRepository,
     ) -> ScheduleHistoryModel:
         # Меняем Расписание и отменяем
-        schedule_dto = ScheduleCDTO.from_orm(schedule)
-        schedule_history_dto = ScheduleHistoryCDTO.from_orm(scheduleHistory)
+        schedule_dto = ScheduleCDTO.model_validate(schedule)
+        schedule_history_dto = ScheduleHistoryCDTO.model_validate(scheduleHistory)
         current_datetime = datetime.now()
         # Отменяем состояние Расписания
         schedule_dto.canceled_at = current_datetime
@@ -318,7 +338,7 @@ class ScheduleHistoryRepository(BaseRepository[ScheduleHistoryModel]):
         order = await orderRepo.get(id=schedule.order_id)
         if order is not None:
             await scheduleRepo.calculate_order(order=order, orderRepo=orderRepo)
-        # Сохраняем информацию о изменении в истории расписания
+        # Сохраняем информацию об изменении в истории расписания
         return await self.update(obj=scheduleHistory, dto=schedule_history_dto)
 
     async def _accept_and_create_next_schedule_base(
@@ -337,8 +357,8 @@ class ScheduleHistoryRepository(BaseRepository[ScheduleHistoryModel]):
         results = []
         new_schedule_history = None
         # Меняем Расписание и принимаем
-        schedule_dto = ScheduleCDTO.from_orm(schedule)
-        schedule_history_dto = ScheduleHistoryCDTO.from_orm(scheduleHistory)
+        schedule_dto = ScheduleCDTO.model_validate(schedule)
+        schedule_history_dto = ScheduleHistoryCDTO.model_validate(scheduleHistory)
         current_datetime = datetime.now()
         # Принимаем состояния Расписания
         schedule_history_dto.is_passed = True
@@ -485,3 +505,40 @@ class ScheduleHistoryRepository(BaseRepository[ScheduleHistoryModel]):
         total_weight = sum(base_line_weight.vehicle_tara_kg for base_line_weight in base_line_weights)
 
         return total_weight
+
+    async def _pass_security_loader(self,
+                                    schedule_id: int,
+                                    scheduleHistory: ScheduleHistoryModel,
+                                    userRepo: UserRepository,
+                                    schedule: ScheduleModel,
+                                    scheduleRepo: ScheduleRepository,
+                                    orderRepo: OrderRepository
+                                    ):
+        if scheduleHistory is not None:
+            digitalUserRDTO = await userRepo.get_admin()
+            next_schedule_history = await self._take_responisbibility(
+                schedule=schedule,
+                operation_id=scheduleHistory.operation_id,
+                userRDTO=digitalUserRDTO,
+                scheduleRepo=scheduleRepo,
+                schedule_history_model=scheduleHistory
+            )
+            schedule = await scheduleRepo.get_first_with_filter(filters=[
+                and_(
+                    ScheduleModel.id == schedule_id,
+                    ScheduleModel.is_active == True,
+                    ScheduleModel.responsible_id != None
+                )
+            ])
+            await self._accept_and_create_next_schedule_base(
+                schedule=schedule,
+                scheduleHistory=next_schedule_history,
+                scheduleRepo=scheduleRepo,
+                orderRepo=orderRepo,
+                next_operation_id=TableConstantsNames.LoadingOperationId,
+                userRDTO=digitalUserRDTO,
+                is_last=False,
+                is_passed=True,
+                vehicle_tara_kg=None,
+                vehicle_brutto_kg=None,
+            )

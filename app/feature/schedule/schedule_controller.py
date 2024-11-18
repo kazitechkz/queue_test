@@ -2,18 +2,21 @@ from datetime import date, time
 from typing import Optional, List
 
 from fastapi import APIRouter, Depends, Query, Path
-from sqlalchemy import and_
-from sqlalchemy.orm import selectinload
+from sqlalchemy import and_, select
+from sqlalchemy.orm import selectinload, joinedload
 
 from app.core.auth_core import check_individual_client, check_legal_client, check_employee, check_client, check_admin, \
     check_admin_and_client, get_current_user
+from app.core.pagination_dto import PaginationScheduleRDTOWithRelations
 from app.domain.models.schedule_history_model import ScheduleHistoryModel
+from app.domain.models.schedule_model import ScheduleModel
 from app.feature.operation.operation_repository import OperationRepository
 from app.feature.order.order_repository import OrderRepository
 from app.feature.organization.organization_repository import OrganizationRepository
 from app.feature.organization_employee.organization_employee_repository import OrganizationEmployeeRepository
 from app.feature.schedule.dtos.schedule_dto import ScheduleRDTO, ScheduleIndividualCDTO, ScheduleLegalCDTO, \
-    RescheduleAllDTO, ScheduleCancelDTO, RescheduleOneDTO, ScheduleCancelOneDTO, ScheduleSpaceDTO,ScheduleCalendarDTO
+    RescheduleAllDTO, ScheduleCancelDTO, RescheduleOneDTO, ScheduleCancelOneDTO, ScheduleSpaceDTO, ScheduleCalendarDTO, \
+    ScheduleRDTOWithRelation
 from app.feature.schedule.filter.schedule_filter import ScheduleFilter, ScheduleClientScheduledFilter, \
     ScheduleClientFromToFilter
 from app.feature.schedule.schedule_repository import ScheduleRepository
@@ -52,6 +55,7 @@ class ScheduleController:
         )(self.get)
         self.router.get(
             "/get-active-schedules",
+            response_model=List[ScheduleRDTOWithRelation],
             summary="Получение всех активных броней",
             description="Получение всех активных броней"
         )(self.get_active_schedules)
@@ -62,6 +66,7 @@ class ScheduleController:
         )(self.get_canceled_schedules)
         self.router.get(
             "/get-all-schedules",
+            response_model=PaginationScheduleRDTOWithRelations,
             summary="Получение всех броней с пагинацией",
             description="Получение всех броней с пагинацией"
         )(self.get_all_schedules)
@@ -159,13 +164,14 @@ class ScheduleController:
                                          workshopScheduleRepo=workshopScheduleRepo)
         return result
 
-    async def check_late_schedules(self,repo: ScheduleRepository = Depends(ScheduleRepository),orderRepo:OrderRepository = Depends(OrderRepository)):
+    async def check_late_schedules(self, repo: ScheduleRepository = Depends(ScheduleRepository),
+                                   orderRepo: OrderRepository = Depends(OrderRepository)):
         return await repo.check_late_schedules(orderRepo=orderRepo)
 
     async def get(self,
                   id: int = Path(gt=0, description="Уникальный идентфикатор"),
                   repo: ScheduleRepository = Depends(ScheduleRepository),
-                  userDTO: UserRDTOWithRelations = Depends(check_client)
+                  userDTO: UserRDTOWithRelations = Depends(get_current_user)
                   ):
         schedule = await repo.get(id=id, options=[
             selectinload(repo.model.order),
@@ -182,8 +188,6 @@ class ScheduleController:
                                   .selectinload(ScheduleHistoryModel.initial_weights)
         ])
         return schedule
-
-
 
     async def get_active_schedules(self,
                                    userDTO: UserRDTOWithRelations = Depends(check_employee),
@@ -206,7 +210,7 @@ class ScheduleController:
                                 ):
         return await repo.paginate_with_filter(
             dto=ScheduleRDTO, page=params.page, per_page=params.per_page,
-            filters=params.apply()
+            filters=params.apply(), options=[joinedload(repo.model.current_operation)]
         )
 
     async def my_active_schedules(self,
@@ -222,7 +226,7 @@ class ScheduleController:
                                        repo: ScheduleRepository = Depends(ScheduleRepository),
                                        ):
         return await repo.get_all_with_filter(
-            filters=[and_(repo.model.is_active == True,repo.model.responsible_id == userDTO.id)],
+            filters=[and_(repo.model.is_active == True, repo.model.responsible_id == userDTO.id)],
             options=[selectinload(repo.model.current_operation)]
         )
 
@@ -283,6 +287,3 @@ class ScheduleController:
         return await repo.cancel_one_schedule(
             schedule_id=schedule_id, dto=dto, orderRepo=orderRepo, userDTO=userDTO
         )
-
-
-

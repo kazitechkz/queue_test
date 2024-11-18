@@ -60,8 +60,7 @@ class BaseRepository(Generic[T]):
                                    options: list = []):
         query = select(self.model)
         if options:
-            for option in options:
-                query = query.options(option)
+            query = query.options(*options)
         # Применение фильтров к запросу
         for filter_condition in filters:
             query = query.filter(filter_condition)
@@ -74,7 +73,9 @@ class BaseRepository(Generic[T]):
             query.limit(per_page).offset((page - 1) * per_page)
         )
         items = results.scalars().all()
+
         dto_items = [dto.from_orm(item) for item in items]
+
         result = Pagination(items=dto_items, per_page=per_page, page=page,
                             total_pages=total_pages, total_items=total_items)
         return result
