@@ -8,7 +8,7 @@ from app.shared.database_constants import AppTableNames, ID, CreatedAt, UpdatedA
 class MaterialModel(Base):
     __tablename__ = AppTableNames.MaterialTableName
     id: Mapped[ID]
-    title: Mapped[str] = mapped_column(Text(length=1000))
+    title: Mapped[str] = mapped_column(Text())
     sap_id: Mapped[str] = mapped_column(String(length=256), index=True, unique=True)
     status: Mapped[bool] = mapped_column(default=True)
     price_without_taxes: Mapped[float] = mapped_column(Numeric(precision=10, scale=2))

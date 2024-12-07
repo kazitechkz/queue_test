@@ -1,17 +1,14 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
-
 from app.core.app_settings import app_settings
 from app.core.seed_database import seed_database
-
 engine_async = create_async_engine(
     app_settings.DB_URL_ASYNC,
     echo=False,
-    pool_size=100,  # Количество соединений в пуле
-    max_overflow=50,  # Максимальное количество дополнительных соединений
-    pool_timeout=300,  # Таймаут ожидания свободного соединения
+    pool_size=100,
+    max_overflow=50,
+    pool_timeout=300,
     pool_recycle=25000,
-    connect_args={"init_command": "SET time_zone = '+05:00'"}
 )
 
 AsyncSessionLocal = sessionmaker(

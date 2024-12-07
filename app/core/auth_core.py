@@ -110,7 +110,7 @@ async def get_current_user(
         selectinload(UserModel.role),
         selectinload(UserModel.user_type),
         selectinload(UserModel.organizations)
-    ).filter(UserModel.id == user_id)
+    ).filter(UserModel.id == int(user_id))
 
     result = await db.execute(query)
     user = result.scalars().first()

@@ -33,13 +33,13 @@ class OrderModel(Base):
     material_sap_id: Mapped[str] = mapped_column(String(length=256), index=True)
 
     quan_t: Mapped[float] = mapped_column(Numeric(precision=10, scale=2))
-    quan: Mapped[int] = mapped_column(Computed("quan_t * 1000"))
+    quan: Mapped[int] = mapped_column(Computed("(quan_t * 1000)::INTEGER", persisted=True))
     quan_released: Mapped[int] = mapped_column(Integer(), default=0)
-    quan_released_t: Mapped[float] = mapped_column(Computed("quan_released / 1000"))
+    quan_released_t: Mapped[float] = mapped_column(Computed("(quan_released / 1000.0)", persisted=True))
     quan_booked: Mapped[int] = mapped_column(Integer(), default=0)
     quan_booked_t: Mapped[float] = mapped_column(Computed("quan_booked / 1000"))
-    quan_left: Mapped[int] = mapped_column(Computed("quan - quan_booked - quan_released"))
-    quan_left_t: Mapped[float] = mapped_column(Computed("quan_left / 1000"))
+    quan_left: Mapped[int] = mapped_column(Computed("(quan_t * 1000)::INTEGER - quan_booked - quan_released"))
+    quan_left_t: Mapped[float] = mapped_column(Computed("((quan_t * 1000)::INTEGER - quan_booked - quan_released) / 1000", persisted=True))
 
     executed_cruise: Mapped[int] = mapped_column(Integer(), default=0)
 
@@ -84,7 +84,7 @@ class OrderModel(Base):
     updated_at: Mapped[UpdatedAt]
     must_paid_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(),
-        Computed("created_at + INTERVAL 1 DAY"),
+        Computed("(created_at + INTERVAL '1 day')", persisted=True),
         nullable=True
     )
 

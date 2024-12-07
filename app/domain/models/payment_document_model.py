@@ -21,7 +21,7 @@ class PaymentDocumentModel(Base):
         ForeignKey(AppTableNames.UserTableName + ".id", onupdate="cascade", ondelete="set null"),
         nullable=True)
     status: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
-    comment: Mapped[Optional[str]] = mapped_column(Text(length=1000), nullable=True)
+    comment: Mapped[Optional[str]] = mapped_column(Text(), nullable=True)
     checked_at: Mapped[Optional[datetime]] = mapped_column(DateTime(), nullable=True)
     created_at: Mapped[CreatedAt]
     updated_at: Mapped[UpdatedAt]

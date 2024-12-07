@@ -23,11 +23,11 @@ class InitialWeightModel(Base):
 
     vehicle_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey(AppTableNames.VehicleTableName + ".id", onupdate="cascade", ondelete="set null"), nullable=True)
-    vehicle_info: Mapped[str] = mapped_column(Text(length=1000))
+    vehicle_info: Mapped[str] = mapped_column(Text())
 
     trailer_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey(AppTableNames.VehicleTableName + ".id", onupdate="cascade", ondelete="set null"), nullable=True)
-    trailer_info: Mapped[Optional[str]] = mapped_column(Text(length=1000), nullable=True)
+    trailer_info: Mapped[Optional[str]] = mapped_column(Text(), nullable=True)
 
     responsible_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey(AppTableNames.UserTableName + ".id", onupdate="cascade", ondelete="set null"), nullable=True)

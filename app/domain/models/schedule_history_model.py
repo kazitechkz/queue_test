@@ -25,7 +25,7 @@ class ScheduleHistoryModel(Base):
     start_at: Mapped[datetime] = mapped_column(nullable=True)
     end_at: Mapped[datetime] = mapped_column(nullable=True)
     canceled_at: Mapped[Optional[datetime]] = mapped_column(nullable=True)
-    cancel_reason: Mapped[str] = mapped_column(Text(length=1000), nullable=True)
+    cancel_reason: Mapped[str] = mapped_column(Text(), nullable=True)
     created_at: Mapped[CreatedAt]
     updated_at: Mapped[UpdatedAt]
 

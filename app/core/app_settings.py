@@ -5,11 +5,22 @@ load_dotenv()
 
 
 class AppSettings(BaseSettings):
-    DB_HOST: str
-    DB_PORT: str
-    DB_USER: str
-    DB_PASSWORD: str
-    DB_NAME: str
+    APP_DATABASE:str
+
+    PG_CONNECTION:str
+    PG_DB_HOST:str
+    PG_DB_PORT:str
+    PG_DB_USER:str
+    PG_DB_PASSWORD:str
+    PG_DB_NAME:str
+
+    MYSQL_CONNECTION: str
+    MYSQL_DB_HOST: str
+    MYSQL_DB_PORT: str
+    MYSQL_DB_USER: str
+    MYSQL_DB_PASSWORD: str
+    MYSQL_DB_NAME: str
+
     SECRET_KEY: str
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
@@ -18,7 +29,10 @@ class AppSettings(BaseSettings):
 
     @property
     def DB_URL_ASYNC(self):
-        return f"mysql+aiomysql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+        if self.APP_DATABASE == "postgresql":
+            return f"{self.PG_CONNECTION}://{self.PG_DB_USER}:{self.PG_DB_PASSWORD}@{self.PG_DB_HOST}:{self.PG_DB_PORT}/{self.PG_DB_NAME}"
+        else:
+            return f"{self.MYSQL_CONNECTION}://{self.MYSQL_DB_USER}:{self.MYSQL_DB_PASSWORD}@{self.MYSQL_DB_HOST}:{self.MYSQL_DB_PORT}/{self.MYSQL_DB_NAME}"
 
     class Config:
         env_file = ".env"

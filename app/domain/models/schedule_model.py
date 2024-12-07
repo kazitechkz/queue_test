@@ -34,11 +34,11 @@ class ScheduleModel(Base):
 
     vehicle_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey(AppTableNames.VehicleTableName + ".id", onupdate="cascade", ondelete="set null"), nullable=True)
-    vehicle_info: Mapped[str] = mapped_column(Text(length=1000))
+    vehicle_info: Mapped[str] = mapped_column(Text())
 
     trailer_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey(AppTableNames.VehicleTableName + ".id", onupdate="cascade", ondelete="set null"), nullable=True)
-    trailer_info: Mapped[Optional[str]] = mapped_column(Text(length=1000), nullable=True)
+    trailer_info: Mapped[Optional[str]] = mapped_column(Text(), nullable=True)
 
     workshop_schedule_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey(AppTableNames.WorkshopScheduleTableName + ".id", onupdate="cascade", ondelete="set null"),
@@ -70,7 +70,7 @@ class ScheduleModel(Base):
 
     canceled_by: Mapped[Optional[int]] = mapped_column(
         ForeignKey(AppTableNames.UserTableName + ".id", onupdate="cascade", ondelete="set null"), nullable=True)
-    cancel_reason: Mapped[str] = mapped_column(Text(length=1000), nullable=True)
+    cancel_reason: Mapped[str] = mapped_column(Text(), nullable=True)
     canceled_at: Mapped[Optional[datetime]] = mapped_column(nullable=True)
 
     created_at: Mapped[CreatedAt]

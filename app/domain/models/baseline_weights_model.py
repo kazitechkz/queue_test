@@ -14,7 +14,7 @@ class BaselineWeightModel(Base):
     id: Mapped[ID]
     vehicle_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey(AppTableNames.VehicleTableName + ".id", onupdate="cascade", ondelete="set null"), nullable=True)
-    vehicle_info: Mapped[str] = mapped_column(Text(length=1000))
+    vehicle_info: Mapped[str] = mapped_column(Text())
     vehicle_tara_kg: Mapped[int] = mapped_column(Integer())
     measured_at: Mapped[datetime] = mapped_column()
     created_at: Mapped[CreatedAt]
