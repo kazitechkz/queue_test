@@ -1,7 +1,7 @@
-from pydantic import BaseModel, Field, EmailStr, field_validator
-from app.feature.user.dtos.user_dto import UserRDTO
-from app.core.validation_rules import PHONE_REGEX, EMAIL_REGEX, TWELVE_DIGITS_REGEX
-from app.feature.organization_type.dtos.organization_type_dto import OrganizationTypeRDTO
+from pydantic import BaseModel, EmailStr, Field, model_validator
+
+from app.core.validation_rules import TWELVE_DIGITS_REGEX, EMAIL_REGEX, PHONE_REGEX
+from app.shared.database_constants import TableConstantsNames
 
 
 class OrganizationDTO(BaseModel):
@@ -9,35 +9,36 @@ class OrganizationDTO(BaseModel):
 
 
 class OrganizationCDTO(BaseModel):
-    full_name: str = Field(max_length=1000, description="Полное наименование компании")
-    short_name: str = Field(max_length=1000, description="Короткое наименование компании")
-    bin: str = Field(max_length=12, description="Номер БИН")
+    full_name: str = Field(max_length=TableConstantsNames.STANDARD_TEXT_LENGTH_MAX, description="Полное наименование компании")
+    short_name: str = Field(max_length=TableConstantsNames.STANDARD_TEXT_LENGTH_MAX, description="Короткое наименование компании")
+    bin: str = Field(max_length=TableConstantsNames.IIN_BIN_LENGTH, description="Номер БИН")
     bik: str = Field(max_length=9, description="Номер БИК")
-    kbe: str = Field(max_length=20, description="Номер КБЕ")
-    email: EmailStr = Field(max_length=255, description="Корпоративная почта")
-    phone: str = Field(max_length=255, description="Корпоративный телефон")
-    address: str = Field(max_length=1000, description="Юридический адрес")
+    kbe: str = Field(max_length=TableConstantsNames.SAP_ORDER_LENGTH_STRING, description="Номер КБЕ")
+    email: EmailStr = Field(max_length=TableConstantsNames.STANDARD_LENGTH_STRING, description="Корпоративная почта")
+    phone: str = Field(max_length=TableConstantsNames.STANDARD_LENGTH_STRING, description="Корпоративный телефон")
+    address: str = Field(max_length=TableConstantsNames.STANDARD_TEXT_LENGTH_MAX, description="Юридический адрес")
     status: bool = Field(default=True, description="Активен ли")
     owner_id: int = Field(description="Владелец компании", gt=0)
     type_id: int = Field(description="Тип компании", gt=0)
 
-    @field_validator('phone')
-    def validate_phone(cls, v) -> str:
-        if not PHONE_REGEX.match(v):
-            raise ValueError('Неверный формат телефона: +77XXXXXXXXX')
-        return v
+    @model_validator(mode="before")
+    def validate_model(cls, values: dict) -> dict:
+        # Проверка телефона
+        phone = values.get("phone")
+        if phone and not PHONE_REGEX.match(phone):
+            raise ValueError("Неверный формат телефона: +77XXXXXXXXX")
 
-    @field_validator('email')
-    def validate_email(cls, v) -> EmailStr:
-        if not EMAIL_REGEX.match(v):
-            raise ValueError('Неверный формат почты')
-        return v
+        # Проверка почты
+        email = values.get("email")
+        if email and not EMAIL_REGEX.match(email):
+            raise ValueError("Неверный формат почты")
 
-    @field_validator('bin')
-    def validate_bin(cls, v) -> str:
-        if not TWELVE_DIGITS_REGEX.match(v):
-            raise ValueError('Неверный формат БИН')
-        return v
+        # Проверка БИН
+        bin_value = values.get("bin")
+        if bin_value and not TWELVE_DIGITS_REGEX.match(bin_value):
+            raise ValueError("Неверный формат БИН")
+
+        return values
 
     class Config:
         from_attributes = True
@@ -58,6 +59,3 @@ class OrganizationRDTO(OrganizationDTO):
 
     class Config:
         from_attributes = True
-
-
-

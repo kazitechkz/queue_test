@@ -7,5 +7,5 @@ from app.domain.models.file_model import FileModel
 
 
 class FileRepository(BaseRepository[FileModel]):
-    def __init__(self, db: Session = Depends(get_db)):
+    def __init__(self, db: Session = Depends(get_db)) -> None:
         super().__init__(FileModel, db)

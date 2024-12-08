@@ -4,9 +4,13 @@ from typing import Annotated
 from sqlalchemy import text
 from sqlalchemy.orm import mapped_column
 
+
 ID = Annotated[int, mapped_column(primary_key=True)]
 CreatedAt = Annotated[datetime, mapped_column(server_default=text("CURRENT_TIMESTAMP"))]
-UpdatedAt = Annotated[datetime, mapped_column(server_default=text("CURRENT_TIMESTAMP"), onupdate=datetime.now())]
+UpdatedAt = Annotated[
+    datetime,
+    mapped_column(server_default=text("CURRENT_TIMESTAMP"), onupdate=datetime.now()),
+]
 
 
 class AppTableNames:
@@ -55,7 +59,7 @@ class TableConstantsNames:
     RoleClientValue = "client"
     RoleClientId = 6
     RoleAccountantValue = "accountant"
-    RoleAccountantId = 6
+    RoleAccountantId = 7
 
     # User Types
     UserLegalTypeValue = "legal_entity"
@@ -103,4 +107,16 @@ class TableConstantsNames:
     ExecutedOperationName = "executed_operation"
     ExecutedOperationId = 11
 
-    RELOAD_OPERATIONS = [ReLoadingEntryExitOperationName, ReLoadingEntryWeightOperationName]
+    RELOAD_OPERATIONS = [
+        ReLoadingEntryExitOperationName,
+        ReLoadingEntryWeightOperationName,
+    ]
+
+    STANDARD_LENGTH_STRING = 255
+    STANDARD_TEXT_LENGTH_MAX = 1000
+    LONG_TEXT_LENGTH_MAX = 2000
+    SAP_ORDER_LENGTH_STRING = 20
+    IIN_BIN_LENGTH = 12
+    MIN_PASSWORD_LENGTH = 4
+    WERKS_LENGTH = 4
+    MATNR_LENGTH = 18

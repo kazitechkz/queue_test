@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import List
 
 from fastapi import Depends
 from sqlalchemy import and_
@@ -11,13 +10,12 @@ from app.domain.models.baseline_weights_model import BaselineWeightModel
 
 
 class BaselineWeightRepository(BaseRepository[BaselineWeightModel]):
-    def __init__(self, db: Session = Depends(get_db)):
+    def __init__(self, db: Session = Depends(get_db)) -> None:
         super().__init__(BaselineWeightModel, db)
 
-    async def get_vehicle_trailer_weights(
-            self,
-            ids: List[int]
-    ):
+    async def get_vehicle_trailer_weights(self, ids: list[int]):
         return await self.get_all_with_filter(
-            filters=[and_(self.model.vehicle_id.in_(ids), self.model.end_at > datetime.now())],
+            filters=[
+                and_(self.model.vehicle_id.in_(ids), self.model.end_at > datetime.now())
+            ],
         )

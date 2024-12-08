@@ -1,7 +1,7 @@
-from typing import List, Type, Generic, TypeVar, Optional, Any, Dict
+from typing import Any, Generic, TypeVar
 
 from pydantic import BaseModel
-from sqlalchemy import select, func, and_, update, asc, desc
+from sqlalchemy import and_, asc, desc, func, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -9,14 +9,15 @@ from app.core.app_exception_response import AppExceptionResponse
 from app.core.database import get_db
 from app.core.pagination_dto import Pagination
 
+
 # Определение типа модели
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class BaseRepository(Generic[T]):
     _instance = None
 
-    def __init__(self, model: Type[T], db: Session):
+    def __init__(self, model: type[T], db: Session) -> None:
         self.model = model
         self.db = db
 
@@ -41,8 +42,7 @@ class BaseRepository(Generic[T]):
 
         return items
 
-    async def get_first_with_filter(self, filters: list = [],
-                                    options: list = []):
+    async def get_first_with_filter(self, filters: list = [], options: list = []):
         query = select(self.model)
         if options:
             for option in options:
@@ -50,14 +50,18 @@ class BaseRepository(Generic[T]):
         # Применение фильтров к запросу
         for filter_condition in filters:
             query = query.filter(filter_condition)
-        results = await self.db.execute(
-            query
-        )
+        results = await self.db.execute(query)
         item = results.scalars().first()
         return item
 
-    async def paginate_with_filter(self, dto: BaseModel, page: int = 1, per_page: int = 20, filters: list = [],
-                                   options: list = []):
+    async def paginate_with_filter(
+        self,
+        dto: BaseModel,
+        page: int = 1,
+        per_page: int = 20,
+        filters: list = [],
+        options: list = [],
+    ):
         query = select(self.model)
         if options:
             query = query.options(*options)
@@ -76,11 +80,16 @@ class BaseRepository(Generic[T]):
 
         dto_items = [dto.from_orm(item) for item in items]
 
-        result = Pagination(items=dto_items, per_page=per_page, page=page,
-                            total_pages=total_pages, total_items=total_items)
+        result = Pagination(
+            items=dto_items,
+            per_page=per_page,
+            page=page,
+            total_pages=total_pages,
+            total_items=total_items,
+        )
         return result
 
-    async def get(self, id: int, options: Optional[list] = None):
+    async def get(self, id: int, options: list | None = None):
         query = select(self.model)
         if options is not None:
             for option in options:
@@ -89,7 +98,7 @@ class BaseRepository(Generic[T]):
         result = await self.db.execute(query)
         return result.scalars().first()
 
-    async def get_filtered(self, filters: Dict[str, Any], options: Optional[list] = None):
+    async def get_filtered(self, filters: dict[str, Any], options: list | None = None):
         query = select(self.model)
         if options:
             for option in options:
@@ -104,7 +113,7 @@ class BaseRepository(Generic[T]):
         result = await self.db.execute(query)
         return result.scalars().first()
 
-    async def get_with_filter(self, filters: [], options: Optional[list] = None):
+    async def get_with_filter(self, filters: [], options: list | None = None):
         query = select(self.model)
         if options:
             for option in options:
@@ -117,10 +126,10 @@ class BaseRepository(Generic[T]):
         return result.scalars().first()
 
     async def get_first_with_filters(
-            self,
-            filters: list = [],
-            options: Optional[list] = None,
-            order_by: Optional[list] = None
+        self,
+        filters: list = [],
+        options: list | None = None,
+        order_by: list | None = None,
     ):
         query = select(self.model)
         if options:
@@ -157,7 +166,7 @@ class BaseRepository(Generic[T]):
         result = await self.db.execute(query)
         return result.scalars().first()
 
-    async def get_all(self) -> List[T]:
+    async def get_all(self) -> list[T]:
         result = await self.db.execute(select(self.model))
         return result.scalars().all()
 
@@ -195,11 +204,8 @@ class BaseRepository(Generic[T]):
             raise ValueError(self._parse_integrity_error(e))
 
     async def filter_and_update(
-            self,
-            update_values: Dict[str, Any],
-            filters: List[Dict[str, Any]] = []
+        self, update_values: dict[str, Any], filters: list[dict[str, Any]] = []
     ):
-
         # Step 1: Filter rows
         query = select(self.model)
         if filters:
@@ -230,9 +236,9 @@ class BaseRepository(Generic[T]):
 
         return 0
 
-
-    async def update_with_filters(self,update_values: Dict[str, Any],
-            filters: List = []):
+    async def update_with_filters(
+        self, update_values: dict[str, Any], filters: list = []
+    ):
         stmt = update(self.model).values(**update_values).where(*filters)
         result = await self.db.execute(stmt)
         await self.db.commit()  # Commit the transaction
@@ -245,18 +251,15 @@ class BaseRepository(Generic[T]):
         await self.db.delete(result)
         await self.db.commit()
 
-    async def refresh_db(self):
+    async def refresh_db(self) -> None:
         self.db = await anext(get_db())
 
     def _parse_integrity_error(self, error: IntegrityError) -> str:
         orig_msg = str(error.orig)
-        err_msg = orig_msg.split(':')[-1].replace('\n', '').strip()
+        err_msg = orig_msg.split(":")[-1].replace("\n", "").strip()
 
-        parts = err_msg.split('.')
+        parts = err_msg.split(".")
         if len(parts) >= 2:
             table, column = parts[-2], parts[-1]
             return f"Duplicate entry for {column} in {table}. Please choose a different value."
-        else:
-            return "An error occurred while processing your request."
-
-
+        return "An error occurred while processing your request."

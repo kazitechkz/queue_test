@@ -1,10 +1,12 @@
-from fastapi.responses import HTMLResponse
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
+from fastapi.responses import HTMLResponse
 
 
 def custom_openapi(app, role: str):
-    routes = [route for route in app.routes if hasattr(route, 'roles') and role in route.roles]
+    routes = [
+        route for route in app.routes if hasattr(route, "roles") and role in route.roles
+    ]
     openapi_schema = get_openapi(
         title=f"DIGITAL QUEUE TEST - {role.capitalize()}",
         version="0.1",
@@ -14,7 +16,7 @@ def custom_openapi(app, role: str):
     return openapi_schema
 
 
-def setup_documentation(app):
+def setup_documentation(app) -> None:
     # Главная страница с выбором ролей
     @app.get("/docs", include_in_schema=False)
     async def get_roles_page():
@@ -87,7 +89,7 @@ def setup_documentation(app):
     @app.get("/docs/client", include_in_schema=False)
     async def get_user_docs():
         return get_swagger_ui_html(openapi_url="/openapi/client", title="Client Docs")
-    
+
     @app.get("/docs/employee", include_in_schema=False)
     async def get_employee_docs():
         return get_swagger_ui_html(openapi_url="/openapi/employee", title="Employee Docs")
@@ -100,7 +102,7 @@ def setup_documentation(app):
     @app.get("/openapi/client", include_in_schema=False)
     async def get_user_openapi():
         return custom_openapi(app, "client")
-    
+
     @app.get("/openapi/employee", include_in_schema=False)
     async def get_employee_openapi():
         return custom_openapi(app, "employee")

@@ -1,0 +1,62 @@
+[
+    {
+        "document_number": "34345DD34453",
+        "registration_number": "ABC123",
+        "car_model": "MAN",
+        "start_at": "2024-09-17T10:00:00",
+        "vin": "12345678912345678",
+        "produced_at": 2023,
+        "engine_volume_sm": 14000,
+        "weight_clean_kg": 9000,
+        "weight_load_max_kg": 20000,
+        "category_id": 1,
+        "color_id": 2,
+        "region_id": 1,
+        "owner_id": 1
+    },
+    {
+        "document_number": "34342HHHH453",
+        "registration_number": "ABD546",
+        "car_model": "METTLER TOLEDO",
+        "start_at": "2024-09-17T10:00:00",
+        "vin": "12345678912345899",
+        "produced_at": 2023,
+        "engine_volume_sm": 15000,
+        "weight_clean_kg": 12000,
+        "weight_load_max_kg": 31000,
+        "category_id": 2,
+        "color_id": 5,
+        "region_id": 2,
+        "organization_id": 1
+    },
+    {
+        "document_number": "34325GFDF453",
+        "registration_number": "DVE543",
+        "car_model": "MERCEDES ACTROS",
+        "start_at": "2024-09-17T10:00:00",
+        "vin": "12345678912345900",
+        "produced_at": 2023,
+        "engine_volume_sm": 15000,
+        "weight_clean_kg": 11000,
+        "weight_load_max_kg": 25000,
+        "category_id": 3,
+        "color_id": 8,
+        "region_id": 17,
+        "organization_id": 2
+    },
+    {
+        "document_number": "34345DDD453",
+        "registration_number": "DDD859",
+        "car_model": "KAMAZ",
+        "start_at": "2024-09-17T10:00:00",
+        "vin": "12398878912345678",
+        "produced_at": 2023,
+        "engine_volume_sm": 10000,
+        "weight_clean_kg": 8000,
+        "weight_load_max_kg": 18000,
+        "category_id": 1,
+        "color_id": 2,
+        "region_id": 1,
+        "owner_id": 4
+    }
+]

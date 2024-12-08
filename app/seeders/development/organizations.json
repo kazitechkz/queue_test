@@ -1,0 +1,30 @@
+[
+    {
+        "id": 1,
+        "full_name": "ТОО 'KAZ ITECH'",
+        "short_name": "KAZ ITECH",
+        "bin": "230540028470",
+        "bik": "BRKEKZKZ",
+        "kbe": "KZ45914122203KZ00557",
+        "email": "kazitech2023@gmail.com",
+        "phone": "+77064205961",
+        "address": "Астана Мангилик Ел",
+        "status": true,
+        "owner_id": 2,
+        "type_id": 1
+    },
+    {
+        "id": 2,
+        "full_name": "ТОО 'I-UNION'",
+        "short_name": "I-UNION",
+        "bin": "220640051457",
+        "bik": "BRKEKZKG",
+        "kbe": "KZ459141222034560557",
+        "email": "iunion@gmail.com",
+        "phone": "+77054171796",
+        "address": "Астана Мангилик Ел",
+        "status": true,
+        "owner_id": 3,
+        "type_id": 1
+    }
+]

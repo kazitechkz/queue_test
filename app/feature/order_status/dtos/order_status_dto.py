@@ -11,13 +11,14 @@ class OrderStatusRDTO(BaseModel):
     status: bool
     is_first: bool
     is_last: bool
-    prev_id: Optional[int]
-    next_id: Optional[int]
+    prev_id: int | None
+    next_id: int | None
     created_at: datetime
     updated_at: datetime
 
     class Config:
         from_attributes = True
+
 
 class OrderStatusWithRelationRDTO(BaseModel):
     id: int
@@ -26,8 +27,8 @@ class OrderStatusWithRelationRDTO(BaseModel):
     status: bool
     is_first: bool
     is_last: bool
-    prev_id: Optional[int]
-    next_id: Optional[int]
+    prev_id: int | None
+    next_id: int | None
     created_at: datetime
     updated_at: datetime
     prev_status: Optional["OrderStatusRDTO"] = None

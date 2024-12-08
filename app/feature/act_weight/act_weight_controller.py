@@ -7,20 +7,20 @@ from app.feature.act_weight.filter.ActWeightFilter import ActWeightFilter
 
 
 class ActWeightController:
-    def __init__(self):
+    def __init__(self) -> None:
         self.router = APIRouter()
         self._add_routes()
 
-    def _add_routes(self):
+    def _add_routes(self) -> None:
         self.router.get("/all")(self.all)
         self.router.get("/get/{id}", response_model=ActWeightRelationsDTO)(self.get)
 
-    #Only for admin and employee
-    async def all(self,
-                  params:ActWeightFilter = Depends(ActWeightFilter),
-                  repo: ActWeightRepository = Depends(ActWeightRepository),
-
-                  ):
+    # Only for admin and employee
+    async def all(
+        self,
+        params: ActWeightFilter = Depends(ActWeightFilter),
+        repo: ActWeightRepository = Depends(ActWeightRepository),
+    ):
         result = await repo.paginate_with_filter(
             dto=ActWeightRelationsDTO,
             page=params.page,
@@ -32,14 +32,15 @@ class ActWeightController:
                 selectinload(repo.model.order),
                 selectinload(repo.model.vehicle),
                 selectinload(repo.model.trailer),
-            ]
+            ],
         )
         return result
 
-    async def get(self,
-                  id:int = Path(gt=0,description="Идентификатор акта взвешивания"),
-                  repo: ActWeightRepository = Depends(ActWeightRepository),
-                  )->ActWeightRelationsDTO:
+    async def get(
+        self,
+        id: int = Path(gt=0, description="Идентификатор акта взвешивания"),
+        repo: ActWeightRepository = Depends(ActWeightRepository),
+    ) -> ActWeightRelationsDTO:
         result = await repo.get(
             id=id,
             options=[
@@ -48,7 +49,7 @@ class ActWeightController:
                 selectinload(repo.model.order),
                 selectinload(repo.model.vehicle),
                 selectinload(repo.model.trailer),
-            ]
+            ],
         )
         result_dto = ActWeightRelationsDTO.from_orm(result)
         return result_dto

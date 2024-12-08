@@ -7,5 +7,5 @@ from app.domain.models.organization_model import OrganizationModel
 
 
 class OrganizationRepository(BaseRepository[OrganizationModel]):
-    def __init__(self, db: Session = Depends(get_db)):
+    def __init__(self, db: Session = Depends(get_db)) -> None:
         super().__init__(OrganizationModel, db)

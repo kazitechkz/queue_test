@@ -1,0 +1,15 @@
+[
+    {"id": 1, "title": "Красный", "value": "red"},
+    {"id": 2, "title": "Оранжевый", "value": "orange"},
+    {"id": 3, "title": "Жёлтый", "value": "yellow"},
+    {"id": 4, "title": "Зелёный", "value": "green"},
+    {"id": 5, "title": "Голубой", "value": "light_blue"},
+    {"id": 6, "title": "Синий", "value": "blue"},
+    {"id": 7, "title": "Фиолетовый", "value": "purple"},
+    {"id": 8, "title": "Белый", "value": "white"},
+    {"id": 9, "title": "Чёрный", "value": "black"},
+    {"id": 10, "title": "Серый", "value": "gray"},
+    {"id": 11, "title": "Серебристый", "value": "silver"},
+    {"id": 12, "title": "Золотистый", "value": "gold"},
+    {"id": 13, "title": "Комбинированный", "value": "combined"}
+]

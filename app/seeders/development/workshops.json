@@ -1,0 +1,16 @@
+[
+    {
+        "id": 1,
+        "title": "Цех 5404",
+        "sap_id": "5404",
+        "factory_id": 1,
+        "factory_sap_id": "1011"
+    },
+    {
+        "id": 2,
+        "title": "Цех 5407",
+        "sap_id": "5407",
+        "factory_id": 2,
+        "factory_sap_id": "1023"
+    }
+]

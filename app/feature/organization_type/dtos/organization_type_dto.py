@@ -1,6 +1,8 @@
 from datetime import datetime
 
-from pydantic import Field, BaseModel
+from pydantic import BaseModel, Field
+
+from app.shared.database_constants import TableConstantsNames
 
 
 class OrganizationTypeDTO(BaseModel):
@@ -8,16 +10,16 @@ class OrganizationTypeDTO(BaseModel):
 
 
 class OrganizationTypeCDTO(BaseModel):
-    title: str = Field(max_length=200)
-    value: str = Field(max_length=255)
+    title: str = Field(max_length=TableConstantsNames.STANDARD_LENGTH_STRING)
+    value: str = Field(max_length=TableConstantsNames.STANDARD_LENGTH_STRING)
 
     class Config:
         from_attributes = True
 
 
 class OrganizationTypeUDTO(OrganizationTypeDTO):
-    title: str = Field(max_length=200)
-    value: str = Field(max_length=255)
+    title: str = Field(max_length=TableConstantsNames.STANDARD_LENGTH_STRING)
+    value: str = Field(max_length=TableConstantsNames.STANDARD_LENGTH_STRING)
 
     class Config:
         from_attributes = True

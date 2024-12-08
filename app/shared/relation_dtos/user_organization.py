@@ -1,5 +1,3 @@
-from typing import Optional
-
 from app.feature.organization.dtos.organization_dto import OrganizationRDTO
 from app.feature.organization_type.dtos.organization_type_dto import OrganizationTypeRDTO
 from app.feature.role.dtos.role_dto import RoleRDTO
@@ -16,9 +14,9 @@ class OrganizationRDTOWithRelations(OrganizationRDTO):
 
 
 class UserRDTOWithRelations(UserRDTO):
-    role: Optional[RoleRDTO] = None
-    user_type: Optional[UserTypeRDTO] = None
-    organizations: Optional[list[OrganizationRDTO]] = []
+    role: RoleRDTO | None = None
+    user_type: UserTypeRDTO | None = None
+    organizations: list[OrganizationRDTO] | None = []
 
     class Config:
         from_attributes = True

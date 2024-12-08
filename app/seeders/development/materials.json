@@ -1,0 +1,74 @@
+[
+    {
+        "id": 1,
+        "title": "ПЕСОК ИЗ ШЛАКОВ ВУ ФЕРРОХРОМА 0-5",
+        "sap_id": "30012553",
+        "price_without_taxes": 800.0,
+        "price_with_taxes": 896.0,
+        "workshop_id": 1,
+        "workshop_sap_id": "5404"
+    },
+    {
+        "id": 2,
+        "title": "ЩЕБЕНЬ ИЗ ШЛАКОВ ВУ ФЕРРОХРОМА 5-20",
+        "sap_id": "80000620",
+        "price_without_taxes": 725.0,
+        "price_with_taxes": 812.0,
+        "workshop_id": 1,
+        "workshop_sap_id": "5404"
+    },
+    {
+        "id": 3,
+        "title": "ЩЕБЕНЬ ИЗ ШЛАКОВ ВУ ФЕРРОХРОМА 20-40",
+        "sap_id": "30133840",
+        "price_without_taxes": 275.0,
+        "price_with_taxes": 308.0,
+        "workshop_id": 1,
+        "workshop_sap_id": "5404"
+    },
+    {
+        "id": 4,
+        "title": "ПЕСОК ИЗ ШЛАКА ВУ ФХ ОПШ ПЦ№4",
+        "sap_id": "80000860",
+        "price_without_taxes": 800.0,
+        "price_with_taxes": 896.0,
+        "workshop_id": 2,
+        "workshop_sap_id": "5407"
+    },
+    {
+        "id": 5,
+        "title": "ЩЕБЕНЬ 5-20 ИЗ ШЛАКА ВУ ФХ ОПШ ПЦ№4",
+        "sap_id": "80000861",
+        "price_without_taxes": 178.57,
+        "price_with_taxes": 200.0,
+        "workshop_id": 2,
+        "workshop_sap_id": "5407"
+    },
+    {
+        "id": 6,
+        "title": "ЩЕБЕНЬ 20-40 ИЗ ШЛАКА ВУ ФХ ОПШ ПЦ№4",
+        "sap_id": "80000862",
+        "price_without_taxes": 178.57,
+        "price_with_taxes": 200.0,
+        "workshop_id": 2,
+        "workshop_sap_id": "5407"
+    },
+    {
+        "id": 7,
+        "title": "ЩЕБЕНЬ ШЛАКОВЫЙ ДЛЯ ДОР. СТРОИТ 40-70",
+        "sap_id": "80000575",
+        "price_without_taxes": 178.57,
+        "price_with_taxes": 200.0,
+        "workshop_id": 2,
+        "workshop_sap_id": "5407"
+    },
+    {
+        "id": 8,
+        "title": "ШЛАК КАМЕНЬ БУТОВЫЙ ВУ ФХ",
+        "sap_id": "30144621",
+        "price_without_taxes": 250.0,
+        "price_with_taxes": 280.0,
+        "workshop_id": 2,
+        "workshop_sap_id": "5407"
+    }
+]

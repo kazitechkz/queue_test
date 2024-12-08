@@ -1,16 +1,14 @@
-from fastapi import Request, HTTPException
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi import HTTPException, Request
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from starlette import status
-from typing import Optional
 
 
 class AuthBearer(HTTPBearer):
-    async def __call__(self, request: Request) -> Optional[str]:
+    async def __call__(self, request: Request) -> str | None:
         try:
             credentials: HTTPAuthorizationCredentials = await super().__call__(request)
             return credentials.credentials  # Возвращаем Bearer токен
         except HTTPException as ex:
             if ex.status_code == status.HTTP_403_FORBIDDEN:
                 return None  # Если токена нет, возвращаем None
-            else:
-                raise ex
+            raise

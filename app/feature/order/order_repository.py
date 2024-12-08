@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from fastapi import Depends
 from sqlalchemy.orm import Session, selectinload
@@ -19,23 +18,25 @@ from app.shared.relation_dtos.user_organization import UserRDTOWithRelations
 
 
 class OrderRepository(BaseRepository[OrderModel]):
-    def __init__(self, db: Session = Depends(get_db)):
+    def __init__(self, db: Session = Depends(get_db)) -> None:
         super().__init__(OrderModel, db)
 
     async def create_order(
-            self,
-            dto,
-            userDTO: UserRDTOWithRelations,
-            materialRepo: MaterialRepository,
-            workshopRepo: WorkshopRepository,
-            factoryRepo: FactoryRepository,
-            sapRequestService: SapRequestService,
-            sapRequestRepo: SapRequestRepository,
-            organizationRepo: Optional[OrganizationRepository] = None,
-            is_individual: bool = True
+        self,
+        dto,
+        userDTO: UserRDTOWithRelations,
+        materialRepo: MaterialRepository,
+        workshopRepo: WorkshopRepository,
+        factoryRepo: FactoryRepository,
+        sapRequestService: SapRequestService,
+        sapRequestRepo: SapRequestRepository,
+        organizationRepo: OrganizationRepository | None = None,
+        is_individual: bool = True,
     ):
         # Retrieve material information and validate workshop and factory
-        material_dict = await materialRepo.count_price(sap_id=dto.material_sap_id, quan=dto.quan_t)
+        material_dict = await materialRepo.count_price(
+            sap_id=dto.material_sap_id, quan=dto.quan_t
+        )
         material = material_dict["material"]
         workshop = await workshopRepo.get(id=material.workshop_id)
         if workshop is None:
@@ -56,31 +57,33 @@ class OrderRepository(BaseRepository[OrderModel]):
             "quan_t": dto.quan_t,
             "price_without_taxes": material_dict["price_without_taxes"],
             "price_with_taxes": material_dict["price_with_taxes"],
-            "end_at": datetime.now().replace(year=datetime.now().year + 1)
+            "end_at": datetime.now().replace(year=datetime.now().year + 1),
         }
 
         # Additional fields for individual or legal order
         if is_individual:
-            order_data.update({
-                "owner_id": userDTO.id,
-                "iin": userDTO.iin,
-                "name": userDTO.name
-            })
+            order_data.update(
+                {"owner_id": userDTO.id, "iin": userDTO.iin, "name": userDTO.name}
+            )
         else:
             # Validate organization for legal order
-            organization = await organizationRepo.get_first_with_filters(filters=[
-                {"id": dto.organization_id}, {"owner_id": userDTO.id}
-            ])
+            organization = await organizationRepo.get_first_with_filters(
+                filters=[{"id": dto.organization_id}, {"owner_id": userDTO.id}]
+            )
             if organization is None:
                 raise AppExceptionResponse.bad_request(message="Организация не найдена")
-            order_data.update({
-                "organization_id": dto.organization_id,
-                "bin": organization.bin,
-                "dogovor": dto.dogovor
-            })
+            order_data.update(
+                {
+                    "organization_id": dto.organization_id,
+                    "bin": organization.bin,
+                    "dogovor": dto.dogovor,
+                }
+            )
 
         order = await self.create(obj=OrderModel(**order_data))
-        sap_request = await sapRequestRepo.request_to_sap(order=order, sapService=sapRequestService)
+        sap_request = await sapRequestRepo.request_to_sap(
+            order=order, sapService=sapRequestService
+        )
         if sap_request is not None and not sap_request.is_failed:
             order.zakaz = sap_request.zakaz
             order.sap_id = sap_request.id
@@ -89,10 +92,14 @@ class OrderRepository(BaseRepository[OrderModel]):
             order.status_id = 2
 
         order = await self.update(obj=order, dto=OrderCDTO.from_orm(order))
-        return await self.get(id=order.id, options=[selectinload(OrderModel.material),
+        return await self.get(
+            id=order.id,
+            options=[
+                selectinload(OrderModel.material),
                 selectinload(OrderModel.organization),
                 selectinload(OrderModel.factory),
                 selectinload(OrderModel.workshop),
                 selectinload(OrderModel.kaspi),
-                selectinload(OrderModel.sap_request),])
-
+                selectinload(OrderModel.sap_request),
+            ],
+        )

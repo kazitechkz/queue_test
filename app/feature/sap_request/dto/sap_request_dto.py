@@ -1,8 +1,9 @@
 from datetime import date as shedule_date
 from datetime import time as shedule_time
-from typing import Optional
 
 from pydantic import BaseModel, Field
+
+from app.shared.database_constants import TableConstantsNames
 
 
 class SapRequestDTO(BaseModel):
@@ -10,20 +11,26 @@ class SapRequestDTO(BaseModel):
 
 
 class SapRequestCDTO(BaseModel):
-    order_id: Optional[int] = Field(None, description="Внешний ключ к таблице заказов, может быть пустым")
-    werks: Optional[str] = Field(None, max_length=4, description="Код завода в SAP")
-    matnr: str = Field(..., max_length=18, description="Код материала в SAP")
-    kun_name: Optional[str] = Field(None, max_length=40, description="ФИО физического лица")
-    iin: Optional[str] = Field(None, max_length=12, description="ИИН физического лица")
+    order_id: int | None = Field(
+        None, description="Внешний ключ к таблице заказов, может быть пустым"
+    )
+    werks: str | None = Field(None, max_length=TableConstantsNames.WERKS_LENGTH, description="Код завода в SAP")
+    matnr: str = Field(..., max_length=TableConstantsNames.MATNR_LENGTH, description="Код материала в SAP")
+    kun_name: str | None = Field(None, max_length=40, description="ФИО физического лица")
+    iin: str | None = Field(None, max_length=TableConstantsNames.IIN_BIN_LENGTH, description="ИИН физического лица")
     quan: int = Field(..., description="Объем заказа")
-    price: Optional[float] = Field(None, description="Цена")
-    dogovor: Optional[str] = Field(None, max_length=10, description="Номер договора")
-    status: Optional[str] = Field(..., max_length=1, description="Статус переноса")
-    zakaz: Optional[str] = Field(None, max_length=10, description="Номер заказа из SAP")
-    text: Optional[str] = Field(None, max_length=50, description="Описание ошибки при переносе")
-    pdf: Optional[bytes] = Field(None, description="Счет на предоплату в формате PDF (Base64)")
-    date: Optional[shedule_date] = Field(None, description="Дата переноса")
-    time: Optional[shedule_time] = Field(None, description="Время переноса")
+    price: float | None = Field(None, description="Цена")
+    dogovor: str | None = Field(None, max_length=TableConstantsNames.SAP_ORDER_LENGTH_STRING, description="Номер договора")
+    status: str | None = Field(..., max_length=1, description="Статус переноса")
+    zakaz: str | None = Field(None, max_length=TableConstantsNames.SAP_ORDER_LENGTH_STRING, description="Номер заказа из SAP")
+    text: str | None = Field(
+        None, max_length=50, description="Описание ошибки при переносе"
+    )
+    pdf: bytes | None = Field(
+        None, description="Счет на предоплату в формате PDF (Base64)"
+    )
+    date: shedule_date | None = Field(None, description="Дата переноса")
+    time: shedule_time | None = Field(None, description="Время переноса")
     is_active: bool = Field(default=True, description="Активен ли запрос?")
     is_failed: bool = Field(default=False, description="Произошел ли сбой при переносе?")
     is_paid: bool = Field(default=False, description="Оплачен ли запрос?")
@@ -34,20 +41,26 @@ class SapRequestCDTO(BaseModel):
 
 
 class SapRequestRDTO(SapRequestDTO):
-    order_id: Optional[int] = Field(None, description="Внешний ключ к таблице заказов, может быть пустым")
-    werks: Optional[str] = Field(None, max_length=4, description="Код завода в SAP")
-    matnr: str = Field(..., max_length=18, description="Код материала в SAP")
-    kun_name: Optional[str] = Field(None, max_length=40, description="ФИО физического лица")
-    iin: Optional[str] = Field(None, max_length=12, description="ИИН физического лица")
+    order_id: int | None = Field(
+        None, description="Внешний ключ к таблице заказов, может быть пустым"
+    )
+    werks: str | None = Field(None, max_length=TableConstantsNames.WERKS_LENGTH, description="Код завода в SAP")
+    matnr: str = Field(..., max_length=TableConstantsNames.MATNR_LENGTH, description="Код материала в SAP")
+    kun_name: str | None = Field(None, max_length=40, description="ФИО физического лица")
+    iin: str | None = Field(None, max_length=TableConstantsNames.IIN_BIN_LENGTH, description="ИИН физического лица")
     quan: int = Field(..., description="Объем заказа")
-    price: Optional[float] = Field(None, description="Цена")
-    dogovor: Optional[str] = Field(None, max_length=10, description="Номер договора")
-    status: Optional[str] = Field(..., max_length=1, description="Статус переноса")
-    zakaz: Optional[str] = Field(None, max_length=10, description="Номер заказа из SAP")
-    text: Optional[str] = Field(None, max_length=50, description="Описание ошибки при переносе")
-    pdf: Optional[bytes] = Field(None, description="Счет на предоплату в формате PDF (Base64)")
-    date: Optional[shedule_date] = Field(None, description="Дата переноса")
-    time: Optional[shedule_time] = Field(None, description="Время переноса")
+    price: float | None = Field(None, description="Цена")
+    dogovor: str | None = Field(None, max_length=TableConstantsNames.SAP_ORDER_LENGTH_STRING, description="Номер договора")
+    status: str | None = Field(..., max_length=1, description="Статус переноса")
+    zakaz: str | None = Field(None, max_length=TableConstantsNames.SAP_ORDER_LENGTH_STRING, description="Номер заказа из SAP")
+    text: str | None = Field(
+        None, max_length=50, description="Описание ошибки при переносе"
+    )
+    pdf: bytes | None = Field(
+        None, description="Счет на предоплату в формате PDF (Base64)"
+    )
+    date: shedule_date | None = Field(None, description="Дата переноса")
+    time: shedule_time | None = Field(None, description="Время переноса")
     is_active: bool = Field(default=True, description="Активен ли запрос?")
     is_failed: bool = Field(default=False, description="Произошел ли сбой при переносе?")
     is_paid: bool = Field(default=False, description="Оплачен ли запрос?")

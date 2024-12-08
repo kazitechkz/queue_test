@@ -1,0 +1,47 @@
+[
+  {
+    "value": "waiting_for_sup",
+    "prev_id": null,
+    "next_id": 3
+  },
+  {
+    "value": "reject_from_sup",
+    "prev_id": 1,
+    "next_id": null
+  },
+  {
+    "value": "waiting_for_payment",
+    "prev_id": 1,
+    "next_id": 5
+  },
+  {
+    "value": "reject_from_payment",
+    "prev_id": 3,
+    "next_id": null
+  },
+  {
+    "value": "waiting_for_execution",
+    "prev_id": 3,
+    "next_id": 6
+  },
+  {
+    "value": "executed",
+    "prev_id": 5,
+    "next_id": 7
+  },
+  {
+    "value": "finished",
+    "prev_id": 6,
+    "next_id": null
+  },
+  {
+    "value": "canceled",
+    "prev_id": null,
+    "next_id": null
+  },
+  {
+    "value": "waiting_for_accept_document",
+    "prev_id": 3,
+    "next_id": 5
+  }
+]

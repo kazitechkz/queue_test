@@ -7,5 +7,5 @@ from app.domain.models.act_weight_model import ActWeightModel
 
 
 class ActWeightRepository(BaseRepository[ActWeightModel]):
-    def __init__(self, db: Session = Depends(get_db)):
+    def __init__(self, db: Session = Depends(get_db)) -> None:
         super().__init__(ActWeightModel, db)

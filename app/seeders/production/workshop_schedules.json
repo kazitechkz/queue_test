@@ -1,0 +1,26 @@
+[
+    {
+        "workshop_id": 1,
+        "workshop_sap_id": "5404",
+        "date_start": "2024-01-01",
+        "date_end": "2024-12-31",
+        "start_at": "09:00:00",
+        "end_at": "20:00:00",
+        "car_service_min": 20,
+        "break_between_service_min": 5,
+        "machine_at_one_time": 4,
+        "is_active": true
+    },
+    {
+        "workshop_id": 2,
+        "workshop_sap_id": "5407",
+        "date_start": "2024-01-01",
+        "date_end": "2024-12-31",
+        "start_at": "09:00:00",
+        "end_at": "18:00:00",
+        "car_service_min": 15,
+        "break_between_service_min": 0,
+        "machine_at_one_time": 2,
+        "is_active": true
+    }
+]

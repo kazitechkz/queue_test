@@ -7,5 +7,5 @@ from app.domain.models.factory_model import FactoryModel
 
 
 class FactoryRepository(BaseRepository[FactoryModel]):
-    def __init__(self, db: Session = Depends(get_db)):
+    def __init__(self, db: Session = Depends(get_db)) -> None:
         super().__init__(FactoryModel, db)

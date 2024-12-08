@@ -1,6 +1,7 @@
-from pydantic import BaseModel, Field, EmailStr, field_validator
+from pydantic import BaseModel, Field, model_validator, EmailStr
 
-from app.core.validation_rules import EMAIL_REGEX, TWELVE_DIGITS_REGEX, PHONE_REGEX
+from app.core.validation_rules import PHONE_REGEX, TWELVE_DIGITS_REGEX, EMAIL_REGEX
+from app.shared.database_constants import TableConstantsNames
 
 
 class UserDTO(BaseModel):
@@ -10,30 +11,28 @@ class UserDTO(BaseModel):
 class UserCDTO(BaseModel):
     role_id: int = Field(description="Роль пользователя")
     type_id: int = Field(description="Тип пользователя")
-    name: str = Field(description="ФИО пользователя", max_length=255)
+    name: str = Field(description="ФИО пользователя", max_length=TableConstantsNames.STANDARD_LENGTH_STRING)
     iin: str
-    email: str
+    email: EmailStr
     phone: str
-    password_hash: str = Field(description="Пароль пользователя", max_length=255, min_length=4)
+    password_hash: str = Field(
+        description="Пароль пользователя", max_length=TableConstantsNames.STANDARD_LENGTH_STRING, min_length=4
+    )
     status: bool = Field(description="Статус пользователя", default=True)
 
-    @field_validator('phone')
-    def validate_phone(cls, v) -> str:
-        if not PHONE_REGEX.match(v):
-            raise ValueError('Неверный формат телефона: +77XXXXXXXXX')
-        return v
+    @model_validator(mode="before")
+    def validate_fields(cls, values: dict) -> dict:
+        # Проверка телефона
+        phone = values.get("phone")
+        if phone and not PHONE_REGEX.match(phone):
+            raise ValueError("Неверный формат телефона: +77XXXXXXXXX")
 
-    @field_validator('iin')
-    def validate_iin(cls, v) -> str:
-        if not TWELVE_DIGITS_REGEX.match(v):
-            raise ValueError('Неверный формат ИИН')
-        return v
+        # Проверка ИИН
+        iin = values.get("iin")
+        if iin and not TWELVE_DIGITS_REGEX.match(iin):
+            raise ValueError("Неверный формат ИИН")
 
-    @field_validator('email')
-    def validate_email(cls, v) -> EmailStr:
-        if not EMAIL_REGEX.match(v):
-            raise ValueError('Неверный формат почты')
-        return v
+        return values
 
     class Config:
         from_attributes = True
@@ -45,12 +44,9 @@ class UserRDTO(UserDTO):
     type_id: int
     name: str
     iin: str
-    email: str
+    email: EmailStr
     phone: str
     status: bool
 
     class Config:
         from_attributes = True
-
-
-

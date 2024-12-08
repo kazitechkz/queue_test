@@ -1,5 +1,4 @@
 from operator import and_
-from typing import Optional
 
 from fastapi import Query
 from sqlalchemy import or_
@@ -11,18 +10,25 @@ from app.shared.relation_dtos.user_organization import UserRDTOWithRelations
 
 
 class VehicleFilter(BaseFilter):
-    def __init__(self,
-                 per_page: int = Query(default=20, gt=0, example=20, description="Количество элементов на страницу"),
-                 page: int = Query(default=1, ge=1, example=1, description="Номер страницы"),
-                 search: Optional[str] = Query(default=None, max_length=255, min_length=3,
-                                               description="Поисковый запрос"),
-                 category_id: Optional[int] = Query(default=None, gt=0, description="Категория ТС"),
-                 color_id: Optional[int] = Query(default=None, gt=0, description="Цвет ТС"),
-                 region_id: Optional[int] = Query(default=None, gt=0, description="Место жительства"),
-                 owner_id: Optional[int] = Query(default=None, gt=0, description="Владелец (физическое лицо) ТС"),
-                 organization_id: Optional[int] = Query(default=None, gt=0,
-                                                        description="Владелец (юридическое лицо) ТС")
-                 ):
+    def __init__(
+        self,
+        per_page: int = Query(
+            default=20, gt=0, example=20, description="Количество элементов на страницу"
+        ),
+        page: int = Query(default=1, ge=1, example=1, description="Номер страницы"),
+        search: str | None = Query(
+            default=None, max_length=255, min_length=3, description="Поисковый запрос"
+        ),
+        category_id: int | None = Query(default=None, gt=0, description="Категория ТС"),
+        color_id: int | None = Query(default=None, gt=0, description="Цвет ТС"),
+        region_id: int | None = Query(default=None, gt=0, description="Место жительства"),
+        owner_id: int | None = Query(
+            default=None, gt=0, description="Владелец (физическое лицо) ТС"
+        ),
+        organization_id: int | None = Query(
+            default=None, gt=0, description="Владелец (юридическое лицо) ТС"
+        ),
+    ) -> None:
         super().__init__(per_page, page, search)
         self.per_page = per_page
         self.page = page
@@ -37,14 +43,15 @@ class VehicleFilter(BaseFilter):
     def apply(self) -> list:
         filters = []
         if self.search:
-            filters.append(or_(
-                self.model.document_number.like(f"%{self.search}%"),
-                self.model.registration_number.like(f"%{self.search}%"),
-                self.model.car_model.like(f"%{self.search}%"),
-                self.model.vin.like(f"%{self.search}%"),
-                self.model.note.like(f"%{self.search}%"),
-                self.model.deregistration_note.like(f"%{self.search}%"),
-            )
+            filters.append(
+                or_(
+                    self.model.document_number.like(f"%{self.search}%"),
+                    self.model.registration_number.like(f"%{self.search}%"),
+                    self.model.car_model.like(f"%{self.search}%"),
+                    self.model.vin.like(f"%{self.search}%"),
+                    self.model.note.like(f"%{self.search}%"),
+                    self.model.deregistration_note.like(f"%{self.search}%"),
+                )
             )
         if self.category_id:
             filters.append(and_(self.model.category_id == self.category_id))
@@ -60,7 +67,7 @@ class VehicleFilter(BaseFilter):
 
 
 class OwnVehicleFilter:
-    def __init__(self):
+    def __init__(self) -> None:
         self.model = VehicleModel
 
     def apply(self, userDTO: UserRDTOWithRelations):
@@ -73,9 +80,8 @@ class OwnVehicleFilter:
 
             # Проверяем, что список owner_ids не пустой
             if owner_ids:
-                print(f"Owner ids: {owner_ids}")
                 # Добавляем фильтр для organization_id
                 filters.append(self.model.organization_id.in_(owner_ids))
             else:
-                print("Список owner_ids пуст!")
+                pass
         return filters

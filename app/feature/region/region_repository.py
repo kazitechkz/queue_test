@@ -7,7 +7,5 @@ from app.domain.models.region_model import RegionModel
 
 
 class RegionRepository(BaseRepository[RegionModel]):
-
-    def __init__(self, db: Session = Depends(get_db)):
+    def __init__(self, db: Session = Depends(get_db)) -> None:
         super().__init__(RegionModel, db)
-

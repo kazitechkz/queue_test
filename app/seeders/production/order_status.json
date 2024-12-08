@@ -1,0 +1,65 @@
+[
+    {
+        "id": 1,
+        "title": "Ожидание создания счета оплаты в SAP",
+        "value": "waiting_for_sup",
+        "is_first": true,
+        "is_last": false
+    },
+    {
+        "id": 2,
+        "title": "Ошибка при создании счета на оплату в системе в SAP",
+        "value": "reject_from_sup",
+        "is_first": false,
+        "is_last": false
+    },
+    {
+        "id": 3,
+        "title": "Ожидание оплаты",
+        "value": "waiting_for_payment",
+        "is_first": false,
+        "is_last": false
+    },
+    {
+        "id": 4,
+        "title": "Отказ в системе эквайринга",
+        "value": "reject_from_payment",
+        "is_first": false,
+        "is_last": false
+    },
+    {
+        "id": 5,
+        "title": "Ожидает бронирования",
+        "value": "waiting_for_execution",
+        "is_first": false,
+        "is_last": false
+    },
+    {
+        "id": 6,
+        "title": "Выполняется",
+        "value": "executed",
+        "is_first": false,
+        "is_last": false
+    },
+    {
+        "id": 7,
+        "title": "Завершен",
+        "value": "finished",
+        "is_first": false,
+        "is_last": true
+    },
+    {
+        "id": 8,
+        "title": "Отклонен",
+        "value": "canceled",
+        "is_first": false,
+        "is_last": true
+    },
+    {
+        "id": 9,
+        "title": "Ожидание подтверждения документов оплаты",
+        "value": "waiting_for_accept_document",
+        "is_first": false,
+        "is_last": false
+    }
+]

@@ -1,5 +1,5 @@
 from fastapi import Depends
-from sqlalchemy import select, and_
+from sqlalchemy import and_
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.app_exception_response import AppExceptionResponse
@@ -11,7 +11,7 @@ from app.shared.relation_dtos.user_organization import UserRDTOWithRelations
 
 
 class UserRepository(BaseRepository[UserModel]):
-    def __init__(self, db: Session = Depends(get_db)):
+    def __init__(self, db: Session = Depends(get_db)) -> None:
         super().__init__(UserModel, db)
 
     async def get_admin(self) -> UserRDTOWithRelations:
@@ -20,8 +20,8 @@ class UserRepository(BaseRepository[UserModel]):
             options=[
                 selectinload(self.model.role),
                 selectinload(self.model.user_type),
-                selectinload(self.model.organizations)
-            ]
+                selectinload(self.model.organizations),
+            ],
         )
         if result is None:
             raise AppExceptionResponse.internal_error(message="Система не найдена")

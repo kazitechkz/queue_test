@@ -7,5 +7,5 @@ from app.domain.models.employee_request import EmployeeRequestModel
 
 
 class EmployeeRequestRepository(BaseRepository[EmployeeRequestModel]):
-    def __init__(self, db: Session = Depends(get_db)):
+    def __init__(self, db: Session = Depends(get_db)) -> None:
         super().__init__(EmployeeRequestModel, db)

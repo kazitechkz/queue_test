@@ -1,0 +1,12 @@
+[
+    {
+        "id": 1,
+        "title": "Физическое лицо",
+        "value": "individual"
+    },
+    {
+        "id": 2,
+        "title": "Юридическое лицо",
+        "value": "legal_entity"
+    }
+]

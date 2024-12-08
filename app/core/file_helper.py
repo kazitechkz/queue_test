@@ -9,15 +9,28 @@ from app.domain.models.file_model import FileModel
 
 
 class FileUploadHelper:
-    def __init__(self, db: Session, upload_dir: str = "static",
-                 allowed_extensions: set = None):
+    def __init__(
+        self,
+        db: Session,
+        upload_dir: str = "static",
+        allowed_extensions: set | None = None,
+    ) -> None:
         self.upload_dir = upload_dir
-        self.allowed_extensions = allowed_extensions or {'png', 'jpg', 'jpeg', 'pdf', 'docx'}
+        self.allowed_extensions = allowed_extensions or {
+            "png",
+            "jpg",
+            "jpeg",
+            "pdf",
+            "docx",
+        }
         self.db = db
         os.makedirs(self.upload_dir, exist_ok=True)
 
     def allowed_file(self, filename: str) -> bool:
-        return '.' in filename and filename.rsplit('.', 1)[1].lower() in self.allowed_extensions
+        return (
+            "." in filename
+            and filename.rsplit(".", 1)[1].lower() in self.allowed_extensions
+        )
 
     async def save_file(self, file: UploadFile) -> FileModel:
         """
@@ -31,7 +44,8 @@ class FileUploadHelper:
         # Проверка и безопасное имя файла
         filename = secure_filename(file.filename)
         if not self.allowed_file(filename):
-            raise ValueError(f"Недопустимое расширение файла: {filename}")
+            msg = f"Недопустимое расширение файла: {filename}"
+            raise ValueError(msg)
 
         # Полный путь к файлу
         file_path = os.path.join(self.upload_dir, filename)
@@ -44,9 +58,9 @@ class FileUploadHelper:
         # Создание записи в базе данных
         file_record = FileModel(
             url=file_path,
-            extension=filename.rsplit('.', 1)[1].lower(),
+            extension=filename.rsplit(".", 1)[1].lower(),
             created_at=datetime.now(),
-            updated_at=datetime.now()
+            updated_at=datetime.now(),
         )
 
         self.db.add(file_record)

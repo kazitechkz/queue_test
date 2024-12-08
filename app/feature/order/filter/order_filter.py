@@ -1,6 +1,3 @@
-from abc import ABC
-from typing import Optional, List
-
 from fastapi import Query
 from sqlalchemy import and_
 
@@ -11,13 +8,20 @@ from app.shared.relation_dtos.user_organization import UserRDTOWithRelations
 
 
 class OrderFilter(BaseFilter):
-    def __init__(self,
-                 per_page: int = Query(default=20, gt=0, example=20, description="Количество элементов на страницу"),
-                 page: int = Query(default=1, ge=1, example=1, description="Номер страницы"),
-                 search: Optional[str] = Query(default=None, max_length=255, min_length=3,
-                                               description="Поисковый запрос по имени, телефону, почте, иину"),
-                 status_id: List[int] = Query(default=[], description="Статус заказа")
-                 ):
+    def __init__(
+        self,
+        per_page: int = Query(
+            default=20, gt=0, example=20, description="Количество элементов на страницу"
+        ),
+        page: int = Query(default=1, ge=1, example=1, description="Номер страницы"),
+        search: str | None = Query(
+            default=None,
+            max_length=255,
+            min_length=3,
+            description="Поисковый запрос по имени, телефону, почте, иину",
+        ),
+        status_id: list[int] = Query(default=[], description="Статус заказа"),
+    ) -> None:
         super().__init__(per_page, page, search)
         self.per_page = per_page
         self.page = page
@@ -39,7 +43,7 @@ class OrderFilter(BaseFilter):
                     # Добавляем фильтр для organization_id
                     filters.append(and_(self.model.organization_id.in_(owner_ids)))
                 else:
-                    print("Список owner_ids пуст!")
+                    pass
 
         if self.status_id:
             filters.append(and_(self.model.status_id.in_(self.status_id)))
@@ -47,7 +51,7 @@ class OrderFilter(BaseFilter):
 
 
 class DetailOrderFilter:
-    def __init__(self, order_id: int = Query(description="Идентификатор заказа")):
+    def __init__(self, order_id: int = Query(description="Идентификатор заказа")) -> None:
         self.model = OrderModel
         self.order_id = order_id
 
@@ -66,7 +70,7 @@ class DetailOrderFilter:
                     # Добавляем фильтр для organization_id
                     filters.append(and_(self.model.organization_id.in_(owner_ids)))
                 else:
-                    print("Список owner_ids пуст!")
+                    pass
 
         if self.order_id:
             filters.append(and_(self.model.id == self.order_id))
@@ -74,11 +78,14 @@ class DetailOrderFilter:
 
 
 class OrderFiltersForPaymentDocuments(BaseFilter):
-    def __init__(self,
-                 per_page: int = Query(default=20, gt=0, example=20, description="Количество элементов на страницу"),
-                 page: int = Query(default=1, ge=1, example=1, description="Номер страницы"),
-                 status: Optional[bool] = Query(default=True, description="Статус заказа")
-                 ):
+    def __init__(
+        self,
+        per_page: int = Query(
+            default=20, gt=0, example=20, description="Количество элементов на страницу"
+        ),
+        page: int = Query(default=1, ge=1, example=1, description="Номер страницы"),
+        status: bool | None = Query(default=True, description="Статус заказа"),
+    ) -> None:
         super().__init__(per_page, page)
         self.per_page = per_page
         self.page = page
@@ -90,6 +97,10 @@ class OrderFiltersForPaymentDocuments(BaseFilter):
         if self.status is True:
             filters.append(and_(self.model.status_id == 9))
         else:
-            filters.append(and_(self.model.status_id == 8, self.model.checked_payment_by_id == userRepo.id))
+            filters.append(
+                and_(
+                    self.model.status_id == 8,
+                    self.model.checked_payment_by_id == userRepo.id,
+                )
+            )
         return filters
-

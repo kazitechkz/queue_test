@@ -1,0 +1,44 @@
+[
+    {
+        "id": 1,
+        "title": "Администратор",
+        "value": "admin",
+        "can_auth": true
+    },
+    {
+        "id": 2,
+        "title": "Служба Безопасности",
+        "value": "security",
+        "can_auth": false
+    },
+    {
+        "id": 3,
+        "title": "Контроллер погрузки",
+        "value": "security_loader",
+        "can_auth": true
+    },
+    {
+        "id": 4,
+        "title": "Погрузчик",
+        "value": "loader",
+        "can_auth": true
+    },
+    {
+        "id": 5,
+        "title": "Весовщик",
+        "value": "weigher",
+        "can_auth": true
+    },
+    {
+        "id": 6,
+        "title": "Клиент",
+        "value": "client",
+        "can_auth": true
+    },
+    {
+        "id": 7,
+        "title": "Бухгалтер",
+        "value": "accountant",
+        "can_auth": true
+    }
+]

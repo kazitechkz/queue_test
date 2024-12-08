@@ -1,0 +1,57 @@
+[
+  {
+    "value": "entry_operation",
+    "prev_id": null,
+    "next_id": 2
+  },
+  {
+    "value": "initial_weight_operation",
+    "prev_id": 1,
+    "next_id": 3
+  },
+  {
+    "value": "loading_entry_operation",
+    "prev_id": 2,
+    "next_id": 4
+  },
+  {
+    "value": "loading_operation",
+    "prev_id": 3,
+    "next_id": 5
+  },
+  {
+    "value": "final_weight_operation",
+    "prev_id": 4,
+    "next_id": 6
+  },
+  {
+    "value": "exit_check_operation",
+    "prev_id": 5,
+    "next_id": 11
+  },
+  {
+    "value": "reloading_entry_exit_operation",
+    "prev_id": 5,
+    "next_id": 8
+  },
+  {
+    "value": "reloading_exit_operation",
+    "prev_id": 7,
+    "next_id": null
+  },
+  {
+    "value": "reloading_entry_weight_operation",
+    "prev_id": 5,
+    "next_id": 10
+  },
+  {
+    "value": "reloading_weight_operation",
+    "prev_id": 9,
+    "next_id": 5
+  },
+  {
+    "value": "executed_operation",
+    "prev_id": 6,
+    "next_id": null
+  }
+]

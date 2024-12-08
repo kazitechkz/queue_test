@@ -1,13 +1,13 @@
-def assign_roles_to_route(app, path, roles):
+def assign_roles_to_route(app, path, roles) -> None:
     for route in app.routes:
         if route.path == path:
-            if hasattr(route, 'roles'):
+            if hasattr(route, "roles"):
                 route.roles.extend(roles)
             else:
                 route.roles = roles
 
 
-def assign_roles(app):
+def assign_roles(app) -> None:
     # Назначаем роль "admin" для всех маршрутов
     assign_roles_to_route(app, "/role/", ["admin"])
     assign_roles_to_route(app, "/role/create", ["admin"])
@@ -46,7 +46,9 @@ def assign_roles(app):
 
     assign_roles_to_route(app, "/organization-employee/", ["admin"])
     assign_roles_to_route(app, "/organization-employee/get/{id}", ["admin"])
-    assign_roles_to_route(app, "/organization-employee/my-drivers/{organization_id}", ["client"])
+    assign_roles_to_route(
+        app, "/organization-employee/my-drivers/{organization_id}", ["client"]
+    )
     assign_roles_to_route(app, "/organization-employee/create", ["admin"])
     assign_roles_to_route(app, "/organization-employee/update/{id}", ["admin"])
     assign_roles_to_route(app, "/organization-employee/delete/{id}", ["admin"])
@@ -79,14 +81,18 @@ def assign_roles(app):
     assign_roles_to_route(app, "/vehicle/add-vehicle", ["admin", "client"])
     assign_roles_to_route(app, "/vehicle/get/{id}", ["admin"])
     assign_roles_to_route(app, "/vehicle/get-own-cars", ["client"])
-    assign_roles_to_route(app, "/vehicle/get-organization-cars/{organization_id}", ["client"])
+    assign_roles_to_route(
+        app, "/vehicle/get-organization-cars/{organization_id}", ["client"]
+    )
     assign_roles_to_route(app, "/vehicle/update/{id}", ["admin"])
     assign_roles_to_route(app, "/vehicle/delete/{id}", ["admin"])
 
     assign_roles_to_route(app, "/factory/", ["admin", "client"])
     assign_roles_to_route(app, "/factory/create", ["admin"])
     assign_roles_to_route(app, "/factory/get/{id}", ["admin"])
-    assign_roles_to_route(app, "/factory/get-by-sap/{sap_id}", ["admin", "employee", "client"])
+    assign_roles_to_route(
+        app, "/factory/get-by-sap/{sap_id}", ["admin", "employee", "client"]
+    )
     assign_roles_to_route(app, "/factory/update/{id}", ["admin"])
     assign_roles_to_route(app, "/factory/delete/{id}", ["admin"])
 
@@ -111,7 +117,9 @@ def assign_roles(app):
 
     assign_roles_to_route(app, "/order-status/all", ["admin", "client", "employee"])
     assign_roles_to_route(app, "/order-status/get/{id}", ["admin", "client", "employee"])
-    assign_roles_to_route(app, "/order-status/get-by-value/{value}", ["admin", "client", "employee"])
+    assign_roles_to_route(
+        app, "/order-status/get-by-value/{value}", ["admin", "client", "employee"]
+    )
 
     assign_roles_to_route(app, "/order/check-order-payment", ["admin"])
     assign_roles_to_route(app, "/order/get-all-order", ["admin", "client"])
@@ -134,7 +142,9 @@ def assign_roles(app):
 
     assign_roles_to_route(app, "/workshop-schedule/", ["admin", "client", "employee"])
     assign_roles_to_route(app, "/workshop-schedule/create", ["admin"])
-    assign_roles_to_route(app, "/workshop-schedule/get-by-id/{id}", ["admin", "client", "employee"])
+    assign_roles_to_route(
+        app, "/workshop-schedule/get-by-id/{id}", ["admin", "client", "employee"]
+    )
     assign_roles_to_route(app, "/workshop-schedule/update/{id}", ["admin"])
     assign_roles_to_route(app, "/workshop-schedule/delete/{id}", ["admin"])
 
@@ -155,20 +165,34 @@ def assign_roles(app):
     assign_roles_to_route(app, "/schedule/my-responsible-schedules", ["employee"])
     assign_roles_to_route(app, "/schedule/check-late-schedules", ["admin"])
 
-    assign_roles_to_route(app, "/schedule-history/take-request/{schedule_id}", ["employee"])
-    assign_roles_to_route(app, "/schedule-history/make-decision/{schedule_id}", ["employee"])
+    assign_roles_to_route(
+        app, "/schedule-history/take-request/{schedule_id}", ["employee"]
+    )
+    assign_roles_to_route(
+        app, "/schedule-history/make-decision/{schedule_id}", ["employee"]
+    )
 
     assign_roles_to_route(app, "/act-weight/all", ["admin", "employee"])
     assign_roles_to_route(app, "/act-weight/get/{id}", ["admin", "employee", "client"])
 
     assign_roles_to_route(app, "/initial-weight/all", ["admin", "employee"])
-    assign_roles_to_route(app, "/initial-weight/get/{id}", ["admin", "employee", "client"])
-    assign_roles_to_route(app, "/baseline-weight/get-vehicle-trailer-weights", ["admin", "employee", "client"])
-    assign_roles_to_route(app, "/baseline-weight/get/{vehicle-id}", ["admin", "employee", "client"])
+    assign_roles_to_route(
+        app, "/initial-weight/get/{id}", ["admin", "employee", "client"]
+    )
+    assign_roles_to_route(
+        app,
+        "/baseline-weight/get-vehicle-trailer-weights",
+        ["admin", "employee", "client"],
+    )
+    assign_roles_to_route(
+        app, "/baseline-weight/get/{vehicle-id}", ["admin", "employee", "client"]
+    )
 
     assign_roles_to_route(app, "/payment_document/upload-payment-file", ["client"])
     assign_roles_to_route(app, "/payment_document/get-payment-docs", ["employee"])
-    assign_roles_to_route(app, "/payment_document/get-payment-doc-by-order-id/{order_id}", ["employee"])
+    assign_roles_to_route(
+        app, "/payment_document/get-payment-doc-by-order-id/{order_id}", ["employee"]
+    )
     assign_roles_to_route(app, "/payment_document/add-comment-to-doc", ["employee"])
     assign_roles_to_route(app, "/payment_document/make-decision", ["employee"])
 

@@ -7,6 +7,5 @@ from app.domain.models.operation_model import OperationModel
 
 
 class OperationRepository(BaseRepository[OperationModel]):
-    def __init__(self, db: Session = Depends(get_db)):
+    def __init__(self, db: Session = Depends(get_db)) -> None:
         super().__init__(OperationModel, db)
-

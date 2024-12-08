@@ -7,5 +7,5 @@ from app.domain.models.user_model import UserModel
 
 
 class AuthRepository(BaseRepository[UserModel]):
-    def __init__(self, db: Session = Depends(get_db)):
+    def __init__(self, db: Session = Depends(get_db)) -> None:
         super().__init__(UserModel, db)

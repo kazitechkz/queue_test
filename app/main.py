@@ -1,11 +1,14 @@
-import uvicorn
-from fastapi import FastAPI, Depends
 from contextlib import asynccontextmanager
+
+import uvicorn
+from fastapi import Depends, FastAPI
 
 from app.core.database import init_db
 from app.shared.auth import AuthBearer
+from app.shared.controllers import (
+    include_routers,  # Новый файл для регистрации всех роутеров
+)
 from app.shared.docs import setup_documentation
-from app.shared.controllers import include_routers  # Новый файл для регистрации всех роутеров
 from app.shared.roles import assign_roles
 
 
@@ -14,6 +17,7 @@ from app.shared.roles import assign_roles
 async def lifespan(app: FastAPI):
     await init_db()
     yield
+
 
 # Создаем приложение FastAPI
 app = FastAPI(
@@ -24,7 +28,7 @@ app = FastAPI(
     debug=True,
     dependencies=[Depends(AuthBearer())],
     docs_url=None,  # Отключаем стандартную документацию на /docs
-    redoc_url=None
+    redoc_url=None,
 )
 
 # Включаем все роутеры

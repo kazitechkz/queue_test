@@ -1,19 +1,25 @@
 from datetime import date, time
 
-from sqlalchemy import ForeignKey, String, Date, Time, Integer, Boolean
+from sqlalchemy import Boolean, Date, ForeignKey, Integer, String, Time
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
 from app.domain.models.workshop_model import WorkshopModel
-from app.shared.database_constants import AppTableNames, ID, UpdatedAt, CreatedAt
+from app.shared.database_constants import ID, AppTableNames, CreatedAt, UpdatedAt, TableConstantsNames
 
 
 class WorkshopScheduleModel(Base):
     __tablename__ = AppTableNames.WorkshopScheduleTableName
     id: Mapped[ID]
     workshop_id: Mapped[int] = mapped_column(
-        ForeignKey(AppTableNames.WorkshopTableName + ".id", ondelete="set null", onupdate="cascade"), nullable=True)
-    workshop_sap_id: Mapped[str] = mapped_column(String(length=256), index=True)
+        ForeignKey(
+            AppTableNames.WorkshopTableName + ".id",
+            ondelete="set null",
+            onupdate="cascade",
+        ),
+        nullable=True,
+    )
+    workshop_sap_id: Mapped[str] = mapped_column(String(length=TableConstantsNames.STANDARD_LENGTH_STRING), index=True)
     date_start: Mapped[date] = mapped_column(Date())
     date_end: Mapped[date] = mapped_column(Date())
     start_at: Mapped[time] = mapped_column(Time())

@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from typing import Optional
 
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
@@ -12,12 +11,12 @@ from starlette import status
 
 from app.core.app_settings import app_settings
 from app.core.database import get_db
-from app.domain.models.organization_model import OrganizationModel
 from app.domain.models.user_model import UserModel
 from app.shared.database_constants import TableConstantsNames
 from app.shared.relation_dtos.user_organization import UserRDTOWithRelations
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/auth/login')
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
@@ -34,58 +33,68 @@ def create_access_token(data: int):
     to_encode = {"sub": str(data), "type": "access"}
     expire = datetime.now() + timedelta(minutes=app_settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire.timestamp()})
-    encoded_jwt = jwt.encode(to_encode, app_settings.SECRET_KEY, algorithm=app_settings.ALGORITHM)
+    encoded_jwt = jwt.encode(
+        to_encode, app_settings.SECRET_KEY, algorithm=app_settings.ALGORITHM
+    )
     return encoded_jwt
 
 
 # Функция для создания refresh токена
 def create_refresh_token(data: int):
-    to_encode = {"sub": str(data), "type": "refresh"}  # Указываем тип токена как "refresh"
+    to_encode = {
+        "sub": str(data),
+        "type": "refresh",
+    }  # Указываем тип токена как "refresh"
     expire = datetime.now() + timedelta(days=app_settings.REFRESH_TOKEN_EXPIRE_DAYS)
     to_encode.update({"exp": expire.timestamp()})
-    encoded_jwt = jwt.encode(to_encode, app_settings.SECRET_KEY, algorithm=app_settings.ALGORITHM)
+    encoded_jwt = jwt.encode(
+        to_encode, app_settings.SECRET_KEY, algorithm=app_settings.ALGORITHM
+    )
     return encoded_jwt
 
 
 def verify_jwt_token(token: str = Depends(oauth2_scheme)) -> dict:
     try:
-        decoded_data = jwt.decode(token, app_settings.SECRET_KEY, algorithms=app_settings.ALGORITHM)
+        decoded_data = jwt.decode(
+            token, app_settings.SECRET_KEY, algorithms=app_settings.ALGORITHM
+        )
         # Проверяем, что это именно Access Token, а не Refresh Token
         if decoded_data.get("type") != "access":
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Недопустимый токен для доступа к ресурсу"
+                detail="Недопустимый токен для доступа к ресурсу",
             )
         return decoded_data
     except jwt.JWTError as jwtError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Не удалось проверить токен {str(jwtError)}",
+            detail=f"Не удалось проверить токен {jwtError!s}",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
 
 def verify_refresh_token(token: str = Depends(oauth2_scheme)) -> dict:
     try:
-        decoded_data = jwt.decode(token, app_settings.SECRET_KEY, algorithms=[app_settings.ALGORITHM])
+        decoded_data = jwt.decode(
+            token, app_settings.SECRET_KEY, algorithms=[app_settings.ALGORITHM]
+        )
         # Проверяем, что это именно Refresh Token
         if decoded_data.get("type") != "refresh":
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Недопустимый токен для обновления"
+                detail="Недопустимый токен для обновления",
             )
         return decoded_data
     except jwt.JWTError as jwtError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Не удалось проверить токен {str(jwtError)}",
+            detail=f"Не удалось проверить токен {jwtError!s}",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
 
 async def get_current_user(
-        token: str = Depends(verify_jwt_token),
-        db: AsyncSession = Depends(get_db)
+    token: str = Depends(verify_jwt_token), db: AsyncSession = Depends(get_db)
 ) -> UserRDTOWithRelations:
     # Проверка истечения срока действия токена
     expire = token.get("exp")
@@ -101,16 +110,20 @@ async def get_current_user(
     if not user_id:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Пользователь не найден {str(user_id)}",
+            detail=f"Пользователь не найден {user_id!s}",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
     # Запрос к базе данных для получения пользователя
-    query = select(UserModel).options(
-        selectinload(UserModel.role),
-        selectinload(UserModel.user_type),
-        selectinload(UserModel.organizations)
-    ).filter(UserModel.id == int(user_id))
+    query = (
+        select(UserModel)
+        .options(
+            selectinload(UserModel.role),
+            selectinload(UserModel.user_type),
+            selectinload(UserModel.organizations),
+        )
+        .filter(UserModel.id == int(user_id))
+    )
 
     result = await db.execute(query)
     user = result.scalars().first()
@@ -143,7 +156,9 @@ def check_security(current_user: UserRDTOWithRelations = Depends(get_current_use
     return current_user
 
 
-def check_security_loader(current_user: UserRDTOWithRelations = Depends(get_current_user)):
+def check_security_loader(
+    current_user: UserRDTOWithRelations = Depends(get_current_user),
+):
     if current_user.role.value != TableConstantsNames.RoleSecurityLoaderValue:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -179,7 +194,9 @@ def check_client(current_user: UserRDTOWithRelations = Depends(get_current_user)
     return current_user
 
 
-def check_individual_client(current_user: UserRDTOWithRelations = Depends(get_current_user)):
+def check_individual_client(
+    current_user: UserRDTOWithRelations = Depends(get_current_user),
+):
     if current_user.role.value != TableConstantsNames.RoleClientValue:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -208,33 +225,46 @@ def check_legal_client(current_user: UserRDTOWithRelations = Depends(get_current
 
 
 def check_employee(current_user: UserRDTOWithRelations = Depends(get_current_user)):
-    if current_user.role.value not in [TableConstantsNames.RoleSecurityValue,
-                                       TableConstantsNames.RoleSecurityLoaderValue, TableConstantsNames.RoleLoaderValue,
-                                       TableConstantsNames.RoleWeigherValue, TableConstantsNames.RoleAccountantValue]:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Отказано в доступе",
-        )
-
-    return current_user
-
-
-def check_admin_and_client(current_user: UserRDTOWithRelations = Depends(get_current_user)):
-    if current_user.role.value not in [TableConstantsNames.RoleAdminValue,
-                                       TableConstantsNames.RoleClientValue]:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Отказано в доступе",
-        )
-
-    return current_user
-
-
-def check_admin_and_employee(current_user: UserRDTOWithRelations = Depends(get_current_user)):
     if current_user.role.value not in [
-        TableConstantsNames.RoleAdminValue, TableConstantsNames.RoleSecurityValue,
-        TableConstantsNames.RoleSecurityLoaderValue, TableConstantsNames.RoleLoaderValue,
-        TableConstantsNames.RoleWeigherValue]:
+        TableConstantsNames.RoleSecurityValue,
+        TableConstantsNames.RoleSecurityLoaderValue,
+        TableConstantsNames.RoleLoaderValue,
+        TableConstantsNames.RoleWeigherValue,
+        TableConstantsNames.RoleAccountantValue,
+    ]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Отказано в доступе",
+        )
+
+    return current_user
+
+
+def check_admin_and_client(
+    current_user: UserRDTOWithRelations = Depends(get_current_user),
+):
+    if current_user.role.value not in [
+        TableConstantsNames.RoleAdminValue,
+        TableConstantsNames.RoleClientValue,
+    ]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Отказано в доступе",
+        )
+
+    return current_user
+
+
+def check_admin_and_employee(
+    current_user: UserRDTOWithRelations = Depends(get_current_user),
+):
+    if current_user.role.value not in [
+        TableConstantsNames.RoleAdminValue,
+        TableConstantsNames.RoleSecurityValue,
+        TableConstantsNames.RoleSecurityLoaderValue,
+        TableConstantsNames.RoleLoaderValue,
+        TableConstantsNames.RoleWeigherValue,
+    ]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Отказано в доступе",

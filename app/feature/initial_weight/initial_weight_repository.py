@@ -7,5 +7,5 @@ from app.domain.models.initial_weight_model import InitialWeightModel
 
 
 class InitialWeightRepository(BaseRepository[InitialWeightModel]):
-    def __init__(self, db: Session = Depends(get_db)):
+    def __init__(self, db: Session = Depends(get_db)) -> None:
         super().__init__(InitialWeightModel, db)

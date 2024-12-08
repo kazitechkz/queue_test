@@ -1,0 +1,112 @@
+[
+    {
+        "id": 1,
+        "title": "Въезд - Прохождение КПП",
+        "value": "entry_operation",
+        "role_id": 2,
+        "role_value": "security",
+        "can_cancel": true,
+        "is_first": true,
+        "is_last": false
+    },
+    {
+        "id": 2,
+        "title": "Первичное взвешивание",
+        "value": "initial_weight_operation",
+        "role_id": 5,
+        "role_value": "weigher",
+        "can_cancel": true,
+        "is_first": false,
+        "is_last": false
+    },
+    {
+        "id": 3,
+        "title": "Валидация перед погрузкой (СБ)",
+        "value": "loading_entry_operation",
+        "role_id": 3,
+        "role_value": "security_loader",
+        "can_cancel": false,
+        "is_first": false,
+        "is_last": false
+    },
+    {
+        "id": 4,
+        "title": "Погрузка товара",
+        "value": "loading_operation",
+        "role_id": 4,
+        "role_value": "loader",
+        "can_cancel": true,
+        "is_first": false,
+        "is_last": false
+    },
+    {
+        "id": 5,
+        "title": "Контрольное взвешивание",
+        "value": "final_weight_operation",
+        "role_id": 5,
+        "role_value": "weigher",
+        "can_cancel": true,
+        "is_first": false,
+        "is_last": false
+    },
+    {
+        "id": 6,
+        "title": "Выезд - Контрольная проверка товара (СБ КПП)",
+        "value": "exit_check_operation",
+        "role_id": 2,
+        "role_value": "security",
+        "can_cancel": true,
+        "is_first": false,
+        "is_last": false
+    },
+    {
+        "id": 7,
+        "title": "Служба безопасности:Валидация перед разгрузкой и отменой",
+        "value": "reloading_entry_exit_operation",
+        "role_id": 3,
+        "role_value": "security_loader",
+        "can_cancel": false,
+        "is_first": false,
+        "is_last": false
+    },
+    {
+        "id": 8,
+        "title": "Разгрузка излишнего товара и выход",
+        "value": "reloading_exit_operation",
+        "role_id": 4,
+        "role_value": "loader",
+        "can_cancel": false,
+        "is_first": false,
+        "is_last": true
+    },
+    {
+        "id": 9,
+        "title": "Служба безопасности:Валидация перед разгрузкой и взвешиванием",
+        "value": "reloading_entry_weight_operation",
+        "role_id": 3,
+        "role_value": "security_loader",
+        "can_cancel": false,
+        "is_first": false,
+        "is_last": false
+    },
+    {
+        "id": 10,
+        "title": "Разгрузка излишнего товара и взвешиванием",
+        "value": "reloading_weight_operation",
+        "role_id": 4,
+        "role_value": "loader",
+        "can_cancel": false,
+        "is_first": false,
+        "is_last": false
+    },
+    {
+        "id": 11,
+        "title": "Успешное завершение",
+        "value": "executed_operation",
+        "role_id": 2,
+        "role_value": "security",
+        "can_cancel": false,
+        "is_first": false,
+        "is_last": true
+    }
+]

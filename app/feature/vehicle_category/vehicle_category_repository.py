@@ -7,7 +7,5 @@ from app.domain.models.vehicle_category_model import VehicleCategoryModel
 
 
 class VehicleCategoryRepository(BaseRepository[VehicleCategoryModel]):
-
-    def __init__(self, db: Session = Depends(get_db)):
+    def __init__(self, db: Session = Depends(get_db)) -> None:
         super().__init__(VehicleCategoryModel, db)
-

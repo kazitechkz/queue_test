@@ -1,6 +1,6 @@
-import datetime
-
 from pydantic import BaseModel, Field
+
+from app.shared.database_constants import TableConstantsNames
 
 
 class RoleDTO(BaseModel):
@@ -8,18 +8,20 @@ class RoleDTO(BaseModel):
 
 
 class RoleCDTO(BaseModel):
-    title: str = Field(max_length=200)
-    value: str = Field(max_length=255)
+    title: str = Field(max_length=TableConstantsNames.STANDARD_LENGTH_STRING)
+    value: str = Field(max_length=TableConstantsNames.STANDARD_LENGTH_STRING)
 
     class Config:
         from_attributes = True
+
 
 class RoleUDTO(RoleDTO):
-    title: str = Field(max_length=200)
-    value: str = Field(max_length=255)
+    title: str = Field(max_length=TableConstantsNames.STANDARD_LENGTH_STRING)
+    value: str = Field(max_length=TableConstantsNames.STANDARD_LENGTH_STRING)
 
     class Config:
         from_attributes = True
+
 
 class RoleRDTO(RoleDTO):
     title: str

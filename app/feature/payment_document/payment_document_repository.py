@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional, List
 
 from fastapi import Depends, UploadFile
 from sqlalchemy import and_
@@ -19,21 +18,32 @@ from app.shared.relation_dtos.user_organization import UserRDTOWithRelations
 
 
 class PaymentDocumentRepository(BaseRepository[PaymentDocumentModel]):
-    def __init__(self, db: Session = Depends(get_db)):
+    def __init__(self, db: Session = Depends(get_db)) -> None:
         super().__init__(PaymentDocumentModel, db)
         self.file_helper = FileUploadHelper(db)
 
-    async def upload_file(self, order_id: int, file: UploadFile, orderRepo: OrderRepository,
-                          userRepo: UserRDTOWithRelations):
+    async def upload_file(
+        self,
+        order_id: int,
+        file: UploadFile,
+        orderRepo: OrderRepository,
+        userRepo: UserRDTOWithRelations,
+    ):
         if userRepo.user_type.value != TableConstantsNames.UserLegalTypeValue:
-            raise AppExceptionResponse.bad_request("Отказано в доступе")
+            msg = "Отказано в доступе"
+            raise AppExceptionResponse.bad_request(msg)
         order: OrderModel = await orderRepo.get(id=order_id)
         if order is None:
-            raise AppExceptionResponse.bad_request("Заказ не найден")
-        if order.organization_id not in [organization.id for organization in userRepo.organizations]:
-            raise AppExceptionResponse.bad_request("Данный заказ не принадлежит вам")
-        if order.status_id != 9 and order.status_id != 3:
-            raise AppExceptionResponse.bad_request("Данный этап пройден")
+            msg = "Заказ не найден"
+            raise AppExceptionResponse.bad_request(msg)
+        if order.organization_id not in [
+            organization.id for organization in userRepo.organizations
+        ]:
+            msg = "Данный заказ не принадлежит вам"
+            raise AppExceptionResponse.bad_request(msg)
+        if order.status_id not in (9, 3):
+            msg = "Данный этап пройден"
+            raise AppExceptionResponse.bad_request(msg)
         try:
             # Используем FileUploadHelper для сохранения файла и получения записи FileModel
             file_record = await self.file_helper.save_file(file)
@@ -41,10 +51,7 @@ class PaymentDocumentRepository(BaseRepository[PaymentDocumentModel]):
             return {"error": str(e)}
 
         # Создаем запись PaymentDocumentModel, используя данные из dto и file_record
-        document = PaymentDocumentModel(
-            file_id=file_record.id,
-            order_id=order_id
-        )
+        document = PaymentDocumentModel(file_id=file_record.id, order_id=order_id)
 
         # Сохраняем запись в базе данных
         result = await self.create(obj=document)
@@ -52,56 +59,69 @@ class PaymentDocumentRepository(BaseRepository[PaymentDocumentModel]):
         return {
             "message": "Файл и платёжный документ успешно загружены",
             "document_id": result.id,
-            "file_url": file_record.url
+            "file_url": file_record.url,
         }
 
-    async def update_order(self, order_id: int, orderRepo: OrderRepository):
+    async def update_order(self, order_id: int, orderRepo: OrderRepository) -> None:
         order = await orderRepo.get(id=order_id)
         if order is None:
-            raise AppExceptionResponse.bad_request("Заказ не найден")
+            msg = "Заказ не найден"
+            raise AppExceptionResponse.bad_request(msg)
         order.status_id = 9  # Укажите нужное значение
 
         # Сохраняем изменения
         await orderRepo.db.commit()
         await orderRepo.db.refresh(order)
 
-    async def get_payment_docs(self,
-                               orderRepo: OrderRepository,
-                               params: OrderFiltersForPaymentDocuments,
-                               userRepo: UserRDTOWithRelations):
+    async def get_payment_docs(
+        self,
+        orderRepo: OrderRepository,
+        params: OrderFiltersForPaymentDocuments,
+        userRepo: UserRDTOWithRelations,
+    ):
         if userRepo.role.value != TableConstantsNames.RoleAccountantValue:
-            raise AppExceptionResponse.bad_request("Отказано в доступе")
-        return await orderRepo.paginate_with_filter(dto=OrderRDTOWithRelations,
-                                                    page=params.page,
-                                                    per_page=params.per_page,
-                                                    filters=params.apply(userRepo),
-                                                    options=[
-                                                        selectinload(orderRepo.model.material),
-                                                        selectinload(orderRepo.model.organization),
-                                                        selectinload(orderRepo.model.factory),
-                                                        selectinload(orderRepo.model.workshop),
-                                                        selectinload(orderRepo.model.kaspi),
-                                                        selectinload(orderRepo.model.sap_request),
-                                                    ]
-                                                    )
+            msg = "Отказано в доступе"
+            raise AppExceptionResponse.bad_request(msg)
+        return await orderRepo.paginate_with_filter(
+            dto=OrderRDTOWithRelations,
+            page=params.page,
+            per_page=params.per_page,
+            filters=params.apply(userRepo),
+            options=[
+                selectinload(orderRepo.model.material),
+                selectinload(orderRepo.model.organization),
+                selectinload(orderRepo.model.factory),
+                selectinload(orderRepo.model.workshop),
+                selectinload(orderRepo.model.kaspi),
+                selectinload(orderRepo.model.sap_request),
+            ],
+        )
 
     async def get_payment_doc_by_order(self, order_id: int, orderRepo: OrderRepository):
         order = await orderRepo.get(id=order_id)
         if order is None:
-            raise AppExceptionResponse.bad_request("Заказ не найден")
+            msg = "Заказ не найден"
+            raise AppExceptionResponse.bad_request(msg)
         docs = await self.get_all_with_filter(
             filters=[and_(self.model.order_id == order_id)],
-            options=[selectinload(self.model.file)]
+            options=[selectinload(self.model.file)],
         )
         if docs is None:
-            raise AppExceptionResponse.bad_request("Ничего не найдено")
+            msg = "Ничего не найдено"
+            raise AppExceptionResponse.bad_request(msg)
         return docs
 
-    async def add_comment_to_doc(self, payment_id: int, status: bool,
-                                 userRepo: UserRDTOWithRelations, comment: Optional[str]):
+    async def add_comment_to_doc(
+        self,
+        payment_id: int,
+        status: bool,
+        userRepo: UserRDTOWithRelations,
+        comment: str | None,
+    ):
         doc: PaymentDocumentModel = await self.get(id=payment_id)
         if doc is None:
-            raise AppExceptionResponse.bad_request("Документ не найден")
+            msg = "Документ не найден"
+            raise AppExceptionResponse.bad_request(msg)
         if status is True:
             doc.checked_by = userRepo.id
             doc.checked_at = datetime.now()
@@ -120,22 +140,30 @@ class PaymentDocumentRepository(BaseRepository[PaymentDocumentModel]):
 
         return doc
 
-    async def make_decision(self, order_id: int, orderRepo: OrderRepository, userRepo: UserRDTOWithRelations,
-                            status: bool):
+    async def make_decision(
+        self,
+        order_id: int,
+        orderRepo: OrderRepository,
+        userRepo: UserRDTOWithRelations,
+        status: bool,
+    ):
         order: OrderModel = await orderRepo.get(id=order_id)
         if order is None:
-            raise AppExceptionResponse.bad_request("Заказ не найден")
+            msg = "Заказ не найден"
+            raise AppExceptionResponse.bad_request(msg)
         if order.checked_payment_by_id is not None:
-            raise AppExceptionResponse.bad_request("Решение уже принято")
+            msg = "Решение уже принято"
+            raise AppExceptionResponse.bad_request(msg)
         if order.status_id == 9 and order.is_paid is False:
             if status is True:
                 return await self.accept_doc(order=order, userRepo=userRepo)
-            else:
-                return await self.cancel_doc(order=order, userRepo=userRepo)
-        else:
-            raise AppExceptionResponse.bad_request("Заказ уже оплачен")
+            return await self.cancel_doc(order=order, userRepo=userRepo)
+        msg = "Заказ уже оплачен"
+        raise AppExceptionResponse.bad_request(msg)
 
-    async def accept_doc(self, order: OrderModel, userRepo: UserRDTOWithRelations) -> OrderModel:
+    async def accept_doc(
+        self, order: OrderModel, userRepo: UserRDTOWithRelations
+    ) -> OrderModel:
         order.is_paid = True
         order.paid_at = datetime.now()
         order.checked_payment_by_id = userRepo.id
@@ -148,7 +176,9 @@ class PaymentDocumentRepository(BaseRepository[PaymentDocumentModel]):
         await self.db.refresh(order)
         return order
 
-    async def cancel_doc(self, order: OrderModel, userRepo: UserRDTOWithRelations) -> OrderModel:
+    async def cancel_doc(
+        self, order: OrderModel, userRepo: UserRDTOWithRelations
+    ) -> OrderModel:
         order.is_paid = False
         order.is_active = False
         order.is_finished = True

@@ -7,7 +7,5 @@ from app.domain.models.vehicle_color_model import VehicleColorModel
 
 
 class VehicleColorRepository(BaseRepository[VehicleColorModel]):
-
-    def __init__(self, db: Session = Depends(get_db)):
+    def __init__(self, db: Session = Depends(get_db)) -> None:
         super().__init__(VehicleColorModel, db)
-
