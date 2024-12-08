@@ -156,14 +156,14 @@ class AppSeeder:
 
     @staticmethod
     def get_seeders_path(filename: str) -> str:
-        base_path = Path("seeders")
+        base_path = Path("app/seeders")
         environment = AppSettings().APP_STATUS.lower()
         env_path = base_path / environment
         if not env_path.exists():
-            raise FileNotFoundError(f"Папка с сидерами не существует")
+            raise FileNotFoundError(f"Папка с сидерами для среды {environment} не существует по пути: {env_path}")
         file_path = env_path / filename
         if not file_path.exists():
-            raise FileNotFoundError(f"Файл сидера не существует")
+            raise FileNotFoundError(f"Файл сидера {filename} не существует по пути: {file_path}")
         return str(file_path)
 
     @staticmethod
