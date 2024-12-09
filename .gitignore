@@ -119,8 +119,6 @@ logs/
 *.log
 
 # Docker
-**/docker-compose.yml
-**/Dockerfile
 **/.dockerignore
 
 # FastAPI
