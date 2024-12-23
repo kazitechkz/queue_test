@@ -11,3 +11,4 @@ python-jose
 passlib
 Werkzeug
 python-multipart
+python-keycloak==5.1.1

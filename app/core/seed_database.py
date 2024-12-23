@@ -156,7 +156,8 @@ class AppSeeder:
 
     @staticmethod
     def get_seeders_path(filename: str) -> str:
-        base_path = Path("app/seeders")
+        current_dir = Path(__file__).resolve().parent
+        base_path = current_dir.parent / "seeders"
         environment = AppSettings().APP_STATUS.lower()
         env_path = base_path / environment
         if not env_path.exists():

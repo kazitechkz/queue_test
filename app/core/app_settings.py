@@ -33,6 +33,11 @@ class AppSettings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int
     APP_STATUS: str
 
+    KEYCLOAK_SERVER_URL:str
+    KEYCLOAK_REALM:str
+    KEYCLOAK_CLIENT_ID:str
+    KEYCLOAK_CLIENT_SECRET:str
+
     @property
     def DB_URL_ASYNC(self) -> str:
         if self.APP_DATABASE == "postgresql":
@@ -41,6 +46,7 @@ class AppSettings(BaseSettings):
 
     class Config:
         env_file = ".env"
+        env_file_encoding = "utf-8"
 
 
 app_settings = AppSettings()

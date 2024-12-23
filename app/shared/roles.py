@@ -198,4 +198,5 @@ def assign_roles(app) -> None:
 
     # assign_roles_to_route(app, "/get-qr/get-qr-link/{order_id}", ["admin", "client"])
     #
-    # assign_roles_to_route(app, "/test/test", ["admin"])
+    assign_roles_to_route(app, "/test/test", ["admin"])
+    assign_roles_to_route(app, "/test/test2", ["admin"])
