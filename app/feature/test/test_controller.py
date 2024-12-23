@@ -42,7 +42,7 @@ class TestController:
 
     async def test3(self,user_id: str):
         try:
-            user_info = keycloak_openid.get_us(get_user)
+            user_info = keycloak_openid.get_us(user_id)
             print(user_info)
             if not user_info:
                 raise HTTPException(
